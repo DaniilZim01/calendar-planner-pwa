@@ -9,6 +9,7 @@ import GoalsPage from "./pages/goals";
 import WellbeingPage from "./pages/wellbeing";
 import PlannerPage from "./pages/planner";
 import CalendarPage from "./pages/calendar";
+import ProfilePage from "./pages/profile";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -19,7 +20,7 @@ function Router() {
         <Route path="/wellbeing" component={WellbeingPage} />
         <Route path="/planner" component={PlannerPage} />
         <Route path="/calendar" component={CalendarPage} />
-        <Route path="/profile" component={() => <div className="app-container screen-container text-center py-20"><h1 className="text-2xl font-semibold text-foreground">Профиль</h1><p className="text-muted-foreground mt-2">Скоро появится</p></div>} />
+        <Route path="/profile" component={ProfilePage} />
         <Route component={NotFound} />
       </Switch>
       <BottomNavigation />

@@ -5,14 +5,28 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAppData } from '../hooks/useLocalStorage';
 import { Task, TaskCounts } from '../types';
 import { isTaskToday, isTaskOverdue } from '../utils/dateUtils';
+import TaskDialog from '../components/TaskDialog';
 
 export default function GoalsPage() {
   const { tasks, setTasks } = useAppData();
   const [workExpanded, setWorkExpanded] = useState(true);
   const [personalExpanded, setPersonalExpanded] = useState(true);
+  const [filter, setFilter] = useState<'all' | 'today' | 'overdue'>('all');
 
-  const workTasks = tasks.filter((task: Task) => task.category === 'work');
-  const personalTasks = tasks.filter((task: Task) => task.category === 'personal');
+  const filterTasks = (taskList: Task[]) => {
+    switch (filter) {
+      case 'today':
+        return taskList.filter((task: Task) => !task.completed && isTaskToday(task.date));
+      case 'overdue':
+        return taskList.filter((task: Task) => !task.completed && isTaskOverdue(task.date));
+      default:
+        return taskList;
+    }
+  };
+
+  const allTasks = tasks.filter((task: Task) => filterTasks([task]).length > 0);
+  const workTasks = filterTasks(tasks.filter((task: Task) => task.category === 'work'));
+  const personalTasks = filterTasks(tasks.filter((task: Task) => task.category === 'personal'));
 
   const getTaskCounts = (): TaskCounts => {
     const today = tasks.filter((task: Task) => !task.completed && isTaskToday(task.date)).length;
@@ -22,6 +36,15 @@ export default function GoalsPage() {
   };
 
   const counts = getTaskCounts();
+
+  const addTask = (newTask: Omit<Task, 'id' | 'createdAt'>) => {
+    const task: Task = {
+      ...newTask,
+      id: Math.random().toString(36),
+      createdAt: new Date().toISOString(),
+    };
+    setTasks((prevTasks: Task[]) => [...prevTasks, task]);
+  };
 
   const toggleTask = (taskId: string) => {
     setTasks((prevTasks: Task[]) =>
@@ -65,18 +88,28 @@ export default function GoalsPage() {
 
         {/* Счетчики задач */}
         <div className="flex gap-3 mb-6">
-          <div className="flex-1 card-soft text-center">
+          <button 
+            onClick={() => setFilter('today')}
+            className={`flex-1 card-soft text-center transition-colors ${filter === 'today' ? 'ring-2 ring-accent' : ''}`}
+          >
             <div className="text-2xl font-bold text-accent">{counts.today}</div>
             <div className="text-xs text-muted-foreground">Сегодня</div>
-          </div>
-          <div className="flex-1 bg-destructive/20 rounded-xl p-4 text-center">
+          </button>
+          <button 
+            onClick={() => setFilter('overdue')}
+            className={`flex-1 text-center transition-colors rounded-xl p-4 ${filter === 'overdue' ? 'ring-2 ring-destructive' : ''}`}
+            style={{ background: 'rgba(179, 138, 138, 0.2)' }}
+          >
             <div className="text-2xl font-bold text-destructive">{counts.overdue}</div>
             <div className="text-xs text-muted-foreground">Просроченные</div>
-          </div>
-          <div className="flex-1 card-soft text-center">
+          </button>
+          <button 
+            onClick={() => setFilter('all')}
+            className={`flex-1 card-soft text-center transition-colors ${filter === 'all' ? 'ring-2 ring-accent' : ''}`}
+          >
             <div className="text-2xl font-bold text-foreground">{counts.total}</div>
             <div className="text-xs text-muted-foreground">Всего</div>
-          </div>
+          </button>
         </div>
 
         {/* Категория РАБОТА */}
@@ -143,22 +176,21 @@ export default function GoalsPage() {
 
         {/* Кнопки действий */}
         <div className="flex gap-3">
-          <Button 
-            className="flex-1 bg-accent hover:bg-accent/90 text-white touch-target"
-            onClick={() => {
-              // TODO: Implement new goal creation modal
-              console.log('Create new goal');
-            }}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Новая цель
-          </Button>
+          <TaskDialog onAddTask={addTask}>
+            <Button className="flex-1 bg-accent hover:bg-accent/90 text-white touch-target">
+              <Plus className="w-4 h-4 mr-2" />
+              Новая цель
+            </Button>
+          </TaskDialog>
           <Button 
             variant="secondary"
             className="flex-1 touch-target"
             onClick={() => {
-              // TODO: Implement list creation modal
-              console.log('Create new list');
+              const listName = prompt('Введите название списка:');
+              if (listName?.trim()) {
+                // Можно добавить логику создания списка
+                console.log('Creating list:', listName);
+              }
             }}
           >
             Создать список

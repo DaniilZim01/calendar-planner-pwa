@@ -77,8 +77,14 @@ export default function PlannerPage() {
         <Button 
           className="w-full bg-accent hover:bg-accent/90 text-white py-4 text-lg touch-target"
           onClick={() => {
-            // TODO: Implement start day functionality
-            console.log('Day started');
+            const now = new Date();
+            const message = now.getHours() < 12 
+              ? 'Доброе утро! Отличный день для достижения целей!'
+              : now.getHours() < 18
+              ? 'Добрый день! Продолжаем работать над задачами!'
+              : 'Добрый вечер! Время подводить итоги дня!';
+            
+            alert(message);
           }}
         >
           Начать день

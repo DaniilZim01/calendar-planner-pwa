@@ -1,0 +1,229 @@
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { User, Settings, Moon, Sun } from 'lucide-react';
+
+interface UserProfile {
+  name: string;
+  email: string;
+  theme: 'light' | 'dark' | 'auto';
+  notifications: boolean;
+  language: string;
+}
+
+export default function ProfilePage() {
+  const [profile, setProfile] = useLocalStorage<UserProfile>('user_profile', {
+    name: '',
+    email: '',
+    theme: 'light',    
+    notifications: true,
+    language: 'ru',
+  });
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [tempProfile, setTempProfile] = useState(profile);
+
+  const handleSave = () => {
+    setProfile(tempProfile);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setTempProfile(profile);
+    setIsEditing(false);
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  return (
+    <div className="app-container animate-fade-in">
+      <div className="screen-container">
+        <div className="mb-6">
+          <h1 className="text-2xl font-thin text-foreground mb-2">Профиль</h1>
+          <p className="text-sm text-muted-foreground font-light">
+            Настройки аккаунта и приложения
+          </p>
+        </div>
+
+        {/* Профиль пользователя */}
+        <Card className="mb-6 bg-background border-border">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-4">
+              <Avatar className="w-16 h-16">
+                <AvatarFallback className="bg-accent text-white text-lg font-light">
+                  {profile.name ? getInitials(profile.name) : <User className="w-8 h-8" />}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <CardTitle className="font-light text-foreground">
+                  {profile.name || 'Пользователь'}
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {profile.email || 'Настройте свой профиль'}
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsEditing(!isEditing)}
+                className="text-accent"
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
+            </div>
+          </CardHeader>
+
+          {isEditing && (
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-light text-foreground">
+                  Имя
+                </Label>
+                <Input
+                  id="name"
+                  value={tempProfile.name}
+                  onChange={(e) => setTempProfile({ ...tempProfile, name: e.target.value })}
+                  placeholder="Введите ваше имя"
+                  className="bg-input border-border focus:ring-accent"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-light text-foreground">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={tempProfile.email}
+                  onChange={(e) => setTempProfile({ ...tempProfile, email: e.target.value })}
+                  placeholder="Введите ваш email"
+                  className="bg-input border-border focus:ring-accent"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={handleCancel}
+                  className="flex-1"
+                >
+                  Отмена
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  className="flex-1 bg-accent hover:bg-accent/90 text-white"
+                >
+                  Сохранить
+                </Button>
+              </div>
+            </CardContent>
+          )}
+        </Card>
+
+        {/* Настройки приложения */}
+        <Card className="mb-6 bg-background border-border">
+          <CardHeader>
+            <CardTitle className="font-light text-foreground">Настройки</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-light text-foreground">
+                Тема оформления
+              </Label>
+              <Select 
+                value={tempProfile.theme} 
+                onValueChange={(value: 'light' | 'dark' | 'auto') => 
+                  setTempProfile({ ...tempProfile, theme: value })
+                }
+              >
+                <SelectTrigger className="bg-input border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="light">
+                    <div className="flex items-center gap-2">
+                      <Sun className="w-4 h-4" />
+                      Светлая
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="dark">
+                    <div className="flex items-center gap-2">
+                      <Moon className="w-4 h-4" />
+                      Темная
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="auto">Автоматически</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-light text-foreground">
+                Язык интерфейса
+              </Label>
+              <Select 
+                value={tempProfile.language} 
+                onValueChange={(value: string) => 
+                  setTempProfile({ ...tempProfile, language: value })
+                }
+              >
+                <SelectTrigger className="bg-input border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ru">Русский</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {tempProfile !== profile && (
+              <div className="flex gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={handleCancel}
+                  className="flex-1"
+                >
+                  Отмена
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  className="flex-1 bg-accent hover:bg-accent/90 text-white"
+                >
+                  Применить
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Информация о приложении */}
+        <Card className="bg-background border-border">
+          <CardHeader>
+            <CardTitle className="font-light text-foreground">О приложении</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p>Календарь-планировщик InCharge</p>
+              <p>Версия 1.0.0</p>
+              <p>Создано для эффективного планирования и достижения целей</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

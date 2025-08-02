@@ -1,84 +1,63 @@
 import { useLocation } from 'wouter';
 
-// Abstract minimalistic pastel icons as React components
+// Functional minimalistic pastel icons as React components
 const GoalsIcon = ({ className }: { className?: string }) => (
-  <div className="relative">
-    <div 
-      className={`${className} bg-current opacity-60`}
-      style={{
-        borderRadius: '20% 60% 40% 80%',
-        transform: 'rotate(10deg)',
-      }}
-    />
-    <div 
-      className={`${className} bg-current opacity-40 absolute top-0.5 left-0.5`}
-      style={{
-        borderRadius: '60% 20% 80% 40%',
-        transform: 'rotate(-15deg) scale(0.7)',
-      }}
-    />
+  <div className="relative w-6 h-6 flex items-center justify-center">
+    {/* Target/bullseye icon for goals */}
+    <div className={`${className} w-4 h-4 rounded-full border-2 border-current opacity-60`}>
+      <div className="w-2 h-2 rounded-full bg-current opacity-80 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+    </div>
   </div>
 );
 
 const WellbeingIcon = ({ className }: { className?: string }) => (
-  <div className="relative">
-    <div 
-      className={`${className} bg-current opacity-50`}
-      style={{
-        borderRadius: '50% 50% 20% 80%',
-        transform: 'rotate(25deg)',
-      }}
-    />
-    <div 
-      className={`${className} bg-current opacity-30 absolute top-1 left-1`}
-      style={{
-        borderRadius: '80% 20% 50% 50%',
-        transform: 'rotate(-30deg) scale(0.6)',
-      }}
-    />
+  <div className="relative w-6 h-6 flex items-center justify-center">
+    {/* Heart icon for wellbeing */}
+    <div className={`${className} w-4 h-4 bg-current opacity-60`}
+         style={{
+           clipPath: 'polygon(50% 85%, 15% 50%, 15% 35%, 25% 25%, 40% 25%, 50% 40%, 60% 25%, 75% 25%, 85% 35%, 85% 50%)'
+         }} />
   </div>
 );
 
 const PlannerIcon = ({ className }: { className?: string }) => (
-  <div className="relative">
-    <div 
-      className={`${className} bg-current opacity-60`}
-      style={{
-        borderRadius: '30% 70% 30% 70%',
-        transform: 'rotate(45deg)',
-      }}
-    />
+  <div className="relative w-6 h-6 flex items-center justify-center">
+    {/* Sun icon for "Today" planner */}
+    <div className={`${className} w-3 h-3 rounded-full bg-current opacity-60 relative`}>
+      <div className="absolute -top-2 left-1/2 w-0.5 h-1.5 bg-current opacity-40 transform -translate-x-1/2" />
+      <div className="absolute -bottom-2 left-1/2 w-0.5 h-1.5 bg-current opacity-40 transform -translate-x-1/2" />
+      <div className="absolute -left-2 top-1/2 w-1.5 h-0.5 bg-current opacity-40 transform -translate-y-1/2" />
+      <div className="absolute -right-2 top-1/2 w-1.5 h-0.5 bg-current opacity-40 transform -translate-y-1/2" />
+    </div>
   </div>
 );
 
 const CalendarIcon = ({ className }: { className?: string }) => (
-  <div className="relative">
-    <div 
-      className={`${className} bg-current opacity-50`}
-      style={{
-        borderRadius: '40% 60% 60% 40%',
-        transform: 'rotate(-20deg)',
-      }}
-    />
-    <div 
-      className={`${className} bg-current opacity-30 absolute top-0.5 left-0.5`}
-      style={{
-        borderRadius: '60% 40% 40% 60%',
-        transform: 'rotate(20deg) scale(0.8)',
-      }}
-    />
+  <div className="relative w-6 h-6 flex items-center justify-center">
+    {/* Calendar grid icon */}
+    <div className={`${className} w-4 h-4 border border-current opacity-60 rounded-sm`}>
+      <div className="w-full h-0.5 bg-current opacity-40 mt-1" />
+      <div className="flex justify-between px-0.5 mt-0.5">
+        <div className="w-0.5 h-0.5 bg-current opacity-40 rounded-full" />
+        <div className="w-0.5 h-0.5 bg-current opacity-40 rounded-full" />
+        <div className="w-0.5 h-0.5 bg-current opacity-40 rounded-full" />
+      </div>
+      <div className="flex justify-between px-0.5 mt-0.5">
+        <div className="w-0.5 h-0.5 bg-current opacity-40 rounded-full" />
+        <div className="w-0.5 h-0.5 bg-current opacity-60 rounded-full" />
+        <div className="w-0.5 h-0.5 bg-current opacity-40 rounded-full" />
+      </div>
+    </div>
   </div>
 );
 
 const ProfileIcon = ({ className }: { className?: string }) => (
-  <div className="relative">
-    <div 
-      className={`${className} bg-current opacity-50`}
-      style={{
-        borderRadius: '50% 50% 50% 20%',
-        transform: 'rotate(15deg)',
-      }}
-    />
+  <div className="relative w-6 h-6 flex items-center justify-center">
+    {/* Person icon for profile */}
+    <div className={`${className} w-4 h-4 relative`}>
+      <div className="w-2 h-2 rounded-full bg-current opacity-60 mx-auto" />
+      <div className="w-3 h-2 bg-current opacity-50 rounded-t-full mt-0.5 mx-auto" />
+    </div>
   </div>
 );
 

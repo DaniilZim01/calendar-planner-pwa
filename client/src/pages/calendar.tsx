@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { useAppData } from '../hooks/useLocalStorage';
 import { Event } from '../types';
 import { getMonthName, generateCalendarDates, formatDate } from '../utils/dateUtils';
+import EventDialog from '../components/EventDialog';
 
 export default function CalendarPage() {
-  const { events } = useAppData();
+  const { events, setEvents } = useAppData();
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -17,6 +18,15 @@ export default function CalendarPage() {
   const selectedDayEvents = events.filter((event: Event) => 
     event.date === selectedDateString
   );
+
+  const addEvent = (newEvent: Omit<Event, 'id' | 'createdAt'>) => {
+    const event: Event = {
+      ...newEvent,
+      id: Math.random().toString(36),
+      createdAt: new Date().toISOString(),
+    };
+    setEvents((prevEvents: Event[]) => [...prevEvents, event]);
+  };
 
   const hasEventOnDate = (date: Date): boolean => {
     const dateString = formatDate(date, 'yyyy-MM-dd');
@@ -169,16 +179,15 @@ export default function CalendarPage() {
         </div>
 
         {/* Кнопка добавления события */}
-        <Button 
-          className="w-full bg-accent hover:bg-accent/90 text-white touch-target"
-          onClick={() => {
-            // TODO: Implement add event modal
-            console.log('Add event for', selectedDateString);
-          }}
+        <EventDialog 
+          onAddEvent={addEvent}
+          selectedDate={selectedDateString}
         >
-          <Plus className="w-4 h-4 mr-2" />
-          Добавить событие
-        </Button>
+          <Button className="w-full bg-accent hover:bg-accent/90 text-white touch-target">
+            <Plus className="w-4 h-4 mr-2" />
+            Добавить событие
+          </Button>
+        </EventDialog>
       </div>
     </div>
   );
