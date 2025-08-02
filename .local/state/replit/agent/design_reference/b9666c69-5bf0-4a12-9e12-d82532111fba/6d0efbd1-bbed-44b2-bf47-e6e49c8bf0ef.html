@@ -1,0 +1,758 @@
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InCharge Calendar - Планировщик и Календарь</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    'primary': '#F7F3ED',
+                    'secondary': '#E8DDD0',
+                    'accent': '#9A8470',
+                    'dark': '#7A634F',
+                    'success': '#8B9A7A',
+                    'warning': '#D4A574',
+                    'error': '#C77E7E'
+                },
+                fontFamily: {
+                    'sans': ['TT Norms Pro', 'system-ui', '-apple-system', 'sans-serif'],
+                    'display': ['TT Interphases Pro', 'TT Norms Pro', 'system-ui', 'sans-serif']
+                },
+                borderRadius: {
+                    'card': '12px',
+                    'element': '8px'
+                }
+            }
+        }
+    };
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .chart-line {
+            fill: none;
+            stroke: #9A8470;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .chart-point {
+            fill: #9A8470;
+            r: 3;
+        }
+        .screen {
+            display: none;
+        }
+        .screen.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-primary min-h-screen font-sans text-dark">
+    <!-- @COMPONENT: MobileApp [Main container with navigation] -->
+    <div class="max-w-sm mx-auto bg-primary min-h-screen relative">
+        
+        <!-- Goal Setter Screen -->
+        <!-- @COMPONENT: GoalSetterScreen [Task management with work/personal categories] -->
+        <div id="goals-screen" class="screen active px-4 py-6 pb-24">
+            <div class="mb-6">
+                <h1 class="text-2xl font-display font-semibold text-dark mb-2">Цели</h1>
+                <p class="text-sm text-dark/70">Управляйте своими задачами и целями</p>
+            </div>
+
+            <!-- Task Counters -->
+            <div class="flex gap-3 mb-6">
+                <div class="flex-1 bg-secondary/50 rounded-card p-4 text-center">
+                    <div class="text-2xl font-bold text-accent" data-bind="todayTasks">2</div>
+                    <div class="text-xs text-dark/60">Сегодня</div>
+                </div>
+                <div class="flex-1 bg-error/20 rounded-card p-4 text-center">
+                    <div class="text-2xl font-bold text-error" data-bind="overdueTasks">1</div>
+                    <div class="text-xs text-dark/60">Просроченные</div>
+                </div>
+                <div class="flex-1 bg-secondary/50 rounded-card p-4 text-center">
+                    <div class="text-2xl font-bold text-dark" data-bind="totalTasks">6</div>
+                    <div class="text-xs text-dark/60">Всего</div>
+                </div>
+            </div>
+
+            <!-- Work Category -->
+            <div class="mb-6">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 bg-accent rounded-full"></div>
+                        <h3 class="font-medium text-dark">РАБОТА</h3>
+                    </div>
+                    <button class="text-accent text-sm" data-event="click:toggleWorkCategory">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                
+                <!-- @MAP: workTasks.map(task => ( -->
+                <div class="space-y-3" data-mock="true">
+                    <div class="flex items-center gap-3 p-3 bg-secondary/30 rounded-element">
+                        <input type="checkbox" class="w-5 h-5 text-accent rounded border-2 border-accent/30" data-bind="task.completed">
+                        <span class="flex-1 text-sm" data-bind="task.title">Завершить запуск проекта</span>
+                        <span class="text-xs text-dark/50" data-bind="task.date">26 янв</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-secondary/30 rounded-element">
+                        <input type="checkbox" class="w-5 h-5 text-accent rounded border-2 border-accent/30" data-bind="task.completed">
+                        <span class="flex-1 text-sm" data-bind="task.title">Подготовить презентацию</span>
+                        <span class="text-xs text-error" data-bind="task.date">24 янв</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-secondary/30 rounded-element">
+                        <input type="checkbox" class="w-5 h-5 text-accent rounded border-2 border-accent/30" data-bind="task.completed">
+                        <span class="flex-1 text-sm" data-bind="task.title">Расширить команду</span>
+                        <span class="text-xs text-dark/50" data-bind="task.date">30 янв</span>
+                    </div>
+                </div>
+                <!-- @END_MAP -->
+            </div>
+
+            <!-- Personal Category -->
+            <div class="mb-6">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 bg-success rounded-full"></div>
+                        <h3 class="font-medium text-dark">ЛИЧНОЕ</h3>
+                    </div>
+                    <button class="text-accent text-sm" data-event="click:togglePersonalCategory">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                
+                <!-- @MAP: personalTasks.map(task => ( -->
+                <div class="space-y-3" data-mock="true">
+                    <div class="flex items-center gap-3 p-3 bg-secondary/30 rounded-element">
+                        <input type="checkbox" class="w-5 h-5 text-success rounded border-2 border-success/30" data-bind="task.completed">
+                        <span class="flex-1 text-sm" data-bind="task.title">Забронировать отпуск</span>
+                        <span class="text-xs text-dark/50" data-bind="task.date">27 янв</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-secondary/30 rounded-element">
+                        <input type="checkbox" class="w-5 h-5 text-success rounded border-2 border-success/30" data-bind="task.completed">
+                        <span class="flex-1 text-sm" data-bind="task.title">Спортзал</span>
+                        <span class="text-xs text-dark/50" data-bind="task.date">Сегодня</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-secondary/30 rounded-element">
+                        <input type="checkbox" class="w-5 h-5 text-success rounded border-2 border-success/30" data-bind="task.completed">
+                        <span class="flex-1 text-sm" data-bind="task.title">Прочитать книгу</span>
+                        <span class="text-xs text-dark/50" data-bind="task.date">31 янв</span>
+                    </div>
+                </div>
+                <!-- @END_MAP -->
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-3">
+                <button class="flex-1 bg-accent text-white py-3 px-4 rounded-card font-medium" data-event="click:createNewGoal">
+                    Новая цель
+                </button>
+                <button class="flex-1 bg-secondary text-dark py-3 px-4 rounded-card font-medium" data-event="click:createList">
+                    Создать список
+                </button>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: GoalSetterScreen -->
+
+        <!-- Wellbeing Tracker Screen -->
+        <!-- @COMPONENT: WellbeingScreen [Health and wellness tracking with charts] -->
+        <div id="wellbeing-screen" class="screen px-4 py-6 pb-24">
+            <div class="mb-6">
+                <h1 class="text-2xl font-display font-semibold text-dark mb-2">Reflect</h1>
+                <p class="text-sm text-dark/70">Отслеживайте свое самочувствие</p>
+            </div>
+
+            <!-- Calendar Widget -->
+            <div class="bg-secondary/50 rounded-card p-4 mb-6">
+                <div class="flex justify-center gap-4 mb-2">
+                    <button class="text-dark/60" data-event="click:previousWeek">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span class="font-medium text-dark">Январь 2025</span>
+                    <button class="text-dark/60" data-event="click:nextWeek">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="flex justify-center gap-2">
+                    <div class="text-center p-2">
+                        <div class="text-xs text-dark/60 mb-1">Чт</div>
+                        <div class="w-8 h-8 flex items-center justify-center text-sm">31</div>
+                    </div>
+                    <div class="text-center p-2">
+                        <div class="text-xs text-dark/60 mb-1">Пт</div>
+                        <div class="w-8 h-8 flex items-center justify-center text-sm">01</div>
+                    </div>
+                    <div class="text-center p-2">
+                        <div class="text-xs text-dark/60 mb-1">Сб</div>
+                        <div class="w-8 h-8 flex items-center justify-center text-sm">02</div>
+                    </div>
+                    <div class="text-center p-2">
+                        <div class="text-xs text-dark/60 mb-1">Вс</div>
+                        <div class="w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center text-sm">03</div>
+                    </div>
+                    <div class="text-center p-2">
+                        <div class="text-xs text-dark/60 mb-1">Пн</div>
+                        <div class="w-8 h-8 flex items-center justify-center text-sm">04</div>
+                    </div>
+                    <div class="text-center p-2">
+                        <div class="text-xs text-dark/60 mb-1">Вт</div>
+                        <div class="w-8 h-8 flex items-center justify-center text-sm">05</div>
+                    </div>
+                    <div class="text-center p-2">
+                        <div class="text-xs text-dark/60 mb-1">Ср</div>
+                        <div class="w-8 h-8 flex items-center justify-center text-sm">06</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Water Tracker -->
+            <div class="bg-secondary/30 rounded-card p-4 mb-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-medium text-dark">ВОДА</h3>
+                    <button class="text-accent" data-event="click:editWater">
+                        <i class="fas fa-pencil-alt text-sm"></i>
+                    </button>
+                </div>
+                <div class="text-2xl font-bold text-dark mb-1" data-bind="waterIntake">0.5 литра</div>
+                <div class="text-xs text-dark/60 mb-4">Сколько воды вы выпили на этой неделе?</div>
+                
+                <!-- Water Chart -->
+                <div class="bg-white rounded-element p-3 mb-3">
+                    <svg width="100%" height="60" viewBox="0 0 280 60" class="overflow-visible">
+                        <!-- Chart grid lines -->
+                        <g class="opacity-20">
+                            <line x1="0" y1="15" x2="280" y2="15" stroke="#9A8470" stroke-width="0.5"/>
+                            <line x1="0" y1="30" x2="280" y2="30" stroke="#9A8470" stroke-width="0.5"/>
+                            <line x1="0" y1="45" x2="280" y2="45" stroke="#9A8470" stroke-width="0.5"/>
+                        </g>
+                        <!-- Water intake chart line -->
+                        <polyline points="0,45 40,35 80,25 120,40 160,20 200,30 240,15 280,25" class="chart-line"/>
+                        <!-- Chart points -->
+                        <circle cx="0" cy="45" class="chart-point"/>
+                        <circle cx="40" cy="35" class="chart-point"/>
+                        <circle cx="80" cy="25" class="chart-point"/>
+                        <circle cx="120" cy="40" class="chart-point"/>
+                        <circle cx="160" cy="20" class="chart-point"/>
+                        <circle cx="200" cy="30" class="chart-point"/>
+                        <circle cx="240" cy="15" class="chart-point"/>
+                        <circle cx="280" cy="25" class="chart-point"/>
+                    </svg>
+                </div>
+                
+                <!-- Week labels -->
+                <div class="flex justify-between text-xs text-dark/60">
+                    <span>Пн</span>
+                    <span>Вт</span>
+                    <span>Ср</span>
+                    <span>Чт</span>
+                    <span>Пт</span>
+                    <span>Сб</span>
+                    <span>Вс</span>
+                </div>
+            </div>
+
+            <!-- Sleep Tracker -->
+            <div class="bg-secondary/30 rounded-card p-4 mb-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-medium text-dark">СОН</h3>
+                    <button class="text-accent" data-event="click:editSleep">
+                        <i class="fas fa-pencil-alt text-sm"></i>
+                    </button>
+                </div>
+                <div class="text-2xl font-bold text-dark mb-1" data-bind="sleepHours">7.5 часов</div>
+                <div class="text-xs text-dark/60 mb-4">Сколько часов вы спали на этой неделе?</div>
+                
+                <!-- Sleep Chart -->
+                <div class="bg-white rounded-element p-3 mb-3">
+                    <svg width="100%" height="60" viewBox="0 0 280 60" class="overflow-visible">
+                        <!-- Chart grid lines -->
+                        <g class="opacity-20">
+                            <line x1="0" y1="15" x2="280" y2="15" stroke="#9A8470" stroke-width="0.5"/>
+                            <line x1="0" y1="30" x2="280" y2="30" stroke="#9A8470" stroke-width="0.5"/>
+                            <line x1="0" y1="45" x2="280" y2="45" stroke="#9A8470" stroke-width="0.5"/>
+                        </g>
+                        <!-- Sleep chart line -->
+                        <polyline points="0,30 40,25 80,35 120,20 160,15 200,25 240,30 280,20" class="chart-line"/>
+                        <!-- Chart points -->
+                        <circle cx="0" cy="30" class="chart-point"/>
+                        <circle cx="40" cy="25" class="chart-point"/>
+                        <circle cx="80" cy="35" class="chart-point"/>
+                        <circle cx="120" cy="20" class="chart-point"/>
+                        <circle cx="160" cy="15" class="chart-point"/>
+                        <circle cx="200" cy="25" class="chart-point"/>
+                        <circle cx="240" cy="30" class="chart-point"/>
+                        <circle cx="280" cy="20" class="chart-point"/>
+                    </svg>
+                </div>
+                
+                <!-- Week labels -->
+                <div class="flex justify-between text-xs text-dark/60">
+                    <span>Пн</span>
+                    <span>Вт</span>
+                    <span>Ср</span>
+                    <span>Чт</span>
+                    <span>Пт</span>
+                    <span>Сб</span>
+                    <span>Вс</span>
+                </div>
+            </div>
+
+            <!-- Mood & Activity -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-secondary/30 rounded-card p-4">
+                    <h3 class="font-medium text-dark mb-2">Настроение</h3>
+                    <input type="text" placeholder="Как дела?" class="w-full bg-white rounded-element px-3 py-2 text-sm border-0" data-bind="mood">
+                </div>
+                <div class="bg-secondary/30 rounded-card p-4">
+                    <h3 class="font-medium text-dark mb-2">Активность</h3>
+                    <input type="text" placeholder="Что делали?" class="w-full bg-white rounded-element px-3 py-2 text-sm border-0" data-bind="activity">
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: WellbeingScreen -->
+
+        <!-- Daily Planner Screen -->
+        <!-- @COMPONENT: DailyPlannerScreen [Today's schedule and events] -->
+        <div id="planner-screen" class="screen px-4 py-6 pb-24">
+            <div class="text-center mb-8">
+                <h1 class="text-lg font-display text-dark/60 mb-2">ДОБРО ПОЖАЛОВАТЬ В</h1>
+                <h2 class="text-3xl font-display font-light text-dark">Today</h2>
+            </div>
+
+            <!-- Events List -->
+            <!-- @MAP: todayEvents.map(event => ( -->
+            <div class="space-y-4 mb-8" data-mock="true">
+                <div class="flex items-start gap-4 p-4 bg-secondary/30 rounded-card">
+                    <div class="text-center min-w-16">
+                        <div class="text-lg font-medium text-dark" data-bind="event.time">8:00</div>
+                        <div class="text-xs text-dark/60">УТР</div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-medium text-dark mb-1" data-bind="event.title">Завтрак с Матвеем</h3>
+                        <p class="text-sm text-dark/60" data-bind="event.location">Пироговая пекарня</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-4 p-4 bg-secondary/30 rounded-card">
+                    <div class="text-center min-w-16">
+                        <div class="text-lg font-medium text-dark" data-bind="event.time">10:00</div>
+                        <div class="text-xs text-dark/60">УТР</div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-medium text-dark mb-1" data-bind="event.title">Тренировка</h3>
+                        <p class="text-sm text-dark/60" data-bind="event.location">Фитнес клуб "Бурак"</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-4 p-4 bg-secondary/30 rounded-card">
+                    <div class="text-center min-w-16">
+                        <div class="text-lg font-medium text-dark" data-bind="event.time">13:30</div>
+                        <div class="text-xs text-dark/60">ДНЯ</div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-medium text-dark mb-1" data-bind="event.title">Обед с Эммой</h3>
+                        <p class="text-sm text-dark/60" data-bind="event.location">Дома</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-4 p-4 bg-secondary/30 rounded-card">
+                    <div class="text-center min-w-16">
+                        <div class="text-lg font-medium text-dark" data-bind="event.time">16:30</div>
+                        <div class="text-xs text-dark/60">ВЕЧ</div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-medium text-dark mb-1" data-bind="event.title">Командная встреча</h3>
+                        <p class="text-sm text-dark/60" data-bind="event.location">Зум линк</p>
+                        <p class="text-xs text-dark/50 mt-1">16:30 - 17:30</p>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_MAP -->
+
+            <!-- Start Day Button -->
+            <button class="w-full bg-accent text-white py-4 rounded-card font-medium text-lg" data-event="click:startDay">
+                Начать день
+            </button>
+        </div>
+        <!-- @END_COMPONENT: DailyPlannerScreen -->
+
+        <!-- Calendar Screen -->
+        <!-- @COMPONENT: CalendarScreen [Monthly calendar view with events] -->
+        <div id="calendar-screen" class="screen px-4 py-6 pb-24">
+            <div class="mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <button class="text-dark/60" data-event="click:previousMonth">
+                        <i class="fas fa-chevron-left text-lg"></i>
+                    </button>
+                    <h1 class="text-xl font-display font-semibold text-dark">Январь 2025</h1>
+                    <button class="text-dark/60" data-event="click:nextMonth">
+                        <i class="fas fa-chevron-right text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Calendar Header -->
+                <div class="grid grid-cols-7 gap-1 mb-2">
+                    <div class="text-center py-2 text-xs font-medium text-dark/60">Пн</div>
+                    <div class="text-center py-2 text-xs font-medium text-dark/60">Вт</div>
+                    <div class="text-center py-2 text-xs font-medium text-dark/60">Ср</div>
+                    <div class="text-center py-2 text-xs font-medium text-dark/60">Чт</div>
+                    <div class="text-center py-2 text-xs font-medium text-dark/60">Пт</div>
+                    <div class="text-center py-2 text-xs font-medium text-dark/60">Сб</div>
+                    <div class="text-center py-2 text-xs font-medium text-dark/60">Вс</div>
+                </div>
+
+                <!-- Calendar Grid -->
+                <div class="grid grid-cols-7 gap-1">
+                    <!-- Previous month days -->
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark/30">30</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark/30">31</div>
+                    
+                    <!-- Current month days -->
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:1">1</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer relative" data-event="click:selectDate:2">
+                        2
+                        <div class="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-accent rounded-full"></div>
+                    </div>
+                    <div class="aspect-square flex items-center justify-center text-sm bg-accent text-white rounded-element cursor-pointer" data-event="click:selectDate:3">3</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:4">4</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer relative" data-event="click:selectDate:5">
+                        5
+                        <div class="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-success rounded-full"></div>
+                    </div>
+                    
+                    <!-- Continue for full month -->
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:6">6</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:7">7</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:8">8</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:9">9</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:10">10</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:11">11</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:12">12</div>
+                    
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:13">13</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:14">14</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:15">15</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:16">16</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:17">17</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:18">18</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:19">19</div>
+                    
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:20">20</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:21">21</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:22">22</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:23">23</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:24">24</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:25">25</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:26">26</div>
+                    
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:27">27</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:28">28</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:29">29</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:30">30</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark hover:bg-secondary/30 rounded-element cursor-pointer" data-event="click:selectDate:31">31</div>
+                    
+                    <!-- Next month days -->
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark/30">1</div>
+                    <div class="aspect-square flex items-center justify-center text-sm text-dark/30">2</div>
+                </div>
+            </div>
+
+            <!-- Events for Selected Day -->
+            <div class="mb-4">
+                <h3 class="font-medium text-dark mb-3">События на 3 января</h3>
+                
+                <!-- @MAP: selectedDayEvents.map(event => ( -->
+                <div class="space-y-3" data-mock="true">
+                    <div class="flex items-center gap-3 p-3 bg-secondary/30 rounded-element">
+                        <div class="w-3 h-3 bg-error rounded-full"></div>
+                        <div class="flex-1">
+                            <h4 class="font-medium text-dark text-sm" data-bind="event.title">Техобслуживание автомобиля</h4>
+                            <p class="text-xs text-dark/60" data-bind="event.time">ВЕСЬ ДЕНЬ</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 p-3 bg-secondary/30 rounded-element">
+                        <div class="w-3 h-3 bg-accent rounded-full"></div>
+                        <div class="flex-1">
+                            <h4 class="font-medium text-dark text-sm" data-bind="event.title">Завтрак с Матвеем</h4>
+                            <p class="text-xs text-dark/60">
+                                <span data-bind="event.location">Пироговая пекарня</span>
+                                <span class="mx-2">•</span>
+                                <span data-bind="event.time">8:00</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 p-3 bg-secondary/30 rounded-element">
+                        <div class="w-3 h-3 bg-success rounded-full"></div>
+                        <div class="flex-1">
+                            <h4 class="font-medium text-dark text-sm" data-bind="event.title">Тренировка</h4>
+                            <p class="text-xs text-dark/60">
+                                <span data-bind="event.location">Фитнес клуб "Бурак"</span>
+                                <span class="mx-2">•</span>
+                                <span data-bind="event.time">10:00</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 p-3 bg-secondary/30 rounded-element">
+                        <div class="w-3 h-3 bg-warning rounded-full"></div>
+                        <div class="flex-1">
+                            <h4 class="font-medium text-dark text-sm" data-bind="event.title">Обед с Эммой</h4>
+                            <p class="text-xs text-dark/60">
+                                <span data-bind="event.location">Дома</span>
+                                <span class="mx-2">•</span>
+                                <span data-bind="event.time">13:30</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 p-3 bg-secondary/30 rounded-element">
+                        <div class="w-3 h-3 bg-accent rounded-full"></div>
+                        <div class="flex-1">
+                            <h4 class="font-medium text-dark text-sm" data-bind="event.title">Командная встреча</h4>
+                            <p class="text-xs text-dark/60">
+                                <span data-bind="event.location">Зум линк</span>
+                                <span class="mx-2">•</span>
+                                <span data-bind="event.time">16:30 - 17:30</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_MAP -->
+            </div>
+
+            <!-- Add Event Button -->
+            <button class="w-full bg-accent text-white py-3 rounded-card font-medium" data-event="click:addEvent">
+                <i class="fas fa-plus mr-2"></i>
+                Добавить событие
+            </button>
+        </div>
+        <!-- @END_COMPONENT: CalendarScreen -->
+
+        <!-- Bottom Navigation -->
+        <!-- @COMPONENT: BottomNavigation [Navigation between main screens] -->
+        <nav class="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-secondary/80 backdrop-blur-md border-t border-dark/10">
+            <div class="flex justify-around py-3">
+                <button class="nav-item flex flex-col items-center py-2 px-3 text-dark/60 hover:text-accent transition-colors" data-nav="goals" data-event="click:showScreen:goals-screen">
+                    <div class="w-6 h-6 mb-1 rounded-lg bg-current opacity-20"></div>
+                    <span class="text-xs font-medium">Цели</span>
+                </button>
+                <button class="nav-item flex flex-col items-center py-2 px-3 text-dark/60 hover:text-accent transition-colors" data-nav="wellbeing" data-event="click:showScreen:wellbeing-screen">
+                    <div class="w-6 h-6 mb-1 rounded-full bg-current opacity-20"></div>
+                    <span class="text-xs font-medium">Reflect</span>
+                </button>
+                <button class="nav-item flex flex-col items-center py-2 px-3 text-dark/60 hover:text-accent transition-colors" data-nav="planner" data-event="click:showScreen:planner-screen">
+                    <div class="w-6 h-6 mb-1 rounded bg-current opacity-20 transform rotate-45"></div>
+                    <span class="text-xs font-medium">Today</span>
+                </button>
+                <button class="nav-item flex flex-col items-center py-2 px-3 text-dark/60 hover:text-accent transition-colors" data-nav="calendar" data-event="click:showScreen:calendar-screen">
+                    <div class="w-6 h-6 mb-1 bg-current opacity-20" style="clip-path: polygon(50% 0%, 0% 100%, 100% 100%)"></div>
+                    <span class="text-xs font-medium">Календарь</span>
+                </button>
+                <button class="nav-item flex flex-col items-center py-2 px-3 text-dark/60 hover:text-accent transition-colors" data-nav="profile" data-event="click:showScreen:profile-screen">
+                    <div class="w-6 h-6 mb-1 rounded-full bg-current opacity-20"></div>
+                    <span class="text-xs font-medium">Профиль</span>
+                </button>
+            </div>
+        </nav>
+        <!-- @END_COMPONENT: BottomNavigation -->
+    </div>
+    <!-- @END_COMPONENT: MobileApp -->
+
+    <script>
+    (function() {
+        // Navigation functionality
+        const screens = document.querySelectorAll('.screen');
+        const navItems = document.querySelectorAll('.nav-item');
+        
+        function showScreen(screenId) {
+            // Hide all screens
+            screens.forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show selected screen
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) {
+                targetScreen.classList.add('active');
+            }
+            
+            // Update navigation active state
+            navItems.forEach(item => {
+                item.classList.remove('text-accent');
+                item.classList.add('text-dark/60');
+            });
+            
+            const activeNavItem = document.querySelector(`[data-nav="${screenId.replace('-screen', '')}"]`);
+            if (activeNavItem) {
+                activeNavItem.classList.remove('text-dark/60');
+                activeNavItem.classList.add('text-accent');
+            }
+        }
+        
+        // Add click handlers to navigation items
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                const screenId = item.dataset.nav + '-screen';
+                showScreen(screenId);
+            });
+        });
+        
+        // Initialize with goals screen active
+        showScreen('goals-screen');
+        
+        // Mock functionality for interactive elements
+        // TODO: Implement business logic, API calls, or state management
+        
+        // Task completion handlers
+        document.addEventListener('change', (e) => {
+            if (e.target.type === 'checkbox') {
+                const taskElement = e.target.closest('.p-3');
+                if (e.target.checked) {
+                    taskElement.style.opacity = '0.6';
+                    taskElement.querySelector('span').style.textDecoration = 'line-through';
+                } else {
+                    taskElement.style.opacity = '1';
+                    taskElement.querySelector('span').style.textDecoration = 'none';
+                }
+                
+                // TODO: Save task completion state to localStorage
+            }
+        });
+        
+        // Calendar date selection
+        document.addEventListener('click', (e) => {
+            if (e.target.dataset.event && e.target.dataset.event.includes('selectDate')) {
+                // Remove previous selection
+                document.querySelectorAll('.grid .bg-accent').forEach(el => {
+                    if (!el.textContent.includes('3')) { // Keep current day highlighted
+                        el.className = el.className.replace('bg-accent text-white', 'text-dark hover:bg-secondary/30');
+                    }
+                });
+                
+                // Add selection to clicked date (except current day)
+                if (!e.target.textContent.includes('3')) {
+                    e.target.className = e.target.className.replace('text-dark hover:bg-secondary/30', 'bg-accent text-white');
+                }
+                
+                // TODO: Load events for selected date
+            }
+        });
+        
+        // Month navigation
+        let currentMonth = 0; // January = 0
+        const months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
+                       'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+        
+        document.addEventListener('click', (e) => {
+            if (e.target.dataset.event === 'click:previousMonth') {
+                currentMonth = currentMonth > 0 ? currentMonth - 1 : 11;
+                updateMonthDisplay();
+            } else if (e.target.dataset.event === 'click:nextMonth') {
+                currentMonth = currentMonth < 11 ? currentMonth + 1 : 0;
+                updateMonthDisplay();
+            }
+        });
+        
+        function updateMonthDisplay() {
+            const monthElement = document.querySelector('#calendar-screen h1');
+            if (monthElement) {
+                monthElement.textContent = `${months[currentMonth]} 2025`;
+            }
+            // TODO: Update calendar grid with correct dates
+        }
+        
+        // Sample data persistence simulation
+        const sampleData = {
+            todayTasks: 2,
+            overdueTasks: 1,
+            totalTasks: 6,
+            waterIntake: '0.5 литра',
+            sleepHours: '7.5 часов',
+            mood: '',
+            activity: '',
+            tasks: {
+                work: [
+                    { id: 1, title: 'Завершить запуск проекта', date: '26 янв', completed: false },
+                    { id: 2, title: 'Подготовить презентацию', date: '24 янв', completed: false },
+                    { id: 3, title: 'Расширить команду', date: '30 янв', completed: false }
+                ],
+                personal: [
+                    { id: 4, title: 'Забронировать отпуск', date: '27 янв', completed: false },
+                    { id: 5, title: 'Спортзал', date: 'Сегодня', completed: false },
+                    { id: 6, title: 'Прочитать книгу', date: '31 янв', completed: false }
+                ]
+            }
+        };
+        
+        // TODO: Load data from localStorage on app start
+        // TODO: Save data to localStorage on changes
+        
+        // Button click handlers for new goals, events, etc.
+        document.addEventListener('click', (e) => {
+            if (e.target.dataset.event) {
+                const action = e.target.dataset.event;
+                
+                switch(action) {
+                    case 'click:createNewGoal':
+                        // TODO: Show goal creation modal
+                        console.log('Create new goal');
+                        break;
+                    case 'click:createList':
+                        // TODO: Show list creation modal
+                        console.log('Create new list');
+                        break;
+                    case 'click:startDay':
+                        // TODO: Mark day as started, maybe show motivational message
+                        console.log('Day started');
+                        break;
+                    case 'click:addEvent':
+                        // TODO: Show event creation modal
+                        console.log('Add new event');
+                        break;
+                    default:
+                        if (action.includes('edit')) {
+                            // TODO: Show edit modal for water/sleep tracking
+                            console.log('Edit tracker');
+                        }
+                }
+            }
+        });
+        
+        // Responsive touch gestures for calendar navigation
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.getElementById('calendar-screen').addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.getElementById('calendar-screen').addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleCalendarSwipe();
+        });
+        
+        function handleCalendarSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    // Swipe left - next month
+                    currentMonth = currentMonth < 11 ? currentMonth + 1 : 0;
+                } else {
+                    // Swipe right - previous month
+                    currentMonth = currentMonth > 0 ? currentMonth - 1 : 11;
+                }
+                updateMonthDisplay();
+            }
+        }
+        
+        console.log('InCharge Calendar App initialized');
+    })();
+    </script>
+</body>
+</html>

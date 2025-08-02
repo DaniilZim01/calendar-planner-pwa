@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate PWA Icons</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .icon-preview {
+            margin: 20px 0;
+            text-align: center;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            margin: 10px;
+        }
+        button {
+            background: #8B7355;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #6B5B3F;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generate PWA Icons</h1>
+    <p>This page helps you generate the required PNG icons for your PWA from the SVG file.</p>
+    
+    <div class="icon-preview">
+        <h3>Icon Preview:</h3>
+        <img id="svgIcon" src="icons/icon.svg" alt="PWA Icon" style="width: 200px; height: 200px;">
+    </div>
+    
+    <div class="icon-preview">
+        <h3>Generated Icons:</h3>
+        <canvas id="canvas192" width="192" height="192"></canvas>
+        <canvas id="canvas512" width="512" height="512"></canvas>
+    </div>
+    
+    <div>
+        <button onclick="generateIcons()">Generate Icons</button>
+        <button onclick="downloadIcon(192)">Download 192x192</button>
+        <button onclick="downloadIcon(512)">Download 512x512</button>
+    </div>
+
+    <script>
+        function generateIcons() {
+            const svg = document.getElementById('svgIcon');
+            const canvas192 = document.getElementById('canvas192');
+            const canvas512 = document.getElementById('canvas512');
+            
+            const ctx192 = canvas192.getContext('2d');
+            const ctx512 = canvas512.getContext('2d');
+            
+            // Generate 192x192 icon
+            ctx192.drawImage(svg, 0, 0, 192, 192);
+            
+            // Generate 512x512 icon
+            ctx512.drawImage(svg, 0, 0, 512, 512);
+        }
+        
+        function downloadIcon(size) {
+            const canvas = document.getElementById(`canvas${size}`);
+            const link = document.createElement('a');
+            link.download = `icon-${size}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // Auto-generate icons when page loads
+        window.addEventListener('load', () => {
+            setTimeout(generateIcons, 100);
+        });
+    </script>
+</body>
+</html> 
