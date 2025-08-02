@@ -1,0 +1,160 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Более приглушенная и эстетичная цветовая схема TT Interphases Pro */
+  --background: hsl(45, 18%, 93%); /* #F1EDE6 - очень мягкий бежевый */
+  --foreground: hsl(20, 12%, 28%); /* #4A453F - тёмный коричневый */
+  --card: hsl(45, 18%, 93%);
+  --card-foreground: hsl(20, 12%, 28%);
+  --popover: hsl(45, 18%, 93%);
+  --popover-foreground: hsl(20, 12%, 28%);
+  --primary: hsl(25, 18%, 45%); /* #7B6B5D - приглушенный коричневый */
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(42, 20%, 80%); /* #D9D1C4 - светло-бежевый */
+  --secondary-foreground: hsl(20, 12%, 28%);
+  --muted: hsl(42, 16%, 85%); /* #E0D8CD - очень светлый бежевый */
+  --muted-foreground: hsl(20, 8%, 50%); /* #7A7067 - серо-коричневый */
+  --accent: hsl(28, 16%, 52%); /* #8B7D6F - мягкий акцентный коричневый */
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(350, 25%, 60%); /* #B38A8A - приглушенный красный */
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --success: hsl(85, 12%, 55%); /* #8A9480 - приглушенный зеленый */
+  --success-foreground: hsl(0, 0%, 98%);
+  --warning: hsl(38, 28%, 58%); /* #C5A572 - приглушенный оранжевый */
+  --warning-foreground: hsl(20, 12%, 28%);
+  --border: hsl(42, 16%, 75%); /* #CFC3B6 */
+  --input: hsl(42, 16%, 85%);
+  --ring: hsl(25, 18%, 45%);
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: hsl(25, 21%, 15%);
+  --foreground: hsl(43, 33%, 90%);
+  --card: hsl(25, 21%, 15%);
+  --card-foreground: hsl(43, 33%, 90%);
+  --popover: hsl(25, 21%, 15%);
+  --popover-foreground: hsl(43, 33%, 90%);
+  --primary: hsl(28, 26%, 53%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(25, 21%, 25%);
+  --secondary-foreground: hsl(43, 33%, 90%);
+  --muted: hsl(25, 21%, 25%);
+  --muted-foreground: hsl(32, 15%, 65%);
+  --accent: hsl(28, 26%, 53%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 50%, 50%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --success: hsl(75, 15%, 45%);
+  --success-foreground: hsl(0, 0%, 98%);
+  --warning: hsl(35, 45%, 55%);
+  --warning-foreground: hsl(0, 0%, 98%);
+  --border: hsl(25, 21%, 25%);
+  --input: hsl(25, 21%, 25%);
+  --ring: hsl(28, 26%, 53%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 200;
+  }
+  
+  h1 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 200;
+    letter-spacing: -0.02em;
+  }
+  
+  h2 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 300;
+    letter-spacing: -0.01em;
+  }
+  
+  h3, h4, h5, h6 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 400;
+  }
+}
+
+@layer components {
+  .app-container {
+    @apply max-w-sm mx-auto bg-background min-h-screen relative;
+  }
+  
+  .screen-container {
+    @apply px-4 py-6 pb-24;
+  }
+  
+  .card-soft {
+    background: rgba(217, 209, 196, 0.4);
+    @apply rounded-xl p-4;
+  }
+  
+  .card-element {
+    background: rgba(217, 209, 196, 0.25);
+    @apply rounded-lg;
+  }
+  
+  .nav-icon {
+    @apply w-6 h-6 mb-1 opacity-40 transition-all duration-200;
+  }
+  
+  .nav-icon.active {
+    @apply opacity-80;
+  }
+  
+  .chart-line {
+    fill: none;
+    stroke: hsl(25, 18%, 45%);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  
+  .chart-point {
+    fill: hsl(25, 18%, 45%);
+    r: 3;
+  }
+  
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+/* Плавные переходы */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
