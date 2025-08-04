@@ -7,3 +7,21 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Export for compatibility with existing code
 export const db = supabase;
+
+// Database helper functions
+export async function testConnection() {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('count')
+      .limit(1);
+    
+    if (error) {
+      throw error;
+    }
+    
+    return { success: true, message: 'Database connection successful' };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+} 
