@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "set NODE_ENV=development && tsx server/index.ts",
-    "build": "echo 'No build needed for serverless functions'",
+    "build": "mkdir -p public && echo '<html><body><h1>Calendar Planner PWA</h1><p>API: <a href=\"/api/health\">/api/health</a>, <a href=\"/api/test\">/api/test</a></p></body></html>' > public/index.html && echo 'Build completed: created public directory'",
     "start": "NODE_ENV=production node dist/index.js",
     "vercel-build": "echo 'No build needed for Vercel'",
     "check": "tsc",
