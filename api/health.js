@@ -1,4 +1,4 @@
-export default function handler(req, res) {
+module.exports = (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -6,4 +6,4 @@ export default function handler(req, res) {
     supabaseUrl: process.env.SUPABASE_URL ? 'Configured' : 'Not configured',
     supabaseKey: process.env.SUPABASE_ANON_KEY ? 'Configured' : 'Not configured'
   });
-} 
+}; 
