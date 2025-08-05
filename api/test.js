@@ -1,4 +1,4 @@
-module.exports = (req, res) => {
+export default function handler(req, res) {
   res.json({
     status: 'success',
     message: 'Simple API endpoint working',
@@ -7,4 +7,4 @@ module.exports = (req, res) => {
     supabaseUrl: process.env.SUPABASE_URL ? 'Configured' : 'Not configured',
     supabaseKey: process.env.SUPABASE_ANON_KEY ? 'Configured' : 'Not configured'
   });
-}; 
+} 
