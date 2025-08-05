@@ -8,16 +8,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API routes - temporarily disabled until auth is fixed
   // app.use('/api/auth', authRoutes);
 
-  // Health check endpoint
-  app.get('/api/health', (req, res) => {
-    res.json({ 
-      status: 'ok', 
-      timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development',
-      supabaseUrl: process.env.SUPABASE_URL ? 'Configured' : 'Not configured',
-      supabaseKey: process.env.SUPABASE_ANON_KEY ? 'Configured' : 'Not conf11111111111111111111111igured'
-    });
-  });
+  // Health check endpoint moved to api/health.js (Vercel serverless function)
 
   // Database test endpoint
   app.get('/api/test-db', async (req, res) => {
@@ -64,15 +55,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Simple test endpoint without database
-  app.get('/api/test-simple', (req, res) => {
-    res.json({
-      status: 'success',
-      message: 'Simple endpoint working',
-      timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development'
-    });
-  });
+  // Simple test endpoint moved to api/test.js (Vercel serverless function)
 
   const httpServer = createServer(app);
 
