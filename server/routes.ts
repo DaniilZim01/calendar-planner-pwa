@@ -1,12 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { sql } from "drizzle-orm";
-import authRoutes from "./routes/auth";
+// import authRoutes from "./routes/auth"; // temporarily disabled
 import { supabase } from "./db/index.ts";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // API routes
-  app.use('/api/auth', authRoutes);
+  // API routes - temporarily disabled until auth is fixed
+  // app.use('/api/auth', authRoutes);
 
   // Health check endpoint
   app.get('/api/health', (req, res) => {

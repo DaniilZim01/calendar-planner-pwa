@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
-import { db } from '../db';
-import { users } from '../db/schema';
-import { eq } from 'drizzle-orm';
+import { supabase } from '../db/index.ts';
 import { hashPassword, comparePassword } from '../utils/password';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { registerSchema, loginSchema, updateUserSchema } from '../validation/schemas';
@@ -16,9 +14,21 @@ export async function register(req: Request, res: Response): Promise<void> {
     const validatedData = registerSchema.parse(req.body);
     
     // Check if user already exists
-    const existingUser = await db.query.users.findFirst({
-      where: eq(users.email, validatedData.email)
-    });
+    const { data: existingUser, error: checkError } = await supabase
+      .from('users')
+      .select('id, email')
+      .eq('email', validatedData.email)
+      .single();
+
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error('Database error:', checkError);
+      res.status(500).json({
+        success: false,
+        message: 'Database error',
+        code: 'DATABASE_ERROR'
+      });
+      return;
+    }
 
     if (existingUser) {
       res.status(409).json({
@@ -33,19 +43,26 @@ export async function register(req: Request, res: Response): Promise<void> {
     const passwordHash = await hashPassword(validatedData.password);
 
     // Create user
-    const [newUser] = await db.insert(users).values({
-      email: validatedData.email,
-      phone: validatedData.phone,
-      name: validatedData.name,
-      passwordHash,
-    }).returning({
-      id: users.id,
-      email: users.email,
-      name: users.name,
-      phone: users.phone,
-      emailVerified: users.emailVerified,
-      createdAt: users.createdAt,
-    });
+    const { data: newUser, error: insertError } = await supabase
+      .from('users')
+      .insert({
+        email: validatedData.email,
+        phone: validatedData.phone,
+        name: validatedData.name,
+        password_hash: passwordHash,
+      })
+      .select('id, email, name, phone, email_verified, created_at')
+      .single();
+
+    if (insertError) {
+      console.error('Insert error:', insertError);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create user',
+        code: 'INSERT_ERROR'
+      });
+      return;
+    }
 
     // Generate tokens
     const accessToken = generateAccessToken(newUser);
