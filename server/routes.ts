@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { sql } from "drizzle-orm";
 import authRoutes from "./routes/auth";
+import { supabase } from "./db/index.ts";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes
@@ -19,10 +20,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Database test endpoint
   app.get('/api/test-db', async (req, res) => {
     try {
-      const { testConnection } = await import('./db');
-      
       // Test Supabase connection
-      const result = await testConnection();
+      const { data, error } = await supabase
+        .from('users')
+        .select('count')
+        .limit(1);
+      
+      if (error) {
+        throw error;
+      }
+      
+      const result = { success: true, message: 'Database connection successful' };
       
       if (result.success) {
         res.json({
