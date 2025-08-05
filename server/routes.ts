@@ -13,7 +13,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ 
       status: 'ok', 
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development'
+      environment: process.env.NODE_ENV || 'development',
+      supabaseUrl: process.env.SUPABASE_URL ? 'Configured' : 'Not configured',
+      supabaseKey: process.env.SUPABASE_ANON_KEY ? 'Configured' : 'Not configured'
     });
   });
 
@@ -60,6 +62,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         supabaseUrl: process.env.SUPABASE_URL ? 'Configured' : 'Not configured'
       });
     }
+  });
+
+  // Simple test endpoint without database
+  app.get('/api/test-simple', (req, res) => {
+    res.json({
+      status: 'success',
+      message: 'Simple endpoint working',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development'
+    });
   });
 
   const httpServer = createServer(app);
