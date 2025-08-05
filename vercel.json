@@ -1,8 +1,19 @@
 {
   "version": 2,
-  "functions": {
-    "api/test.js": {
-      "runtime": "nodejs18.x"
+  "builds": [
+    {
+      "src": "server/index.ts",
+      "use": "@vercel/node"
     }
-  }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "server/index.ts"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "server/index.ts"
+    }
+  ]
 }
