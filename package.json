@@ -92,7 +92,8 @@
     "esbuild": "^0.25.0",
     "@replit/vite-plugin-cartographer": "^0.2.8",
     "@replit/vite-plugin-runtime-error-modal": "^0.0.3",
-    "@tailwindcss/typography": "^0.5.15"
+    "@tailwindcss/typography": "^0.5.15",
+    "@supabase/supabase-js": "^2.53.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.3",
