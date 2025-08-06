@@ -1,0 +1,5 @@
+[33m55b88df[m[33m ([m[1;36mHEAD -> [m[1;32mdeployment-fixes[m[33m, [m[1;31morigin/deployment-fixes[m[33m)[m DB structure refactoring and migration
+[33mc671e2a[m Update vercel.json
+[33m641e701[m Update vite.config.ts
+[33ma706736[m Delete dist directory
+[33m1f5ec67[m Update vite.config.ts
