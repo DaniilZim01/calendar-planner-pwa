@@ -7,7 +7,8 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cC
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const JWT_SECRET = process.env.JWT_ACCESS_SECRET || 'your-secret-key-change-in-production';
+const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'your-access-secret-key';
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key';
 
 export default async function handler(req, res) {
   // Only allow POST requests
@@ -68,15 +69,26 @@ export default async function handler(req, res) {
       });
     }
 
-    // Generate JWT token
-    const token = jwt.sign(
+    // Generate access token
+    const accessToken = jwt.sign(
       {
         userId: newUser.id,
         email: newUser.email,
         name: newUser.name
       },
-      JWT_SECRET,
+      JWT_ACCESS_SECRET,
       { expiresIn: '15m' }
+    );
+
+    // Generate refresh token
+    const refreshToken = jwt.sign(
+      {
+        userId: newUser.id,
+        email: newUser.email,
+        name: newUser.name
+      },
+      JWT_REFRESH_SECRET,
+      { expiresIn: '7d' }
     );
 
     // Return success response
@@ -91,7 +103,8 @@ export default async function handler(req, res) {
           phone: newUser.phone,
           emailVerified: newUser.email_verified
         },
-        accessToken: token
+        accessToken: accessToken,
+        refreshToken: refreshToken
       }
     });
 

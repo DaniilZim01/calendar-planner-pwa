@@ -80,9 +80,22 @@
             margin: 10px 0;
             font-size: 11px;
         }
+        .cors-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
+    <div class="cors-notice">
+        <strong>⚠️ Внимание:</strong> Браузер может блокировать запросы из-за CORS. 
+        Используйте Postman для полного тестирования API.
+    </div>
+
     <h1>🧪 Тест API Аутентификации</h1>
     
     <div class="container">
@@ -95,13 +108,13 @@
         <h2>📝 Регистрация пользователя</h2>
         <div class="test-section">
             <label>Email:</label>
-            <input type="email" id="register-email" value="test2@example.com" placeholder="Введите email">
+            <input type="email" id="register-email" value="test3@example.com" placeholder="Введите email">
             
             <label>Пароль:</label>
             <input type="password" id="register-password" value="TestPassword123!" placeholder="Введите пароль">
             
             <label>Имя:</label>
-            <input type="text" id="register-name" value="Test User 2" placeholder="Введите имя">
+            <input type="text" id="register-name" value="Test User 3" placeholder="Введите имя">
             
             <label>Телефон (опционально):</label>
             <input type="tel" id="register-phone" value="+1234567890" placeholder="Введите телефон">
@@ -138,6 +151,55 @@
         </div>
     </div>
 
+    <div class="container">
+        <h2>📋 Инструкции для Postman</h2>
+        <div class="test-section">
+            <h3>1. Тест подключения к базе</h3>
+            <p><strong>GET</strong> https://calendar-planner-pwa.vercel.app/api/test-db</p>
+            
+            <h3>2. Регистрация пользователя</h3>
+            <p><strong>POST</strong> https://calendar-planner-pwa.vercel.app/api/auth/register</p>
+            <p><strong>Headers:</strong> Content-Type: application/json</p>
+            <p><strong>Body (JSON):</strong></p>
+            <pre>{
+  "email": "test4@example.com",
+  "password": "TestPassword123!",
+  "name": "Test User 4",
+  "phone": "+1234567890"
+}</pre>
+            
+            <h3>3. Вход в систему</h3>
+            <p><strong>POST</strong> https://calendar-planner-pwa.vercel.app/api/auth/login</p>
+            <p><strong>Headers:</strong> Content-Type: application/json</p>
+            <p><strong>Body (JSON):</strong></p>
+            <pre>{
+  "email": "test@example.com",
+  "password": "TestPassword123!"
+}</pre>
+            
+            <h3>4. Получение профиля</h3>
+            <p><strong>GET</strong> https://calendar-planner-pwa.vercel.app/api/auth/profile</p>
+            <p><strong>Headers:</strong></p>
+            <ul>
+                <li>Authorization: Bearer YOUR_JWT_TOKEN</li>
+                <li>Content-Type: application/json</li>
+            </ul>
+            
+            <h3>5. Обновление профиля</h3>
+            <p><strong>PUT</strong> https://calendar-planner-pwa.vercel.app/api/auth/update-profile</p>
+            <p><strong>Headers:</strong></p>
+            <ul>
+                <li>Authorization: Bearer YOUR_JWT_TOKEN</li>
+                <li>Content-Type: application/json</li>
+            </ul>
+            <p><strong>Body (JSON):</strong></p>
+            <pre>{
+  "name": "Обновленное имя",
+  "phone": "+9876543210"
+}</pre>
+        </div>
+    </div>
+
     <script>
         let currentToken = '';
 
@@ -147,19 +209,26 @@
             resultDiv.textContent = 'Тестирование подключения...';
 
             try {
-                const response = await fetch('https://calendar-planner-pwa.vercel.app/api/test-db');
-                const data = await response.json();
+                const response = await fetch('https://calendar-planner-pwa.vercel.app/api/test-db', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    mode: 'cors'
+                });
                 
                 if (response.ok) {
+                    const data = await response.json();
                     resultDiv.className = 'result success';
                     resultDiv.textContent = `✅ Успешно!\n${JSON.stringify(data, null, 2)}`;
                 } else {
+                    const errorText = await response.text();
                     resultDiv.className = 'result error';
-                    resultDiv.textContent = `❌ Ошибка ${response.status}:\n${JSON.stringify(data, null, 2)}`;
+                    resultDiv.textContent = `❌ Ошибка ${response.status}:\n${errorText}`;
                 }
             } catch (error) {
                 resultDiv.className = 'result error';
-                resultDiv.textContent = `❌ Ошибка сети:\n${error.message}`;
+                resultDiv.textContent = `❌ Ошибка сети (CORS):\n${error.message}\n\nИспользуйте Postman для тестирования API.`;
             }
         }
 
@@ -181,27 +250,27 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(userData)
+                    body: JSON.stringify(userData),
+                    mode: 'cors'
                 });
 
-                const data = await response.json();
-                
                 if (response.ok) {
+                    const data = await response.json();
                     resultDiv.className = 'result success';
                     resultDiv.textContent = `✅ Регистрация успешна!\n${JSON.stringify(data, null, 2)}`;
                     
-                    // Сохраняем токен
                     if (data.data && data.data.accessToken) {
                         currentToken = data.data.accessToken;
                         updateTokenDisplay();
                     }
                 } else {
+                    const errorText = await response.text();
                     resultDiv.className = 'result error';
-                    resultDiv.textContent = `❌ Ошибка регистрации ${response.status}:\n${JSON.stringify(data, null, 2)}`;
+                    resultDiv.textContent = `❌ Ошибка регистрации ${response.status}:\n${errorText}`;
                 }
             } catch (error) {
                 resultDiv.className = 'result error';
-                resultDiv.textContent = `❌ Ошибка сети:\n${error.message}`;
+                resultDiv.textContent = `❌ Ошибка сети (CORS):\n${error.message}\n\nИспользуйте Postman для тестирования API.`;
             }
         }
 
@@ -221,27 +290,27 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(userData)
+                    body: JSON.stringify(userData),
+                    mode: 'cors'
                 });
 
-                const data = await response.json();
-                
                 if (response.ok) {
+                    const data = await response.json();
                     resultDiv.className = 'result success';
                     resultDiv.textContent = `✅ Вход успешен!\n${JSON.stringify(data, null, 2)}`;
                     
-                    // Сохраняем токен
                     if (data.data && data.data.accessToken) {
                         currentToken = data.data.accessToken;
                         updateTokenDisplay();
                     }
                 } else {
+                    const errorText = await response.text();
                     resultDiv.className = 'result error';
-                    resultDiv.textContent = `❌ Ошибка входа ${response.status}:\n${JSON.stringify(data, null, 2)}`;
+                    resultDiv.textContent = `❌ Ошибка входа ${response.status}:\n${errorText}`;
                 }
             } catch (error) {
                 resultDiv.className = 'result error';
-                resultDiv.textContent = `❌ Ошибка сети:\n${error.message}`;
+                resultDiv.textContent = `❌ Ошибка сети (CORS):\n${error.message}\n\nИспользуйте Postman для тестирования API.`;
             }
         }
 
@@ -262,21 +331,22 @@
                     headers: {
                         'Authorization': `Bearer ${currentToken}`,
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    mode: 'cors'
                 });
 
-                const data = await response.json();
-                
                 if (response.ok) {
+                    const data = await response.json();
                     resultDiv.className = 'result success';
                     resultDiv.textContent = `✅ Профиль получен!\n${JSON.stringify(data, null, 2)}`;
                 } else {
+                    const errorText = await response.text();
                     resultDiv.className = 'result error';
-                    resultDiv.textContent = `❌ Ошибка получения профиля ${response.status}:\n${JSON.stringify(data, null, 2)}`;
+                    resultDiv.textContent = `❌ Ошибка получения профиля ${response.status}:\n${errorText}`;
                 }
             } catch (error) {
                 resultDiv.className = 'result error';
-                resultDiv.textContent = `❌ Ошибка сети:\n${error.message}`;
+                resultDiv.textContent = `❌ Ошибка сети (CORS):\n${error.message}\n\nИспользуйте Postman для тестирования API.`;
             }
         }
 
@@ -303,21 +373,22 @@
                         'Authorization': `Bearer ${currentToken}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(updateData)
+                    body: JSON.stringify(updateData),
+                    mode: 'cors'
                 });
 
-                const data = await response.json();
-                
                 if (response.ok) {
+                    const data = await response.json();
                     resultDiv.className = 'result success';
                     resultDiv.textContent = `✅ Профиль обновлен!\n${JSON.stringify(data, null, 2)}`;
                 } else {
+                    const errorText = await response.text();
                     resultDiv.className = 'result error';
-                    resultDiv.textContent = `❌ Ошибка обновления профиля ${response.status}:\n${JSON.stringify(data, null, 2)}`;
+                    resultDiv.textContent = `❌ Ошибка обновления профиля ${response.status}:\n${errorText}`;
                 }
             } catch (error) {
                 resultDiv.className = 'result error';
-                resultDiv.textContent = `❌ Ошибка сети:\n${error.message}`;
+                resultDiv.textContent = `❌ Ошибка сети (CORS):\n${error.message}\n\nИспользуйте Postman для тестирования API.`;
             }
         }
 
