@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +11,7 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
+  const [, navigate] = useLocation();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,6 +21,7 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
       return;
     }
     await register({ name, email, password });
+    navigate('/auth');
   };
 
   return (
@@ -41,5 +44,6 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
     </form>
   );
 }
+
 
 
