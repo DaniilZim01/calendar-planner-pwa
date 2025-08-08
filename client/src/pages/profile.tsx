@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -6,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { User, Settings, Moon, Sun } from 'lucide-react';
+import { User, Settings, Moon, Sun, LogIn } from 'lucide-react';
+import { useIsAuthenticated } from '@/lib/hooks';
 
 interface UserProfile {
   name: string;
@@ -17,6 +19,8 @@ interface UserProfile {
 }
 
 export default function ProfilePage() {
+  const isAuthenticated = useIsAuthenticated();
+  const [, navigate] = useLocation();
   const [profile, setProfile] = useLocalStorage<UserProfile>('user_profile', {
     name: '',
     email: '',
@@ -74,14 +78,26 @@ export default function ProfilePage() {
                   {profile.email || 'Настройте свой профиль'}
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsEditing(!isEditing)}
-                className="text-accent"
-              >
-                <Settings className="w-4 h-4" />
-              </Button>
+              <div className="flex items-center gap-2">
+                {!isAuthenticated && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate('/auth')}
+                    className="border-accent text-accent"
+                  >
+                    <LogIn className="w-4 h-4 mr-1" /> Войти / Регистрация
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsEditing(!isEditing)}
+                  className="text-accent"
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </CardHeader>
 
