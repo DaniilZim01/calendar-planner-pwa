@@ -2,6 +2,9 @@
   "version": 2,
   "outputDirectory": "dist/public",
   "rewrites": [
-    { "source": "/((?!api|.*\\..*).*)", "destination": "/index.html" }
+    { "source": "/(assets/.*)", "destination": "/$1" },
+    { "source": "/icons/(.*)", "destination": "/icons/$1" },
+    { "source": "/(manifest\\.json)", "destination": "/$1" },
+    { "source": "/((?!api|assets|icons|manifest\\.json).*)", "destination": "/index.html" }
   ]
 }

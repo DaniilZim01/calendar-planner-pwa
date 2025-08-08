@@ -1,24 +1,44 @@
-const CACHE_NAME = "planner-cache-v1";
+const CACHE_NAME = "planner-cache-v3"; // bump to invalidate old caches
 const urlsToCache = [
   "/",
-  "/index.html",
   "/manifest.json",
   "/icons/icon-192.png",
-  "/icons/icon-512.png"
-  // Add other necessary files here
+  "/icons/icon-512.png",
 ];
 
-self.addEventListener("install", event => {
+self.addEventListener("install", (event) => {
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
   );
 });
 
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request).then(
-      response => response || fetch(event.request)
-    )
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      )
+    ).then(() => self.clients.claim())
   );
-}); 
+});
+
+// Network-first for navigations (index.html) to avoid stale hashed assets references
+self.addEventListener("fetch", (event) => {
+  const req = event.request;
+  if (req.mode === "navigate") {
+    event.respondWith(
+      fetch(req).catch(() => caches.match("/"))
+    );
+    return;
+  }
+
+  // Cache-first for other requests, fallback to network
+  event.respondWith(
+    caches.match(req).then((cached) => cached || fetch(req))
+  );
+});
