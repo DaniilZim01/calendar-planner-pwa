@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { User, Settings, Moon, Sun, LogIn } from 'lucide-react';
 import { useIsAuthenticated } from '@/lib/hooks';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface UserProfile {
   name: string;
@@ -21,6 +22,7 @@ interface UserProfile {
 export default function ProfilePage() {
   const isAuthenticated = useIsAuthenticated();
   const [, navigate] = useLocation();
+  const { user, logout } = useAuth();
   const [profile, setProfile] = useLocalStorage<UserProfile>('user_profile', {
     name: '',
     email: '',
@@ -72,10 +74,10 @@ export default function ProfilePage() {
               </Avatar>
               <div className="flex-1">
                 <CardTitle className="font-light text-foreground">
-                  {profile.name || 'Пользователь'}
+                  {user?.name || profile.name || 'Пользователь'}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  {profile.email || 'Настройте свой профиль'}
+                  {user?.email || profile.email || 'Настройте свой профиль'}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -105,6 +107,19 @@ export default function ProfilePage() {
             </CardContent>
           )}
 
+          {isAuthenticated && !isEditing && (
+            <CardContent className="pt-0 pb-4">
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => logout()}
+                >
+                  Выйти
+                </Button>
+              </div>
+            </CardContent>
+          )}
+
           {isEditing && (
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -113,10 +128,11 @@ export default function ProfilePage() {
                 </Label>
                 <Input
                   id="name"
-                  value={tempProfile.name}
-                  onChange={(e) => setTempProfile({ ...tempProfile, name: e.target.value })}
+                  value={isAuthenticated ? (user?.name ?? '') : tempProfile.name}
+                  onChange={(e) => !isAuthenticated && setTempProfile({ ...tempProfile, name: e.target.value })}
                   placeholder="Введите ваше имя"
                   className="bg-input border-border focus:ring-accent"
+                  disabled={isAuthenticated}
                 />
               </div>
 
@@ -127,28 +143,31 @@ export default function ProfilePage() {
                 <Input
                   id="email"
                   type="email"
-                  value={tempProfile.email}
-                  onChange={(e) => setTempProfile({ ...tempProfile, email: e.target.value })}
+                  value={isAuthenticated ? (user?.email ?? '') : tempProfile.email}
+                  onChange={(e) => !isAuthenticated && setTempProfile({ ...tempProfile, email: e.target.value })}
                   placeholder="Введите ваш email"
                   className="bg-input border-border focus:ring-accent"
+                  disabled={isAuthenticated}
                 />
               </div>
 
-              <div className="flex gap-3 pt-4">
-                <Button
-                  variant="outline"
-                  onClick={handleCancel}
-                  className="flex-1"
-                >
-                  Отмена
-                </Button>
-                <Button
-                  onClick={handleSave}
-                  className="flex-1 bg-accent hover:bg-accent/90 text-white"
-                >
-                  Сохранить
-                </Button>
-              </div>
+              {!isAuthenticated && (
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={handleCancel}
+                    className="flex-1"
+                  >
+                    Отмена
+                  </Button>
+                  <Button
+                    onClick={handleSave}
+                    className="flex-1 bg-accent hover:bg-accent/90 text-white"
+                  >
+                    Сохранить
+                  </Button>
+                </div>
+              )}
             </CardContent>
           )}
         </Card>
