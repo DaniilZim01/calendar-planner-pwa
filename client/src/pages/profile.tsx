@@ -79,16 +79,6 @@ export default function ProfilePage() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                {!isAuthenticated && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate('/auth')}
-                    className="border-accent text-accent"
-                  >
-                    <LogIn className="w-4 h-4 mr-1" /> Войти / Регистрация
-                  </Button>
-                )}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -100,6 +90,20 @@ export default function ProfilePage() {
               </div>
             </div>
           </CardHeader>
+
+          {!isAuthenticated && !isEditing && (
+            <CardContent className="pt-0 pb-4">
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/auth')}
+                  className="border-accent text-accent"
+                >
+                  <LogIn className="w-4 h-4 mr-2" /> Войти / Регистрация
+                </Button>
+              </div>
+            </CardContent>
+          )}
 
           {isEditing && (
             <CardContent className="space-y-4">
