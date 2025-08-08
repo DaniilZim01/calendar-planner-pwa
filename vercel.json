@@ -2,6 +2,6 @@
   "version": 2,
   "outputDirectory": "dist/public",
   "rewrites": [
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/(?:(?!api/|assets/|.*\..*).)*", "destination": "/index.html" }
   ]
 }
