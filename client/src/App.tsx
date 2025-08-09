@@ -11,6 +11,7 @@ import WellbeingPage from "./pages/wellbeing";
 import PlannerPage from "./pages/planner";
 import CalendarPage from "./pages/calendar";
 import ProfilePage from "./pages/profile";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import AuthPage from "./pages/auth";
 import NotFound from "@/pages/not-found";
 
@@ -23,7 +24,13 @@ function Router() {
         <Route path="/wellbeing" component={WellbeingPage} />
         <Route path="/planner" component={PlannerPage} />
         <Route path="/calendar" component={CalendarPage} />
-        <Route path="/profile" component={ProfilePage} />
+        <Route path="/profile">
+          {() => (
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          )}
+        </Route>
         <Route component={NotFound} />
       </Switch>
       <BottomNavigation />

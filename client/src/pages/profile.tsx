@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { User, Settings, Moon, Sun, LogIn } from 'lucide-react';
-import { useIsAuthenticated } from '@/lib/hooks';
+import { useIsAuthenticated, useUpdateProfile } from '@/lib/hooks';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UserProfile {
@@ -23,6 +23,7 @@ export default function ProfilePage() {
   const isAuthenticated = useIsAuthenticated();
   const [, navigate] = useLocation();
   const { user, logout } = useAuth();
+  const updateProfile = useUpdateProfile();
   const [profile, setProfile] = useLocalStorage<UserProfile>('user_profile', {
     name: '',
     email: '',
@@ -33,9 +34,16 @@ export default function ProfilePage() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [tempProfile, setTempProfile] = useState(profile);
+  const [authedName, setAuthedName] = useState<string>(user?.name ?? '');
 
-  const handleSave = () => {
-    setProfile(tempProfile);
+  const handleSave = async () => {
+    if (isAuthenticated) {
+      try {
+        await updateProfile.mutateAsync({ name: authedName });
+      } catch {}
+    } else {
+      setProfile(tempProfile);
+    }
     setIsEditing(false);
   };
 
@@ -128,11 +136,13 @@ export default function ProfilePage() {
                 </Label>
                 <Input
                   id="name"
-                  value={isAuthenticated ? (user?.name ?? '') : tempProfile.name}
-                  onChange={(e) => !isAuthenticated && setTempProfile({ ...tempProfile, name: e.target.value })}
+                  value={isAuthenticated ? authedName : tempProfile.name}
+                  onChange={(e) => {
+                    if (isAuthenticated) setAuthedName(e.target.value);
+                    else setTempProfile({ ...tempProfile, name: e.target.value });
+                  }}
                   placeholder="Введите ваше имя"
                   className="bg-input border-border focus:ring-accent"
-                  disabled={isAuthenticated}
                 />
               </div>
 
@@ -152,6 +162,23 @@ export default function ProfilePage() {
               </div>
 
               {!isAuthenticated && (
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={handleCancel}
+                    className="flex-1"
+                  >
+                    Отмена
+                  </Button>
+                  <Button
+                    onClick={handleSave}
+                    className="flex-1 bg-accent hover:bg-accent/90 text-white"
+                  >
+                    Сохранить
+                  </Button>
+                </div>
+              )}
+              {isAuthenticated && (
                 <div className="flex gap-3 pt-4">
                   <Button
                     variant="outline"
