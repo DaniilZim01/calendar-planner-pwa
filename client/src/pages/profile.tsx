@@ -35,11 +35,12 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [tempProfile, setTempProfile] = useState(profile);
   const [authedName, setAuthedName] = useState<string>(user?.name ?? '');
+  const [authedPhone, setAuthedPhone] = useState<string>(user?.phone ?? '');
 
   const handleSave = async () => {
     if (isAuthenticated) {
       try {
-        await updateProfile.mutateAsync({ name: authedName });
+        await updateProfile.mutateAsync({ name: authedName, phone: authedPhone || undefined });
       } catch {}
     } else {
       setProfile(tempProfile);
@@ -160,6 +161,22 @@ export default function ProfilePage() {
                   disabled={isAuthenticated}
                 />
               </div>
+
+              {isAuthenticated && (
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-sm font-light text-foreground">
+                    Телефон
+                  </Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={authedPhone}
+                    onChange={(e) => setAuthedPhone(e.target.value)}
+                    placeholder="Введите ваш телефон"
+                    className="bg-input border-border focus:ring-accent"
+                  />
+                </div>
+              )}
 
               {!isAuthenticated && (
                 <div className="flex gap-3 pt-4">
