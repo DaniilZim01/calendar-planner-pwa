@@ -18,10 +18,32 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      const { data, error } = await supabase
+      const scope = (req.query?.scope || '').toString();
+      let query = supabase
         .from('tasks')
         .select('id, title, description, due_date, completed, priority, created_at, updated_at')
-        .eq('user_id', req.user.userId)
+        .eq('user_id', req.user.userId);
+
+      if (scope === 'today') {
+        const today = new Date();
+        const start = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), 0, 0, 0));
+        const end = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), 23, 59, 59));
+        query = query.gte('due_date', start.toISOString()).lte('due_date', end.toISOString());
+      } else if (scope === 'week') {
+        const now = new Date();
+        const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+        const day = d.getUTCDay();
+        const diff = (day === 0 ? -6 : 1) - day; // Monday start
+        d.setUTCDate(d.getUTCDate() + diff);
+        d.setUTCHours(0, 0, 0, 0);
+        const start = d;
+        const end = new Date(start);
+        end.setUTCDate(end.getUTCDate() + 6);
+        end.setUTCHours(23, 59, 59, 999);
+        query = query.gte('due_date', start.toISOString()).lte('due_date', end.toISOString());
+      }
+
+      const { data, error } = await query
         .order('due_date', { ascending: true, nullsFirst: true })
         .order('created_at', { ascending: false });
 
