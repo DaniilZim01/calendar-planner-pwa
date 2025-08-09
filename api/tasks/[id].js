@@ -103,7 +103,6 @@ export default async function handler(req, res) {
         .from('tasks')
         .update({ completed: !existing.completed, updated_at: new Date().toISOString() })
         .eq('id', id)
-        .eq('user_id', req.user.userId)
         .select('id, title, description, due_date, completed, priority, created_at, updated_at')
         .single();
       if (error) throw error;
