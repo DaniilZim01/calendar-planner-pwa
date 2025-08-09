@@ -11,7 +11,7 @@ import WellbeingPage from "./pages/wellbeing";
 import PlannerPage from "./pages/planner";
 import CalendarPage from "./pages/calendar";
 import ProfilePage from "./pages/profile";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AuthPage from "./pages/auth";
 import NotFound from "@/pages/not-found";
 
