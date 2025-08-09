@@ -29,11 +29,19 @@ export default async function handler(req, res) {
       if (priority !== undefined) updateData.priority = Number(priority);
       if (completed !== undefined) updateData.completed = Boolean(completed);
 
+      // ensure ownership via user_tasks
+      const { data: map, error: mapErr } = await supabase
+        .from('user_tasks')
+        .select('task_id')
+        .eq('task_id', id)
+        .eq('user_id', req.user.userId)
+        .single();
+      if (mapErr || !map) return res.status(404).json({ success: false, message: 'Task not found' });
+
       const { data, error } = await supabase
         .from('tasks')
         .update(updateData)
         .eq('id', id)
-        .eq('user_id', req.user.userId)
         .select('id, title, description, due_date, completed, priority, created_at, updated_at')
         .single();
 
@@ -49,11 +57,19 @@ export default async function handler(req, res) {
 
   if (req.method === 'DELETE') {
     try {
+      // ensure ownership via user_tasks
+      const { data: map, error: mapErr } = await supabase
+        .from('user_tasks')
+        .select('task_id')
+        .eq('task_id', id)
+        .eq('user_id', req.user.userId)
+        .single();
+      if (mapErr || !map) return res.status(404).json({ success: false, message: 'Task not found' });
+
       const { error } = await supabase
         .from('tasks')
         .delete()
-        .eq('id', id)
-        .eq('user_id', req.user.userId);
+        .eq('id', id);
 
       if (error) throw error;
       return res.status(200).json({ success: true, message: 'Task deleted' });
@@ -66,11 +82,19 @@ export default async function handler(req, res) {
   if (req.method === 'PATCH') {
     try {
       // toggle completed
+      // ensure ownership via user_tasks and fetch current state
+      const { data: map, error: mapErr } = await supabase
+        .from('user_tasks')
+        .select('task_id')
+        .eq('task_id', id)
+        .eq('user_id', req.user.userId)
+        .single();
+      if (mapErr || !map) return res.status(404).json({ success: false, message: 'Task not found' });
+
       const { data: existing, error: findError } = await supabase
         .from('tasks')
         .select('completed')
         .eq('id', id)
-        .eq('user_id', req.user.userId)
         .single();
       if (findError) throw findError;
       if (!existing) return res.status(404).json({ success: false, message: 'Task not found' });

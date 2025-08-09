@@ -19,10 +19,23 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const scope = (req.query?.scope || '').toString();
+
+      // Fetch task ids belonging to the user via user_tasks mapping
+      const { data: mappings, error: mapError } = await supabase
+        .from('user_tasks')
+        .select('task_id')
+        .eq('user_id', req.user.userId);
+      if (mapError) throw mapError;
+
+      const taskIds = (mappings || []).map((m) => m.task_id);
+      if (taskIds.length === 0) {
+        return res.status(200).json({ success: true, message: 'Tasks fetched successfully', data: [] });
+      }
+
       let query = supabase
         .from('tasks')
         .select('id, title, description, due_date, completed, priority, created_at, updated_at')
-        .eq('user_id', req.user.userId);
+        .in('id', taskIds);
 
       if (scope === 'today') {
         const today = new Date();
@@ -73,19 +86,23 @@ export default async function handler(req, res) {
         due_date: dueDate ? new Date(dueDate).toISOString() : null,
         priority: Number.isInteger(priority) ? priority : 1,
         completed: false,
-        user_id: req.user.userId,
         updated_at: new Date().toISOString(),
       };
 
-      const { data, error } = await supabase
+      const { data: created, error: insertError } = await supabase
         .from('tasks')
         .insert(payload)
         .select('id, title, description, due_date, completed, priority, created_at, updated_at')
         .single();
+      if (insertError) throw insertError;
 
-      if (error) throw error;
+      // link to user via user_tasks
+      const { error: linkError } = await supabase
+        .from('user_tasks')
+        .insert({ user_id: req.user.userId, task_id: created.id });
+      if (linkError) throw linkError;
 
-      return res.status(201).json({ success: true, message: 'Task created', data });
+      return res.status(201).json({ success: true, message: 'Task created', data: created });
     } catch (error) {
       console.error('Task create error:', error);
       return res.status(500).json({ success: false, message: 'Failed to create task' });
