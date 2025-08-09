@@ -10,6 +10,11 @@ import {
   setStoredTokens,
   clearStoredTokens,
   getStoredTokens,
+  fetchTasks,
+  createTask,
+  updateTask,
+  toggleTask,
+  deleteTask,
 } from './api';
 
 export function useLogin() {
@@ -71,6 +76,63 @@ export function useVerifyToken() {
 export function useIsAuthenticated() {
   const tokens = getStoredTokens();
   return Boolean(tokens?.accessToken);
+}
+
+// Tasks hooks
+export function useTasks(scope?: 'today' | 'week') {
+  return useQuery({
+    queryKey: ['tasks', scope ?? 'all'],
+    queryFn: () => fetchTasks(scope),
+    select: (res) => res.data,
+  });
+}
+
+export function useCreateTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: createTask,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['tasks', 'today'] });
+      qc.invalidateQueries({ queryKey: ['tasks', 'week'] });
+    },
+  });
+}
+
+export function useUpdateTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: Parameters<typeof updateTask>[1] }) => updateTask(id, input),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['tasks', 'today'] });
+      qc.invalidateQueries({ queryKey: ['tasks', 'week'] });
+    },
+  });
+}
+
+export function useToggleTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => toggleTask(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['tasks', 'today'] });
+      qc.invalidateQueries({ queryKey: ['tasks', 'week'] });
+    },
+  });
+}
+
+export function useDeleteTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteTask(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['tasks', 'today'] });
+      qc.invalidateQueries({ queryKey: ['tasks', 'week'] });
+    },
+  });
 }
 
 

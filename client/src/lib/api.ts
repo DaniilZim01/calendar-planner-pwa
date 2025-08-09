@@ -163,4 +163,50 @@ export async function verifyToken(): Promise<ApiSuccess<{ valid: boolean }>> {
 }
 
 
+// Tasks API
+export type ApiTask = {
+  id: string;
+  title: string;
+  description: string | null;
+  due_date: string | null;
+  completed: boolean;
+  priority: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TaskInput = {
+  title: string;
+  description?: string;
+  dueDate?: string; // ISO string
+  priority?: number; // 1..3
+};
+
+export async function fetchTasks(scope?: 'today' | 'week'): Promise<ApiSuccess<ApiTask[]>> {
+  const url = scope ? `/api/tasks?scope=${scope}` : '/api/tasks';
+  const { data } = await api.get<ApiSuccess<ApiTask[]>>(url);
+  return data;
+}
+
+export async function createTask(input: TaskInput): Promise<ApiSuccess<ApiTask>> {
+  const { data } = await api.post<ApiSuccess<ApiTask>>('/api/tasks', input);
+  return data;
+}
+
+export async function updateTask(id: string, input: Partial<TaskInput & { completed: boolean }>): Promise<ApiSuccess<ApiTask>> {
+  const { data } = await api.put<ApiSuccess<ApiTask>>(`/api/tasks/${id}`, input);
+  return data;
+}
+
+export async function toggleTask(id: string): Promise<ApiSuccess<ApiTask>> {
+  const { data } = await api.patch<ApiSuccess<ApiTask>>(`/api/tasks/${id}`);
+  return data;
+}
+
+export async function deleteTask(id: string): Promise<ApiSuccess<{ message?: string }>> {
+  const { data } = await api.delete<ApiSuccess<{ message?: string }>>(`/api/tasks/${id}`);
+  return data;
+}
+
+
 

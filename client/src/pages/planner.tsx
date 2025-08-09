@@ -1,10 +1,11 @@
 import { Button } from '@/components/ui/button';
-import { useAppData } from '../hooks/useLocalStorage';
 import { Event } from '../types';
 import { formatTime, getCurrentDateString } from '../utils/dateUtils';
+import { useTasks, useToggleTask } from '@/lib/hooks';
 
 export default function PlannerPage() {
-  const { events } = useAppData();
+  const { data: tasksToday, isLoading: isLoadingTasks } = useTasks('today');
+  const toggleTask = useToggleTask();
   
   const todayEvents = events.filter((event: Event) => 
     event.date === getCurrentDateString()
@@ -52,6 +53,31 @@ export default function PlannerPage() {
             ДОБРО ПОЖАЛОВАТЬ В
           </h1>
           <h2 className="text-3xl font-thin text-foreground tracking-tight">Today</h2>
+        </div>
+
+        {/* Задачи на сегодня */}
+        <div className="space-y-2 mb-8">
+          <h3 className="text-xl font-light text-foreground mb-2">Задачи на сегодня</h3>
+          {isLoadingTasks ? (
+            <div className="text-sm text-muted-foreground">Загрузка...</div>
+          ) : (tasksToday && tasksToday.length > 0 ? (
+            tasksToday.map((t) => (
+              <div key={t.id} className="flex items-center gap-3 p-3 card-element">
+                <input
+                  type="checkbox"
+                  checked={t.completed}
+                  onChange={() => toggleTask.mutate(t.id)}
+                  className="w-5 h-5"
+                />
+                <div className="flex-1">
+                  <div className={`text-foreground ${t.completed ? 'line-through opacity-60' : ''}`}>{t.title}</div>
+                  {t.description && <div className="text-xs text-muted-foreground">{t.description}</div>}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-sm text-muted-foreground">На сегодня задач нет</div>
+          ))}
         </div>
 
         {/* События на сегодня */}
