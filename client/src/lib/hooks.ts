@@ -91,7 +91,43 @@ export function useCreateTask() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: createTask,
-    onSuccess: () => {
+    onMutate: async (input) => {
+      await Promise.all([
+        qc.cancelQueries({ queryKey: ['tasks'] }),
+        qc.cancelQueries({ queryKey: ['tasks', 'today'] }),
+        qc.cancelQueries({ queryKey: ['tasks', 'week'] }),
+      ]);
+      const keys = [
+        ['tasks'],
+        ['tasks', 'today'],
+        ['tasks', 'week'],
+      ] as const;
+      const snapshots = keys.map((key) => ({ key, prev: qc.getQueryData<any>(key as any) }));
+      const optimistic = {
+        id: 'temp-' + Date.now(),
+        title: input.title,
+        description: input.description ?? null,
+        due_date: input.dueDate ?? null,
+        completed: false,
+        priority: input.priority ?? 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      keys.forEach((key) => {
+        const prev = qc.getQueryData<any>(key as any);
+        if (prev?.data) {
+          qc.setQueryData<any>(key as any, {
+            ...prev,
+            data: [optimistic, ...prev.data],
+          });
+        }
+      });
+      return { snapshots };
+    },
+    onError: (_err, _input, ctx) => {
+      ctx?.snapshots?.forEach((s: any) => qc.setQueryData(s.key as any, s.prev));
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['tasks', 'today'] });
       qc.invalidateQueries({ queryKey: ['tasks', 'week'] });
@@ -115,7 +151,33 @@ export function useToggleTask() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => toggleTask(id),
-    onSuccess: () => {
+    onMutate: async (id: string) => {
+      await Promise.all([
+        qc.cancelQueries({ queryKey: ['tasks'] }),
+        qc.cancelQueries({ queryKey: ['tasks', 'today'] }),
+        qc.cancelQueries({ queryKey: ['tasks', 'week'] }),
+      ]);
+      const keys = [
+        ['tasks'],
+        ['tasks', 'today'],
+        ['tasks', 'week'],
+      ] as const;
+      const snapshots = keys.map((key) => ({ key, prev: qc.getQueryData<any>(key as any) }));
+      keys.forEach((key) => {
+        const prev = qc.getQueryData<any>(key as any);
+        if (prev?.data) {
+          qc.setQueryData<any>(key as any, {
+            ...prev,
+            data: prev.data.map((t: any) => (t.id === id ? { ...t, completed: !t.completed } : t)),
+          });
+        }
+      });
+      return { snapshots };
+    },
+    onError: (_err, _id, ctx) => {
+      ctx?.snapshots?.forEach((s: any) => qc.setQueryData(s.key as any, s.prev));
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['tasks', 'today'] });
       qc.invalidateQueries({ queryKey: ['tasks', 'week'] });
