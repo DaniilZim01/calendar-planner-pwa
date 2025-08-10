@@ -43,18 +43,9 @@ export default function PlannerPage() {
           <h2 className="text-3xl font-thin text-foreground tracking-tight">Today</h2>
         </div>
 
-        {/* Tabs */}
-        <div className="flex items-center gap-2 mb-4">
-          {(['today','week','all'] as const).map(k => (
-            <button
-              key={k}
-              onClick={() => setTab(k)}
-              className={`px-3 py-1.5 rounded-full border text-sm ${tab===k ? 'bg-accent text-white border-accent' : 'border-border text-foreground'}`}
-            >
-              {k==='today'?'Сегодня':k==='week'?'Неделя':'Все'}
-            </button>
-          ))}
-          <div className="ml-auto flex items-center gap-2">
+        {/* Row 1: search/sort (left) + add task (right) */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
             <button
               aria-label="Поиск"
               className="w-8 h-8 rounded-full border flex items-center justify-center text-muted-foreground hover:text-accent"
@@ -73,8 +64,21 @@ export default function PlannerPage() {
             >
               <span className="text-[10px]">{sort==='priority'?'P':'D'}</span>
             </button>
-            <Button onClick={() => { setIsCreating(true); setEditingId(null); }} className="bg-accent hover:bg-accent/90 text-white">+ Задача</Button>
           </div>
+          <Button onClick={() => { setIsCreating(true); setEditingId(null); }} className="bg-accent hover:bg-accent/90 text-white">+ Задача</Button>
+        </div>
+
+        {/* Row 2: tabs */}
+        <div className="flex items-center gap-2 mb-4">
+          {(['today','week','all'] as const).map(k => (
+            <button
+              key={k}
+              onClick={() => setTab(k)}
+              className={`px-3 py-1.5 rounded-full border text-sm ${tab===k ? 'bg-accent text-white border-accent' : 'border-border text-foreground'}`}
+            >
+              {k==='today'?'Сегодня':k==='week'?'Неделя':'Все'}
+            </button>
+          ))}
         </div>
 
         {/* Create/Edit modals */}
