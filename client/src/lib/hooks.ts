@@ -92,17 +92,11 @@ export function useCreateTask() {
   return useMutation({
     mutationFn: createTask,
     onMutate: async (input) => {
-      await Promise.all([
-        qc.cancelQueries({ queryKey: ['tasks'] }),
-        qc.cancelQueries({ queryKey: ['tasks', 'today'] }),
-        qc.cancelQueries({ queryKey: ['tasks', 'week'] }),
-      ]);
-      const keys = [
-        ['tasks'],
-        ['tasks', 'today'],
-        ['tasks', 'week'],
-      ] as const;
-      const snapshots = keys.map((key) => ({ key, prev: qc.getQueryData<any>(key as any) }));
+      await qc.cancelQueries({ queryKey: ['tasks'], exact: false });
+
+      const snapshots = qc.getQueriesData<any>({ queryKey: ['tasks'] })
+        .map(([key, prev]) => ({ key, prev }));
+
       const optimistic = {
         id: 'temp-' + Date.now(),
         title: input.title,
@@ -113,24 +107,57 @@ export function useCreateTask() {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
-      keys.forEach((key) => {
-        const prev = qc.getQueryData<any>(key as any);
-        if (prev?.data) {
-          qc.setQueryData<any>(key as any, {
-            ...prev,
-            data: [optimistic, ...prev.data],
-          });
+
+      const isToday = (iso?: string | null) => {
+        if (!iso) return false;
+        const d = new Date(iso);
+        const now = new Date();
+        return d.getUTCFullYear() === now.getUTCFullYear() &&
+          d.getUTCMonth() === now.getUTCMonth() &&
+          d.getUTCDate() === now.getUTCDate();
+      };
+      const isThisWeek = (iso?: string | null) => {
+        if (!iso) return false;
+        const d = new Date(Date.UTC(new Date(iso).getUTCFullYear(), new Date(iso).getUTCMonth(), new Date(iso).getUTCDate()));
+        const now = new Date();
+        const monday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+        const day = monday.getUTCDay();
+        const diff = (day === 0 ? -6 : 1) - day;
+        monday.setUTCDate(monday.getUTCDate() + diff);
+        monday.setUTCHours(0, 0, 0, 0);
+        const sunday = new Date(monday);
+        sunday.setUTCDate(sunday.getUTCDate() + 6);
+        sunday.setUTCHours(23, 59, 59, 999);
+        return d >= monday && d <= sunday;
+      };
+
+      qc.getQueriesData<any>({ queryKey: ['tasks'] }).forEach(([key]) => {
+        const list = qc.getQueryData<any>(key as any) as any[] | undefined;
+        if (!Array.isArray(list)) return;
+        const scope = Array.isArray(key) && key.length >= 2 ? key[1] : undefined;
+        if (scope === 'today') {
+          if (isToday(optimistic.due_date)) {
+            qc.setQueryData<any>(key as any, [optimistic, ...list]);
+          }
+          return;
         }
+        if (scope === 'week') {
+          if (isThisWeek(optimistic.due_date)) {
+            qc.setQueryData<any>(key as any, [optimistic, ...list]);
+          }
+          return;
+        }
+        // 'all' or other
+        qc.setQueryData<any>(key as any, [optimistic, ...list]);
       });
+
       return { snapshots };
     },
     onError: (_err, _input, ctx) => {
       ctx?.snapshots?.forEach((s: any) => qc.setQueryData(s.key as any, s.prev));
     },
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: ['tasks'] });
-      qc.invalidateQueries({ queryKey: ['tasks', 'today'] });
-      qc.invalidateQueries({ queryKey: ['tasks', 'week'] });
+      qc.invalidateQueries({ queryKey: ['tasks'], exact: false });
     },
   });
 }
@@ -139,10 +166,29 @@ export function useUpdateTask() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: Parameters<typeof updateTask>[1] }) => updateTask(id, input),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['tasks'] });
-      qc.invalidateQueries({ queryKey: ['tasks', 'today'] });
-      qc.invalidateQueries({ queryKey: ['tasks', 'week'] });
+    onMutate: async ({ id, input }) => {
+      await qc.cancelQueries({ queryKey: ['tasks'], exact: false });
+      const snapshots = qc.getQueriesData<any>({ queryKey: ['tasks'] })
+        .map(([key, prev]) => ({ key, prev }));
+      qc.getQueriesData<any>({ queryKey: ['tasks'] }).forEach(([key]) => {
+        const list = qc.getQueryData<any>(key as any) as any[] | undefined;
+        if (!Array.isArray(list)) return;
+        qc.setQueryData<any>(key as any, list.map((t) => (t.id === id ? {
+          ...t,
+          title: input.title ?? t.title,
+          description: input.description ?? t.description,
+          due_date: input.dueDate ?? t.due_date,
+          priority: input.priority ?? t.priority,
+          updated_at: new Date().toISOString(),
+        } : t)));
+      });
+      return { snapshots };
+    },
+    onError: (_err, _vars, ctx) => {
+      ctx?.snapshots?.forEach((s: any) => qc.setQueryData(s.key as any, s.prev));
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'], exact: false });
     },
   });
 }
@@ -152,25 +198,13 @@ export function useToggleTask() {
   return useMutation({
     mutationFn: (id: string) => toggleTask(id),
     onMutate: async (id: string) => {
-      await Promise.all([
-        qc.cancelQueries({ queryKey: ['tasks'] }),
-        qc.cancelQueries({ queryKey: ['tasks', 'today'] }),
-        qc.cancelQueries({ queryKey: ['tasks', 'week'] }),
-      ]);
-      const keys = [
-        ['tasks'],
-        ['tasks', 'today'],
-        ['tasks', 'week'],
-      ] as const;
-      const snapshots = keys.map((key) => ({ key, prev: qc.getQueryData<any>(key as any) }));
-      keys.forEach((key) => {
-        const prev = qc.getQueryData<any>(key as any);
-        if (prev?.data) {
-          qc.setQueryData<any>(key as any, {
-            ...prev,
-            data: prev.data.map((t: any) => (t.id === id ? { ...t, completed: !t.completed } : t)),
-          });
-        }
+      await qc.cancelQueries({ queryKey: ['tasks'], exact: false });
+      const snapshots = qc.getQueriesData<any>({ queryKey: ['tasks'] })
+        .map(([key, prev]) => ({ key, prev }));
+      qc.getQueriesData<any>({ queryKey: ['tasks'] }).forEach(([key]) => {
+        const list = qc.getQueryData<any>(key as any) as any[] | undefined;
+        if (!Array.isArray(list)) return;
+        qc.setQueryData<any>(key as any, list.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
       });
       return { snapshots };
     },
@@ -178,9 +212,7 @@ export function useToggleTask() {
       ctx?.snapshots?.forEach((s: any) => qc.setQueryData(s.key as any, s.prev));
     },
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: ['tasks'] });
-      qc.invalidateQueries({ queryKey: ['tasks', 'today'] });
-      qc.invalidateQueries({ queryKey: ['tasks', 'week'] });
+      qc.invalidateQueries({ queryKey: ['tasks'], exact: false });
     },
   });
 }
@@ -189,10 +221,22 @@ export function useDeleteTask() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => deleteTask(id),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['tasks'] });
-      qc.invalidateQueries({ queryKey: ['tasks', 'today'] });
-      qc.invalidateQueries({ queryKey: ['tasks', 'week'] });
+    onMutate: async (id: string) => {
+      await qc.cancelQueries({ queryKey: ['tasks'], exact: false });
+      const snapshots = qc.getQueriesData<any>({ queryKey: ['tasks'] })
+        .map(([key, prev]) => ({ key, prev }));
+      qc.getQueriesData<any>({ queryKey: ['tasks'] }).forEach(([key]) => {
+        const list = qc.getQueryData<any>(key as any) as any[] | undefined;
+        if (!Array.isArray(list)) return;
+        qc.setQueryData<any>(key as any, list.filter((t) => t.id !== id));
+      });
+      return { snapshots };
+    },
+    onError: (_err, _id, ctx) => {
+      ctx?.snapshots?.forEach((s: any) => qc.setQueryData(s.key as any, s.prev));
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'], exact: false });
     },
   });
 }
