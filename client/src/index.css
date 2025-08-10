@@ -6,7 +6,7 @@
 
 :root {
   /* Более приглушенная и эстетичная цветовая схема TT Interphases Pro */
-  --background: hsl(45, 18%, 93%); /* #F1EDE6 - очень мягкий бежевый */
+  --background: #F7F4EF; /* основной светлый беж */
   --foreground: hsl(20, 12%, 28%); /* #4A453F - тёмный коричневый */
   --card: hsl(45, 18%, 93%);
   --card-foreground: hsl(20, 12%, 28%);
@@ -102,7 +102,7 @@
   }
   
   .card-element {
-    background: rgba(217, 209, 196, 0.25);
+    background: rgba(217, 209, 196, 0.22);
     @apply rounded-lg;
   }
   

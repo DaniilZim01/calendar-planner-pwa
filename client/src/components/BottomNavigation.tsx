@@ -73,9 +73,8 @@ export default function BottomNavigation() {
   const [location, navigate] = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-sm backdrop-blur-md border-t border-border" 
-         style={{ background: 'rgba(217, 209, 196, 0.8)' }}>
-      <div className="flex justify-around py-3">
+    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-sm border-t border-border bg-background/95" >
+      <div className="flex justify-around py-3 px-2">
         {navigationItems.map((item) => {
           const isActive = location === item.path;
           const IconComponent = item.icon;
@@ -84,12 +83,15 @@ export default function BottomNavigation() {
             <button
               key={item.id}
               onClick={() => navigate(item.path)}
-              className={`flex flex-col items-center py-2 px-3 touch-target transition-colors ${
+              className={`relative flex flex-col items-center py-2 px-3 touch-target transition-colors ${
                 isActive ? 'text-accent' : 'text-muted-foreground hover:text-accent'
               }`}
             >
               <IconComponent className={`nav-icon ${isActive ? 'active' : ''}`} />
               <span className="text-xs font-light">{item.label}</span>
+              {isActive && (
+                <span className="absolute -top-3 left-0 right-0 mx-auto h-0.5 w-10 rounded-full bg-accent" />
+              )}
             </button>
           );
         })}
