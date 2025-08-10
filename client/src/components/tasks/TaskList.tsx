@@ -42,6 +42,14 @@ export function TaskList({
           </div>
         </div>
       ))}
+      {/* Skeleton on heavy transitions */}
+      {!items?.length && (
+        <div className="space-y-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="animate-pulse h-12 rounded-lg bg-secondary/40" />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
