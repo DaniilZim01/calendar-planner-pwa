@@ -74,23 +74,22 @@ export default function BottomNavigation() {
 
   return (
     <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-sm border-t border-border bg-background" >
-      <div className="flex justify-around py-3 px-2">
-        {navigationItems.map((item) => {
+      <div className="grid grid-cols-5 h-20 px-1">
+        {navigationItems.map((item, idx) => {
           const isActive = location === item.path;
           const IconComponent = item.icon;
-          
           return (
             <button
               key={item.id}
               onClick={() => navigate(item.path)}
-              className={`relative flex flex-col items-center py-2 px-3 touch-target transition-colors ${
+              className={`relative w-full h-full flex flex-col items-center justify-center transition-colors ${
                 isActive ? 'text-accent' : 'text-muted-foreground hover:text-accent'
               }`}
             >
               <IconComponent className={`nav-icon ${isActive ? 'active' : ''}`} />
-              <span className="text-xs font-light">{item.label}</span>
+              <span className="text-xs font-light leading-tight">{item.label}</span>
               {isActive && (
-                <span className="absolute -top-3 left-0 right-0 mx-auto h-0.5 w-10 rounded-full bg-accent" />
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-10 rounded-full bg-accent" />
               )}
             </button>
           );
