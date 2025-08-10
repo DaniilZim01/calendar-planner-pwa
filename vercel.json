@@ -2,7 +2,7 @@
   "version": 2,
   "outputDirectory": "dist/public",
   "crons": [
-    { "path": "/api/maintenance/cleanup-completed", "schedule": "@daily" }
+    { "path": "/api/maintenance/cleanup-completed", "schedule": "0 3 * * *" }
   ],
   "rewrites": [
     { "source": "/(assets/.*)", "destination": "/$1" },
