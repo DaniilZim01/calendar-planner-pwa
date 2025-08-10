@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTasks, useToggleTask, useCreateTask, useDeleteTask, useUpdateTask } from '@/lib/hooks';
 import { TaskForm } from '@/components/tasks/TaskForm';
@@ -14,6 +14,22 @@ export default function PlannerPage() {
   const deleteTask = useDeleteTask();
   const updateTask = useUpdateTask();
   const [tab, setTab] = useState<'today' | 'week' | 'all'>('today');
+  const [query, setQuery] = useState('');
+  const [sort, setSort] = useState<'priority' | 'due'>('priority');
+
+  const applySortFilter = (items?: any[]) => {
+    const base = (items || []).filter(t =>
+      query ? (t.title?.toLowerCase().includes(query.toLowerCase()) || t.description?.toLowerCase().includes(query.toLowerCase())) : true
+    );
+    if (sort === 'priority') {
+      return [...base].sort((a,b)=> (b.priority||0)-(a.priority||0));
+    }
+    return [...base].sort((a,b)=> (a.due_date||'').localeCompare(b.due_date||''));
+  };
+
+  const todayFiltered = useMemo(()=>applySortFilter(tasksToday), [tasksToday, query, sort]);
+  const weekFiltered = useMemo(()=>applySortFilter(tasksWeek), [tasksWeek, query, sort]);
+  const allFiltered = useMemo(()=>applySortFilter(tasksAll), [tasksAll, query, sort]);
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -38,7 +54,17 @@ export default function PlannerPage() {
               {k==='today'?'Сегодня':k==='week'?'Неделя':'Все'}
             </button>
           ))}
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <input
+              value={query}
+              onChange={(e)=>setQuery(e.target.value)}
+              placeholder="Поиск"
+              className="px-3 py-1.5 text-sm rounded-full border bg-background"
+            />
+            <select value={sort} onChange={(e)=>setSort(e.target.value as any)} className="px-2 py-1.5 text-sm rounded-full border bg-background">
+              <option value="priority">Приоритет</option>
+              <option value="due">Срок</option>
+            </select>
             <Button onClick={() => { setIsCreating(true); setEditingId(null); }} className="bg-accent hover:bg-accent/90 text-white">+ Задача</Button>
           </div>
         </div>
@@ -72,7 +98,7 @@ export default function PlannerPage() {
               <div className="text-sm text-muted-foreground">Загрузка...</div>
             ) : (
               <TaskList
-                items={tasksToday||[]}
+                items={todayFiltered||[]}
                 onToggle={(id)=>toggleTask.mutate(id)}
                 onEdit={(id)=>{ setEditingId(id); setIsCreating(false); }}
                 onDelete={(id)=>deleteTask.mutate(id)}
@@ -86,7 +112,7 @@ export default function PlannerPage() {
               <div className="text-sm text-muted-foreground">Загрузка...</div>
             ) : (
               <TaskList
-                items={tasksWeek||[]}
+                items={weekFiltered||[]}
                 onToggle={(id)=>toggleTask.mutate(id)}
                 onEdit={(id)=>{ setEditingId(id); setIsCreating(false); }}
                 onDelete={(id)=>deleteTask.mutate(id)}
@@ -100,7 +126,7 @@ export default function PlannerPage() {
               <div className="text-sm text-muted-foreground">Загрузка...</div>
             ) : (
               <TaskList
-                items={tasksAll||[]}
+                items={allFiltered||[]}
                 onToggle={(id)=>toggleTask.mutate(id)}
                 onEdit={(id)=>{ setEditingId(id); setIsCreating(false); }}
                 onDelete={(id)=>deleteTask.mutate(id)}

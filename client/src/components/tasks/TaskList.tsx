@@ -20,7 +20,7 @@ export function TaskList({
       {items.map((t) => (
         <div
           key={t.id}
-          className="flex items-center gap-3 p-3 card-element cursor-pointer select-none rounded-lg transition-colors hover:bg-accent/10"
+          className="flex items-center gap-3 p-3 card-element cursor-pointer select-none rounded-lg transition-colors hover:bg-accent/10 active:bg-accent/20 active:scale-[.99]"
           onClick={() => onToggle(t.id)}
           role="button"
           aria-pressed={t.completed}
