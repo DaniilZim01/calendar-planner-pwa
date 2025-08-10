@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTasks, useToggleTask, useCreateTask, useDeleteTask, useUpdateTask } from '@/lib/hooks';
 import { TaskForm } from '@/components/tasks/TaskForm';
+import { TaskModal } from '@/components/tasks/TaskModal';
 import { TaskList } from '@/components/tasks/TaskList';
 
 export default function PlannerPage() {
@@ -42,32 +43,27 @@ export default function PlannerPage() {
           </div>
         </div>
 
-        {/* Create/Edit form */}
-        {isCreating && (
-          <div className="mb-4 p-4 card-element">
-            <TaskForm
-              onSubmit={async (v) => { await createTask.mutateAsync(v); setIsCreating(false); }}
-              onCancel={() => setIsCreating(false)}
-              submitLabel="Добавить"
-            />
-          </div>
-        )}
-
-        {editingId && (
-          <div className="mb-4 p-4 card-element">
-            <TaskForm
-              initialValues={(tasksAll||[]).find(t=>t.id===editingId) ? {
-                title: (tasksAll||[]).find(t=>t.id===editingId)!.title,
-                description: (tasksAll||[]).find(t=>t.id===editingId)!.description ?? undefined,
-                dueDate: (tasksAll||[]).find(t=>t.id===editingId)!.due_date ?? undefined,
-                priority: (tasksAll||[]).find(t=>t.id===editingId)!.priority,
-              } : undefined}
-              onSubmit={async (v) => { await updateTask.mutateAsync({ id: editingId!, input: v }); setEditingId(null); }}
-              onCancel={() => setEditingId(null)}
-              submitLabel="Сохранить"
-            />
-          </div>
-        )}
+        {/* Create/Edit modals */}
+        <TaskModal
+          open={isCreating}
+          title="Новая задача"
+          submitLabel="Добавить"
+          onClose={() => setIsCreating(false)}
+          onSubmit={async (v) => { await createTask.mutateAsync(v); setIsCreating(false); }}
+        />
+        <TaskModal
+          open={Boolean(editingId)}
+          title="Редактировать задачу"
+          initialValues={(tasksAll||[]).find(t=>t.id===editingId) ? {
+            title: (tasksAll||[]).find(t=>t.id===editingId)!.title,
+            description: (tasksAll||[]).find(t=>t.id===editingId)!.description ?? undefined,
+            dueDate: (tasksAll||[]).find(t=>t.id===editingId)!.due_date ?? undefined,
+            priority: (tasksAll||[]).find(t=>t.id===editingId)!.priority,
+          } : undefined}
+          submitLabel="Сохранить"
+          onClose={() => setEditingId(null)}
+          onSubmit={async (v) => { await updateTask.mutateAsync({ id: editingId!, input: v }); setEditingId(null); }}
+        />
 
         {/* Lists */}
         {tab==='today' && (

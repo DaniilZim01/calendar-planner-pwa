@@ -6,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useTasks, useCreateTask, useUpdateTask, useToggleTask, useDeleteTask } from '@/lib/hooks';
 import type { ApiTask } from '@/lib/api';
 import { TaskForm } from '@/components/tasks/TaskForm';
+import { TaskModal } from '@/components/tasks/TaskModal';
 
 export default function GoalsPage() {
   const [filter, setFilter] = React.useState<'all' | 'today' | 'overdue'>('all');
@@ -86,21 +87,21 @@ export default function GoalsPage() {
           )}
         </div>
 
-        {isCreating && (
-          <div className="mb-4 p-4 card-element">
-            <TaskForm onSubmit={async (v) => { await createTask.mutateAsync(v); setIsCreating(false); }} onCancel={() => setIsCreating(false)} submitLabel="Добавить" />
-          </div>
-        )}
-        {editingId && (
-          <div className="mb-4 p-4 card-element">
-            <TaskForm
-              initialValues={(() => { const t = allTasks.find(x=>x.id===editingId); return t ? { title: t.title, description: t.description ?? undefined, dueDate: t.due_date ?? undefined, priority: t.priority } : undefined; })()}
-              onSubmit={async (v) => { await updateTask.mutateAsync({ id: editingId!, input: v }); setEditingId(null); }}
-              onCancel={() => setEditingId(null)}
-              submitLabel="Сохранить"
-            />
-          </div>
-        )}
+        <TaskModal
+          open={isCreating}
+          title="Новая задача"
+          submitLabel="Добавить"
+          onClose={() => setIsCreating(false)}
+          onSubmit={async (v) => { await createTask.mutateAsync(v); setIsCreating(false); }}
+        />
+        <TaskModal
+          open={Boolean(editingId)}
+          title="Редактировать задачу"
+          initialValues={(() => { const t = allTasks.find(x=>x.id===editingId); return t ? { title: t.title, description: t.description ?? undefined, dueDate: t.due_date ?? undefined, priority: t.priority } : undefined; })()}
+          submitLabel="Сохранить"
+          onClose={() => setEditingId(null)}
+          onSubmit={async (v) => { await updateTask.mutateAsync({ id: editingId!, input: v }); setEditingId(null); }}
+        />
 
         <div className="flex gap-3">
           <Button className="flex-1 bg-accent hover:bg-accent/90 text-white touch-target" onClick={() => { setIsCreating(true); setEditingId(null); }}>

@@ -112,8 +112,8 @@
   - `client/src/lib/api.ts` — axios‑клиент, interceptors, авторизация, авто‑рефреш токенов
   - `client/src/lib/hooks.ts` — хуки (auth, profile, tasks), оптимистичные апдейты для toggle/create
 - UI:
-  - Today: вкладки «Сегодня / Неделя / Все», список задач (`TaskList`), форма (`TaskForm`)
-  - Цели (goals): пока локальная демо‑логика; будет переключено на серверные задачи (единая сущность)
+  - Today: вкладки «Сегодня / Неделя / Все», список задач (`TaskList`), модальные формы (`TaskModal` + `TaskForm`)
+  - Цели (goals): использует серверные задачи (единая сущность с Today), модальные формы (`TaskModal`)
   - Профиль: данные из `/api/auth/profile`, обновление имени/телефона
 - PWA: `client/public/manifest.json`, `client/public/service-worker.js`
 
