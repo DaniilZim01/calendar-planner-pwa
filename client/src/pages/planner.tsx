@@ -55,16 +55,24 @@ export default function PlannerPage() {
             </button>
           ))}
           <div className="ml-auto flex items-center gap-2">
-            <input
-              value={query}
-              onChange={(e)=>setQuery(e.target.value)}
-              placeholder="Поиск"
-              className="px-3 py-1.5 text-sm rounded-full border bg-background"
-            />
-            <select value={sort} onChange={(e)=>setSort(e.target.value as any)} className="px-2 py-1.5 text-sm rounded-full border bg-background">
-              <option value="priority">Приоритет</option>
-              <option value="due">Срок</option>
-            </select>
+            <button
+              aria-label="Поиск"
+              className="w-8 h-8 rounded-full border flex items-center justify-center text-muted-foreground hover:text-accent"
+              onClick={() => {
+                const q = prompt('Поиск по задачам:') || '';
+                setQuery(q);
+              }}
+            >
+              <span className="w-3.5 h-3.5 rounded-full border mr-0.5 inline-block" />
+              <span className="w-2 h-0.5 bg-current inline-block rotate-45 -ml-2 mt-2" />
+            </button>
+            <button
+              aria-label="Сортировка"
+              className="w-8 h-8 rounded-full border flex items-center justify-center text-muted-foreground hover:text-accent"
+              onClick={() => setSort((s)=> s==='priority'?'due':'priority')}
+            >
+              <span className="text-[10px]">{sort==='priority'?'P':'D'}</span>
+            </button>
             <Button onClick={() => { setIsCreating(true); setEditingId(null); }} className="bg-accent hover:bg-accent/90 text-white">+ Задача</Button>
           </div>
         </div>
