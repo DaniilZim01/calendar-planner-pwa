@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { z } from 'zod';
 import { authenticateToken } from '../auth/middleware.js';
 
 const supabaseUrl = process.env.SUPABASE_URL || 'https://doirvgumddwncxujbosb.supabase.co';
@@ -75,10 +76,19 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      const { title, description, dueDate, priority } = req.body || {};
-      if (!title || typeof title !== 'string' || title.trim().length < 1) {
-        return res.status(400).json({ success: false, message: 'Title is required' });
+      const createTaskSchema = z.object({
+        title: z.string().min(1, 'Title is required').max(255),
+        description: z.string().max(10000).optional().nullable(),
+        dueDate: z.union([z.string().datetime({ offset: true }).or(z.string()), z.null()]).optional(),
+        priority: z.number().int().min(1).max(5).optional(),
+      });
+
+      const parseResult = createTaskSchema.safeParse(req.body || {});
+      if (!parseResult.success) {
+        return res.status(400).json({ success: false, message: 'Invalid task data', errors: parseResult.error.flatten() });
       }
+
+      const { title, description, dueDate, priority } = parseResult.data;
 
       const payload = {
         title: title.trim(),

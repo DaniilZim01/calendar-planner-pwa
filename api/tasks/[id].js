@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { z } from 'zod';
 import { authenticateToken } from '../auth/middleware.js';
 
 const supabaseUrl = process.env.SUPABASE_URL || 'https://doirvgumddwncxujbosb.supabase.co';
@@ -21,7 +22,20 @@ export default async function handler(req, res) {
 
   if (req.method === 'PUT') {
     try {
-      const { title, description, dueDate, priority, completed } = req.body || {};
+      const updateTaskSchema = z.object({
+        title: z.string().min(1).max(255).optional(),
+        description: z.string().max(10000).optional().nullable(),
+        dueDate: z.union([z.string().datetime({ offset: true }).or(z.string()), z.null()]).optional(),
+        priority: z.number().int().min(1).max(5).optional(),
+        completed: z.boolean().optional(),
+      });
+
+      const parseResult = updateTaskSchema.safeParse(req.body || {});
+      if (!parseResult.success) {
+        return res.status(400).json({ success: false, message: 'Invalid task data', errors: parseResult.error.flatten() });
+      }
+
+      const { title, description, dueDate, priority, completed } = parseResult.data;
       const updateData = { updated_at: new Date().toISOString() };
       if (title !== undefined) updateData.title = String(title).trim();
       if (description !== undefined) updateData.description = description ? String(description) : null;

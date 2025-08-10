@@ -1,6 +1,9 @@
 {
   "version": 2,
   "outputDirectory": "dist/public",
+  "crons": [
+    { "path": "/api/maintenance/cleanup-completed", "schedule": "@daily" }
+  ],
   "rewrites": [
     { "source": "/(assets/.*)", "destination": "/$1" },
     { "source": "/icons/(.*)", "destination": "/icons/$1" },
