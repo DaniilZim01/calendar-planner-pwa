@@ -32,10 +32,17 @@ export default function GoalsPage() {
   };
 
   const TaskItem = ({ task }: { task: ApiTask }) => (
-    <div className="flex items-center gap-3 p-3 card-element">
+    <div
+      className="flex items-center gap-3 p-3 card-element cursor-pointer select-none rounded-lg transition-colors hover:bg-accent/10"
+      onClick={() => toggleTaskMut.mutate(task.id)}
+      role="button"
+      aria-pressed={task.completed}
+      tabIndex={0}
+    >
       <Checkbox
         checked={task.completed}
         onCheckedChange={() => toggleTaskMut.mutate(task.id)}
+        onClick={(e) => e.stopPropagation()}
         className="w-5 h-5 rounded-full border-2 data-[state=checked]:bg-accent data-[state=checked]:border-accent"
       />
       <span className={`flex-1 text-sm ${task.completed ? 'line-through opacity-60' : ''}`}>{task.title}</span>
