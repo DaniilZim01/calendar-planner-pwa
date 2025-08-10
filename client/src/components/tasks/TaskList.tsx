@@ -18,10 +18,18 @@ export function TaskList({
   return (
     <div className="space-y-2">
       {items.map((t) => (
-        <div key={t.id} className="flex items-center gap-3 p-3 card-element">
+        <div
+          key={t.id}
+          className="flex items-center gap-3 p-3 card-element cursor-pointer select-none rounded-lg transition-colors hover:bg-accent/10"
+          onClick={() => onToggle(t.id)}
+          role="button"
+          aria-pressed={t.completed}
+          tabIndex={0}
+        >
           <Checkbox
             checked={t.completed}
             onCheckedChange={() => onToggle(t.id)}
+            onClick={(e) => e.stopPropagation()}
             className="w-5 h-5 rounded-full border-2 data-[state=checked]:bg-accent data-[state=checked]:border-accent"
           />
           <div className="flex-1">
@@ -29,8 +37,8 @@ export function TaskList({
             {t.description && <div className="text-xs text-muted-foreground">{t.description}</div>}
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => onEdit(t.id)}>Изм.</Button>
-            <Button variant="outline" size="sm" onClick={() => onDelete(t.id)}>Удал.</Button>
+            <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onEdit(t.id); }}>Изм.</Button>
+            <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onDelete(t.id); }}>Удал.</Button>
           </div>
         </div>
       ))}
