@@ -6,8 +6,11 @@
 
 ## 🚀 Endpoints
 
+Важно: на тарифе Vercel Hobby действует лимит на количество серверлес‑функций (≤12). Чтобы уложиться в лимит, аутентификация временно объединена в один эндпоинт `api/auth/index.js` с параметром `action`. Контракты и тела запросов не изменились, меняется только URL. После апгрейда можно вернуть раздельные файлы без изменений схем.
+
 ### 1. **Регистрация пользователя**
-- **URL:** `POST /api/auth/register`
+- Было: `POST /api/auth/register`
+- Стало: `POST /api/auth?action=register`
 - **Описание:** Создание нового пользователя
 - **Headers:** `Content-Type: application/json`
 - **Body:**
@@ -39,7 +42,8 @@
 ```
 
 ### 2. **Вход в систему**
-- **URL:** `POST /api/auth/login`
+- Было: `POST /api/auth/login`
+- Стало: `POST /api/auth?action=login`
 - **Описание:** Аутентификация пользователя
 - **Headers:** `Content-Type: application/json`
 - **Body:**
@@ -69,7 +73,8 @@
 ```
 
 ### 3. **Обновление токенов**
-- **URL:** `POST /api/auth/refresh`
+- Было: `POST /api/auth/refresh`
+- Стало: `POST /api/auth?action=refresh`
 - **Описание:** Обновление access token с помощью refresh token
 - **Headers:** `Content-Type: application/json`
 - **Body:**
@@ -96,7 +101,8 @@
 ```
 
 ### 4. **Проверка токена**
-- **URL:** `POST /api/auth/verify`
+- Было: `POST /api/auth/verify`
+- Стало: `POST /api/auth?action=verify`
 - **Описание:** Проверка валидности access token
 - **Headers:** `Content-Type: application/json`
 - **Body:**
@@ -130,7 +136,8 @@
 ```
 
 ### 5. **Получение профиля** (защищенный)
-- **URL:** `GET /api/auth/profile`
+- Было: `GET /api/auth/profile`
+- Стало: `GET /api/auth?action=profile`
 - **Описание:** Получение данных профиля пользователя
 - **Headers:** 
   - `Authorization: Bearer eyJ...`
@@ -155,7 +162,8 @@
 ```
 
 ### 6. **Обновление профиля** (защищенный)
-- **URL:** `PUT /api/auth/update-profile`
+- Было: `PUT /api/auth/update-profile`
+- Стало: `PUT /api/auth?action=update-profile`
 - **Описание:** Обновление данных профиля
 - **Headers:** 
   - `Authorization: Bearer eyJ...`
@@ -187,7 +195,8 @@
 ```
 
 ### 7. **Смена пароля** (защищенный)
-- **URL:** `PUT /api/auth/change-password`
+- Было: `PUT /api/auth/change-password`
+- Стало: `PUT /api/auth?action=change-password`
 - **Описание:** Изменение пароля пользователя
 - **Headers:** 
   - `Authorization: Bearer eyJ...`
@@ -211,7 +220,8 @@
 ```
 
 ### 8. **Выход из системы** (защищенный)
-- **URL:** `POST /api/auth/logout`
+- Было: `POST /api/auth/logout`
+- Стало: `POST /api/auth?action=logout`
 - **Описание:** Выход пользователя из системы
 - **Headers:** 
   - `Authorization: Bearer eyJ...`
@@ -263,14 +273,24 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ### **Postman Collection**
 Создайте коллекцию в Postman с следующими запросами:
 
-1. **Register User** - POST `/api/auth/register`
-2. **Login User** - POST `/api/auth/login`
-3. **Refresh Token** - POST `/api/auth/refresh`
-4. **Verify Token** - POST `/api/auth/verify`
-5. **Get Profile** - GET `/api/auth/profile`
-6. **Update Profile** - PUT `/api/auth/update-profile`
-7. **Change Password** - PUT `/api/auth/change-password`
-8. **Logout** - POST `/api/auth/logout`
+1. Register User — POST `/api/auth?action=register`
+2. Login User — POST `/api/auth?action=login`
+3. Refresh Token — POST `/api/auth?action=refresh`
+4. Verify Token — POST `/api/auth?action=verify`
+5. Get Profile — GET `/api/auth?action=profile`
+6. Update Profile — PUT `/api/auth?action=update-profile`
+7. Change Password — PUT `/api/auth?action=change-password`
+8. Logout — POST `/api/auth?action=logout`
+
+### События
+
+Новые функции событий (в одной/двух серверлес‑функциях):
+- GET  `/api/events?from=ISO&to=ISO`
+- POST `/api/events`
+- PATCH `/api/events/:id`
+- DELETE `/api/events/:id`
+
+Body для POST/PATCH: title, description?, startTime(UTC ISO), endTime(UTC ISO), timezone, location?, isAllDay.
 
 ### **Переменные окружения**
 Настройте переменные в Postman:
