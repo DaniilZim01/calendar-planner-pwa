@@ -5,6 +5,9 @@
     { "path": "/api/maintenance/cleanup-completed", "schedule": "0 3 * * *" }
   ],
   "rewrites": [
+    { "source": "/api/auth/update-profile", "destination": "/api/auth/profile" },
+    { "source": "/api/auth/change-password", "destination": "/api/auth/profile" },
+    { "source": "/api/auth/verify", "destination": "/api/auth/profile" },
     { "source": "/(assets/.*)", "destination": "/$1" },
     { "source": "/icons/(.*)", "destination": "/icons/$1" },
     { "source": "/(manifest\\.json)", "destination": "/$1" },
