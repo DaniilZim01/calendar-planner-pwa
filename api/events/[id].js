@@ -40,7 +40,7 @@ export default async function handler(req, res) {
     try {
       const { data, error } = await supabase
         .from('events')
-        .select('id, user_id, title, description, start_time, end_time, timezone, location, is_all_day, category, category_color, created_at, updated_at')
+        .select('id, user_id, title, description, start_time, end_time, timezone, location, is_all_day, created_at, updated_at')
         .eq('id', id)
         .eq('user_id', req.user.userId)
         .single();
@@ -68,15 +68,13 @@ export default async function handler(req, res) {
       if (body.timezone !== undefined) updateData.timezone = body.timezone;
       if (body.location !== undefined) updateData.location = body.location ?? null;
       if (body.isAllDay !== undefined) updateData.is_all_day = Boolean(body.isAllDay);
-      if (body.category !== undefined) updateData.category = body.category ?? null;
-      if (body.category_color !== undefined) updateData.category_color = body.category_color ?? null;
 
       const { data, error } = await supabase
         .from('events')
         .update(updateData)
         .eq('id', id)
         .eq('user_id', req.user.userId)
-        .select('id, user_id, title, description, start_time, end_time, timezone, location, is_all_day, category, category_color, created_at, updated_at')
+        .select('id, user_id, title, description, start_time, end_time, timezone, location, is_all_day, created_at, updated_at')
         .single();
       if (error) throw error;
       if (!data) return res.status(404).json({ success: false, message: 'Event not found' });

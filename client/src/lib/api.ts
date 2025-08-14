@@ -221,8 +221,7 @@ export type ApiEvent = {
   timezone: string;
   location: string | null;
   is_all_day: boolean;
-  category: string | null;
-  category_color: string | null;
+  
   created_at: string;
   updated_at: string;
 };
@@ -235,8 +234,7 @@ export type EventInput = {
   timezone: string;
   location?: string | null;
   isAllDay?: boolean;
-  category?: string | null;
-  category_color?: string | null;
+  
 };
 
 export type EventUpdateInput = Partial<EventInput>;

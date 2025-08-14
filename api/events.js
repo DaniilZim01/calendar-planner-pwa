@@ -15,8 +15,7 @@ const insertSchema = z.object({
   timezone: z.string().min(1),
   location: z.string().optional().nullable(),
   isAllDay: z.boolean().optional().default(false),
-  category: z.string().optional().nullable(),
-  category_color: z.string().optional().nullable(),
+  
 }).refine((val) => new Date(val.endTime).getTime() > new Date(val.startTime).getTime(), {
   message: 'endTime must be greater than startTime',
   path: ['endTime'],
@@ -30,8 +29,7 @@ const updateSchema = z.object({
   timezone: z.string().min(1).optional(),
   location: z.string().optional().nullable(),
   isAllDay: z.boolean().optional(),
-  category: z.string().optional().nullable(),
-  category_color: z.string().optional().nullable(),
+  
 }).refine((val) => {
   if (!val.startTime || !val.endTime) return true;
   return new Date(val.endTime).getTime() > new Date(val.startTime).getTime();
@@ -58,7 +56,7 @@ export default async function handler(req, res) {
 
       let query = supabase
         .from('events')
-        .select('id, user_id, title, description, start_time, end_time, timezone, location, is_all_day, category, category_color, created_at, updated_at')
+        .select('id, user_id, title, description, start_time, end_time, timezone, location, is_all_day, created_at, updated_at')
         .eq('user_id', req.user.userId)
         .order('start_time', { ascending: true });
 
@@ -91,15 +89,14 @@ export default async function handler(req, res) {
         timezone: body.timezone,
         location: body.location ?? null,
         is_all_day: Boolean(body.isAllDay),
-        category: body.category ?? null,
-        category_color: body.category_color ?? null,
+        
         updated_at: new Date().toISOString(),
       };
 
       const { data, error } = await supabase
         .from('events')
         .insert(payload)
-        .select('id, user_id, title, description, start_time, end_time, timezone, location, is_all_day, category, category_color, created_at, updated_at')
+        .select('id, user_id, title, description, start_time, end_time, timezone, location, is_all_day, created_at, updated_at')
         .single();
       if (error) throw error;
       return res.status(201).json({ success: true, message: 'Event created', data });
@@ -126,15 +123,14 @@ export default async function handler(req, res) {
       if (body.timezone !== undefined) updateData.timezone = body.timezone;
       if (body.location !== undefined) updateData.location = body.location ?? null;
       if (body.isAllDay !== undefined) updateData.is_all_day = Boolean(body.isAllDay);
-      if (body.category !== undefined) updateData.category = body.category ?? null;
-      if (body.category_color !== undefined) updateData.category_color = body.category_color ?? null;
+      
 
       const { data, error } = await supabase
         .from('events')
         .update(updateData)
         .eq('id', id)
         .eq('user_id', req.user.userId)
-        .select('id, user_id, title, description, start_time, end_time, timezone, location, is_all_day, category, category_color, created_at, updated_at')
+        .select('id, user_id, title, description, start_time, end_time, timezone, location, is_all_day, created_at, updated_at')
         .single();
       if (error) throw error;
       if (!data) return res.status(404).json({ success: false, message: 'Event not found' });

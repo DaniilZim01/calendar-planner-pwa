@@ -240,7 +240,7 @@ export default function PlannerPage() {
                   const time = `${String(start.getHours()).padStart(2,'0')}:${String(start.getMinutes()).padStart(2,'0')}`;
                   return (
                     <Link href={`/event/${ev.id}`} key={ev.id} className="flex items-center gap-3 p-3 card-element rounded-lg cursor-pointer hover:bg-accent/10 active:bg-accent/20 transition-colors">
-                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: ev.category_color || '#B9A989' }} />
+                      <div className="w-2.5 h-2.5 rounded-full bg-accent" />
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-foreground">{ev.title}</span>
