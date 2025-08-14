@@ -85,6 +85,8 @@ export default function PlannerPage() {
     const { hh: eh, mm: em } = parseHM(newEvent.allDay ? '23:59' : (newEvent.endTime || newEvent.time));
     const start = new Date(y, (m || 1) - 1, d || 1, sh, sm, 0, 0).toISOString();
     const end = new Date(y, (m || 1) - 1, d || 1, eh, em, 0, 0).toISOString();
+    const map = JSON.parse(localStorage.getItem('event_category_colors') || '{}');
+    const color = map[newEvent.category] || undefined;
     createEvent.mutate({
       title: newEvent.title,
       description: null,
@@ -93,6 +95,8 @@ export default function PlannerPage() {
       timezone: tz,
       location: newEvent.location || null,
       isAllDay: Boolean(newEvent.allDay),
+      category: newEvent.category || null,
+      category_color: newEvent.category_color || color || null,
     });
   };
 
@@ -236,7 +240,7 @@ export default function PlannerPage() {
                   const time = `${String(start.getHours()).padStart(2,'0')}:${String(start.getMinutes()).padStart(2,'0')}`;
                   return (
                     <Link href={`/event/${ev.id}`} key={ev.id} className="flex items-center gap-3 p-3 card-element rounded-lg cursor-pointer hover:bg-accent/10 active:bg-accent/20 transition-colors">
-                      <div className="w-2.5 h-2.5 rounded-full bg-accent" />
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: ev.category_color || '#B9A989' }} />
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-foreground">{ev.title}</span>

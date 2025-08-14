@@ -23,6 +23,10 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
   const [time, setTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [category, setCategory] = useState<'work' | 'personal' | 'health' | 'other'>('other');
+  const [categoryColor, setCategoryColor] = useState<string>(() => {
+    const map = JSON.parse(localStorage.getItem('event_category_colors') || '{}');
+    return map[category] || '#93B69C';
+  });
   const [allDay, setAllDay] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -36,6 +40,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
       time: allDay ? undefined : time || undefined,
       endTime: allDay ? undefined : endTime || undefined,
       category,
+      category_color: categoryColor,
       allDay,
     });
 
@@ -46,6 +51,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
     setTime('');
     setEndTime('');
     setCategory('other');
+    setCategoryColor('#93B69C');
     setAllDay(false);
     setOpen(false);
   };
@@ -162,6 +168,34 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                 <SelectItem value="other">Другое</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-light text-foreground">Цвет категории</Label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                '#7FB9D6', // Sky Blue
+                '#E9A7B6', // Blush Pink
+                '#93B69C', // Sage Green
+                '#E9C46A', // Warm Honey
+                '#5873A6', // Indigo Blue
+                '#B296C7', // Lavender Plum
+              ].map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => {
+                    setCategoryColor(c);
+                    const map = JSON.parse(localStorage.getItem('event_category_colors') || '{}');
+                    map[category] = c;
+                    localStorage.setItem('event_category_colors', JSON.stringify(map));
+                  }}
+                  aria-label={`Выбрать цвет ${c}`}
+                  className={`w-6 h-6 rounded-full border ${categoryColor === c ? 'ring-2 ring-accent' : ''}`}
+                  style={{ backgroundColor: c }}
+                />
+              ))}
+            </div>
           </div>
 
           <div className="flex gap-3 pt-4">

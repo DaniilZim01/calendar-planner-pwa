@@ -78,6 +78,22 @@ export default function CalendarPage() {
     });
   };
 
+  const colorsForDate = (date: Date): string[] => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    const dateString = `${y}-${m}-${d}`;
+    const set = new Set<string>();
+    (events || []).forEach((ev: ApiEvent) => {
+      const local = new Date(ev.start_time);
+      const ly = local.getFullYear();
+      const lm = String(local.getMonth() + 1).padStart(2, '0');
+      const ld = String(local.getDate()).padStart(2, '0');
+      if (`${ly}-${lm}-${ld}` === dateString && ev.category_color) set.add(ev.category_color);
+    });
+    return Array.from(set).slice(0, 4);
+  };
+
   const navigateMonth = (direction: 'prev' | 'next') => {
     if (direction === 'prev') {
       if (currentMonth === 0) {
@@ -112,7 +128,7 @@ export default function CalendarPage() {
     const timeEnd = `${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`;
     return (
       <Link href={`/event/${event.id}`} className="flex items-center gap-3 p-3 card-element rounded-lg cursor-pointer hover:bg-accent/10 active:bg-accent/20 transition-colors">
-        <div className="w-3 h-3 rounded-full bg-accent"></div>
+        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: event.category_color || '#B9A989' }}></div>
         <div className="flex-1">
           <h4 className="font-medium text-foreground text-sm">{event.title}</h4>
           <p className="text-xs text-muted-foreground">
@@ -193,8 +209,12 @@ export default function CalendarPage() {
                   }`}
                 >
                   {date.getDate()}
-                  {hasEvent && !isSelected && (
-                    <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-accent rounded-full"></div>
+                  {!isSelected && colorsForDate(date).length > 0 && (
+                    <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
+                      {colorsForDate(date).map((c, i) => (
+                        <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c }} />
+                      ))}
+                    </div>
                   )}
                 </button>
               );
