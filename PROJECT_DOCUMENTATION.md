@@ -44,8 +44,9 @@
 - Period (для будущего функционала)
   - id, user_id, date_start, date_end, cycle_length, created_at
 
-- Дополнительно (есть в схеме, не активировано во фронте):
-  - Events, WellbeingData
+- Дополнительно:
+  - Events (включены: серверное API + фронт интеграция списка/создания)
+  - WellbeingData (запланировано)
 
 Связи:
 - User —< UserTask >— Task
@@ -78,7 +79,7 @@
 - POST `/api/auth/verify` — проверить валидность access‑токена
 - PUT `/api/auth/change-password` — сменить пароль (защищено)
 
-Задачи (все защищено токеном):
+ Задачи (все защищено токеном):
 - GET `/api/tasks` — список задач пользователя
   - Доппараметры: `?scope=today|week` для фильтрации по дате
 - POST `/api/tasks` — создать задачу
@@ -92,6 +93,16 @@
   - Чтение: берём `task_id` из `user_tasks` по `user_id`, затем `.in('id', ...)` из `tasks`
   - Создание: запись в `tasks`, затем линк в `user_tasks`
   - Любые обновления/удаления/тоггл — предварительная проверка владения через `user_tasks`
+События (все защищено токеном):
+- GET `/api/events?from&to` — список событий пользователя в диапазоне (UTC ISO)
+- POST `/api/events` — создать событие (title, description?, startTime, endTime, timezone, location?, isAllDay?)
+- PATCH `/api/events/:id` — частичное обновление
+- DELETE `/api/events/:id` — удаление
+
+Особенности реализации:
+- Храним UTC `start_time`/`end_time` + `timezone` пользователя (IANA), сервер нормализует в UTC
+- Отбор по диапазону выполняется по `start_time`
+
 
 Формат ответа (общий):
 ```json

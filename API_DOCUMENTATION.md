@@ -246,6 +246,60 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 Body для POST/PATCH: title, description?, startTime(UTC ISO), endTime(UTC ISO), timezone, location?, isAllDay.
 
+#### Примеры
+
+- Получить список (защищено):
+  - Headers: `Authorization: Bearer <accessToken>`
+  - GET `/api/events?from=2025-01-10T00:00:00.000Z&to=2025-01-20T23:59:59.999Z`
+
+- Создать событие:
+  - Headers: `Authorization: Bearer <accessToken>`, `Content-Type: application/json`
+  - POST `/api/events`
+  - Body:
+  ```json
+  {
+    "title": "Встреча",
+    "description": "Обсуждение",
+    "startTime": "2025-01-12T10:00:00.000Z",
+    "endTime": "2025-01-12T11:00:00.000Z",
+    "timezone": "Europe/Moscow",
+    "location": "Zoom",
+    "isAllDay": false
+  }
+  ```
+
+- Обновить событие:
+  - Headers: `Authorization: Bearer <accessToken>`, `Content-Type: application/json`
+  - PATCH `/api/events/:id`
+  - Body (пример):
+  ```json
+  {
+    "title": "Встреча (обновлено)",
+    "location": "Skype"
+  }
+  ```
+
+- Удалить событие:
+  - Headers: `Authorization: Bearer <accessToken>`
+  - DELETE `/api/events/:id`
+
+Структура ответа `data` для событий:
+```json
+{
+  "id": "uuid",
+  "user_id": "uuid",
+  "title": "Встреча",
+  "description": "Обсуждение",
+  "start_time": "2025-01-12T10:00:00.000Z",
+  "end_time": "2025-01-12T11:00:00.000Z",
+  "timezone": "Europe/Moscow",
+  "location": "Zoom",
+  "is_all_day": false,
+  "created_at": "2025-01-10T09:00:00.000Z",
+  "updated_at": "2025-01-10T09:00:00.000Z"
+}
+```
+
 ### **Переменные окружения**
 Настройте переменные в Postman:
 - `baseUrl`: `https://calendar-planner-pwa.vercel.app`

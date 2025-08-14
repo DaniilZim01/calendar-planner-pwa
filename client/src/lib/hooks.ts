@@ -15,6 +15,10 @@ import {
   updateTask,
   toggleTask,
   deleteTask,
+  fetchEvents,
+  createEvent,
+  updateEvent,
+  deleteEvent,
 } from './api';
 
 export function useLogin() {
@@ -241,5 +245,51 @@ export function useDeleteTask() {
   });
 }
 
+
+// Events hooks
+export function useEvents(params?: { from?: string; to?: string }) {
+  const key: (string | undefined)[] = ['events', params?.from, params?.to];
+  return useQuery({
+    queryKey: key,
+    queryFn: () => fetchEvents(params),
+    select: (res) => res.data,
+  });
+}
+
+export function useCreateEvent(listKeyParams?: { from?: string; to?: string }) {
+  const qc = useQueryClient();
+  const listKey: (string | undefined)[] = ['events', listKeyParams?.from, listKeyParams?.to];
+  return useMutation({
+    mutationFn: createEvent,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['events'], exact: false });
+      if (listKey.length) qc.invalidateQueries({ queryKey: listKey as any });
+    },
+  });
+}
+
+export function useUpdateEvent(listKeyParams?: { from?: string; to?: string }) {
+  const qc = useQueryClient();
+  const listKey: (string | undefined)[] = ['events', listKeyParams?.from, listKeyParams?.to];
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: Parameters<typeof updateEvent>[1] }) => updateEvent(id, input),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['events'], exact: false });
+      if (listKey.length) qc.invalidateQueries({ queryKey: listKey as any });
+    },
+  });
+}
+
+export function useDeleteEvent(listKeyParams?: { from?: string; to?: string }) {
+  const qc = useQueryClient();
+  const listKey: (string | undefined)[] = ['events', listKeyParams?.from, listKeyParams?.to];
+  return useMutation({
+    mutationFn: (id: string) => deleteEvent(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['events'], exact: false });
+      if (listKey.length) qc.invalidateQueries({ queryKey: listKey as any });
+    },
+  });
+}
 
 

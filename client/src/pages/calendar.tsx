@@ -1,36 +1,80 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAppData } from '../hooks/useLocalStorage';
-import { Event } from '../types';
 import { getMonthName, generateCalendarDates, formatDate } from '../utils/dateUtils';
 import EventDialog from '../components/EventDialog';
+import { useCreateEvent, useEvents } from '@/lib/hooks';
+import type { ApiEvent } from '@/lib/api';
 
 export default function CalendarPage() {
-  const { events, setEvents } = useAppData();
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const calendarDates = generateCalendarDates(currentYear, currentMonth);
+  const gridStart = calendarDates[0];
+  const gridEnd = calendarDates[calendarDates.length - 1];
+  const range = useMemo(() => {
+    const start = new Date(gridStart);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(gridEnd);
+    end.setHours(23, 59, 59, 999);
+    return { from: start.toISOString(), to: end.toISOString() };
+  }, [gridStart, gridEnd]);
+
+  const { data: events = [], isLoading } = useEvents({ from: range.from, to: range.to });
+  const createEventMutation = useCreateEvent({ from: range.from, to: range.to });
   const selectedDateString = formatDate(selectedDate, 'yyyy-MM-dd');
   
-  const selectedDayEvents = events.filter((event: Event) => 
-    event.date === selectedDateString
-  );
+  const selectedDayEvents: ApiEvent[] = useMemo(() => {
+    return (events || []).filter((ev: ApiEvent) => {
+      const tz = ev.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const local = new Date(ev.start_time);
+      // Получаем локальную дату пользователя для сравнения по дню
+      const y = local.getFullYear();
+      const m = String(local.getMonth() + 1).padStart(2, '0');
+      const d = String(local.getDate()).padStart(2, '0');
+      const dayStr = `${y}-${m}-${d}`;
+      return dayStr === selectedDateString;
+    });
+  }, [events, selectedDateString]);
 
-  const addEvent = (newEvent: Omit<Event, 'id' | 'createdAt'>) => {
-    const event: Event = {
-      ...newEvent,
-      id: Math.random().toString(36),
-      createdAt: new Date().toISOString(),
+  const addEvent = (newEvent: any) => {
+    // newEvent: { title, location?, date: 'yyyy-MM-dd', time?, endTime?, category, allDay }
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const [y, m, d] = String(newEvent.date).split('-').map((v: string) => parseInt(v, 10));
+    const parseHM = (t?: string) => {
+      if (!t) return { hh: 0, mm: 0 };
+      const [hh, mm] = t.split(':').map((v: string) => parseInt(v, 10));
+      return { hh: hh || 0, mm: mm || 0 };
     };
-    setEvents((prevEvents: Event[]) => [...prevEvents, event]);
+    const { hh: sh, mm: sm } = parseHM(newEvent.allDay ? '00:00' : newEvent.time);
+    const { hh: eh, mm: em } = parseHM(newEvent.allDay ? '23:59' : (newEvent.endTime || newEvent.time));
+    const start = new Date(y, (m || 1) - 1, d || 1, sh, sm, 0, 0).toISOString();
+    const end = new Date(y, (m || 1) - 1, d || 1, eh, em, 0, 0).toISOString();
+    createEventMutation.mutate({
+      title: newEvent.title,
+      description: null,
+      startTime: start,
+      endTime: end,
+      timezone: tz,
+      location: newEvent.location || null,
+      isAllDay: Boolean(newEvent.allDay),
+    });
   };
 
   const hasEventOnDate = (date: Date): boolean => {
-    const dateString = formatDate(date, 'yyyy-MM-dd');
-    return events.some((event: Event) => event.date === dateString);
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    const dateString = `${y}-${m}-${d}`;
+    return (events || []).some((ev: ApiEvent) => {
+      const local = new Date(ev.start_time);
+      const ly = local.getFullYear();
+      const lm = String(local.getMonth() + 1).padStart(2, '0');
+      const ld = String(local.getDate()).padStart(2, '0');
+      return `${ly}-${lm}-${ld}` === dateString;
+    });
   };
 
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -60,29 +104,24 @@ export default function CalendarPage() {
     return date.getMonth() === currentMonth;
   };
 
-  const EventItem = ({ event }: { event: Event }) => {
-    const getCategoryColor = (category: string) => {
-      switch (category) {
-        case 'work': return 'bg-accent';
-        case 'personal': return 'bg-success';
-        case 'health': return 'bg-warning';
-        default: return 'bg-muted';
-      }
-    };
-
+  const EventItem = ({ event }: { event: ApiEvent }) => {
+    const start = new Date(event.start_time);
+    const end = new Date(event.end_time);
+    const time = `${String(start.getHours()).padStart(2, '0')}:${String(start.getMinutes()).padStart(2, '0')}`;
+    const timeEnd = `${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`;
     return (
-      <div className="flex items-center gap-3 p-3 card-element">
-        <div className={`w-3 h-3 rounded-full ${getCategoryColor(event.category)}`}></div>
+      <div className="flex items-center gap-3 p-3 card-element rounded-lg">
+        <div className="w-3 h-3 rounded-full bg-accent"></div>
         <div className="flex-1">
           <h4 className="font-medium text-foreground text-sm">{event.title}</h4>
           <p className="text-xs text-muted-foreground">
-            {event.allDay ? (
+            {event.is_all_day ? (
               'ВЕСЬ ДЕНЬ'
             ) : (
               <>
                 {event.location && <span>{event.location} • </span>}
-                <span>{event.time}</span>
-                {event.endTime && ` - ${event.endTime}`}
+                <span>{time}</span>
+                {event.end_time && ` - ${timeEnd}`}
               </>
             )}
           </p>
@@ -166,8 +205,10 @@ export default function CalendarPage() {
           </h3>
           
           <div className="space-y-3">
-            {selectedDayEvents.length > 0 ? (
-              selectedDayEvents.map((event: Event) => (
+            {isLoading ? (
+              <div className="text-center py-8 text-muted-foreground text-sm">Загрузка…</div>
+            ) : selectedDayEvents.length > 0 ? (
+              selectedDayEvents.map((event: ApiEvent) => (
                 <EventItem key={event.id} event={event} />
               ))
             ) : (

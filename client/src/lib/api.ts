@@ -210,3 +210,55 @@ export async function deleteTask(id: string): Promise<ApiSuccess<{ message?: str
 
 
 
+// Events API
+export type ApiEvent = {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  start_time: string; // ISO in UTC
+  end_time: string;   // ISO in UTC
+  timezone: string;
+  location: string | null;
+  is_all_day: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type EventInput = {
+  title: string;
+  description?: string | null;
+  startTime: string; // ISO string (will be normalized to UTC on server)
+  endTime: string;   // ISO string (will be normalized to UTC on server)
+  timezone: string;
+  location?: string | null;
+  isAllDay?: boolean;
+};
+
+export type EventUpdateInput = Partial<EventInput>;
+
+export async function fetchEvents(params?: { from?: string; to?: string }): Promise<ApiSuccess<ApiEvent[]>> {
+  const qs = new URLSearchParams();
+  if (params?.from) qs.set('from', params.from);
+  if (params?.to) qs.set('to', params.to);
+  const url = `/api/events${qs.toString() ? `?${qs.toString()}` : ''}`;
+  const { data } = await api.get<ApiSuccess<ApiEvent[]>>(url);
+  return data;
+}
+
+export async function createEvent(input: EventInput): Promise<ApiSuccess<ApiEvent>> {
+  const { data } = await api.post<ApiSuccess<ApiEvent>>('/api/events', input);
+  return data;
+}
+
+export async function updateEvent(id: string, input: EventUpdateInput): Promise<ApiSuccess<ApiEvent>> {
+  const { data } = await api.patch<ApiSuccess<ApiEvent>>(`/api/events/${id}`, input);
+  return data;
+}
+
+export async function deleteEvent(id: string): Promise<ApiSuccess<{ message?: string }>> {
+  const { data } = await api.delete<ApiSuccess<{ message?: string }>>(`/api/events/${id}`);
+  return data;
+}
+
+
