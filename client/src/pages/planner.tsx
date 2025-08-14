@@ -6,31 +6,48 @@ import { TaskModal } from '@/components/tasks/TaskModal';
 import { TaskList } from '@/components/tasks/TaskList';
 import EventDialog from '@/components/EventDialog';
 import type { ApiEvent } from '@/lib/api';
-import { Plus } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 export default function PlannerPage() {
-  const { data: tasksToday, isLoading: isLoadingTasksToday } = useTasks('today');
-  const { data: tasksWeek, isLoading: isLoadingTasksWeek } = useTasks('week');
+  // Загружаем все задачи и фильтруем по выбранной дате локально
   const { data: tasksAll, isLoading: isLoadingTasksAll } = useTasks();
   const toggleTask = useToggleTask();
   const createTask = useCreateTask();
   const deleteTask = useDeleteTask();
   const updateTask = useUpdateTask();
-  const [tab, setTab] = useState<'today' | 'week' | 'all'>('today');
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<'priority' | 'due'>('priority');
   
-  // Events: Today range (local day → ISO)
-  const todayRange = useMemo(() => {
-    const start = new Date();
+  // Выбранная дата и 7‑дневная полоса
+  const getWeekStart = (d: Date) => {
+    const copy = new Date(d);
+    const day = copy.getDay();
+    const diff = (day === 0 ? -6 : 1) - day; // сдвиг к понедельнику
+    copy.setDate(copy.getDate() + diff);
+    copy.setHours(0,0,0,0);
+    return copy;
+  };
+  const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
+  const [weekStart, setWeekStart] = useState<Date>(() => getWeekStart(new Date()));
+  const weekDays: Date[] = useMemo(() => {
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(weekStart);
+      d.setDate(d.getDate() + i);
+      return d;
+    });
+  }, [weekStart]);
+
+  // Events: диапазон = выбранный день
+  const dayRange = useMemo(() => {
+    const start = new Date(selectedDate);
     start.setHours(0, 0, 0, 0);
-    const end = new Date();
+    const end = new Date(selectedDate);
     end.setHours(23, 59, 59, 999);
     return { from: start.toISOString(), to: end.toISOString() };
-  }, []);
-  const { data: eventsToday = [], isLoading: isLoadingEventsToday } = useEvents({ from: todayRange.from, to: todayRange.to });
-  const createEvent = useCreateEvent({ from: todayRange.from, to: todayRange.to });
+  }, [selectedDate]);
+  const { data: eventsToday = [], isLoading: isLoadingEventsToday } = useEvents({ from: dayRange.from, to: dayRange.to });
+  const createEvent = useCreateEvent({ from: dayRange.from, to: dayRange.to });
 
   const applySortFilter = (items?: any[]) => {
     const base = (items || []).filter(t =>
@@ -42,9 +59,15 @@ export default function PlannerPage() {
     return [...base].sort((a,b)=> (a.due_date||'').localeCompare(b.due_date||''));
   };
 
-  const todayFiltered = useMemo(()=>applySortFilter(tasksToday), [tasksToday, query, sort]);
-  const weekFiltered = useMemo(()=>applySortFilter(tasksWeek), [tasksWeek, query, sort]);
-  const allFiltered = useMemo(()=>applySortFilter(tasksAll), [tasksAll, query, sort]);
+  // Список задач на выбранную дату
+  const y = selectedDate.getFullYear();
+  const m = String(selectedDate.getMonth() + 1).padStart(2, '0');
+  const d = String(selectedDate.getDate()).padStart(2, '0');
+  const selectedDayIso = `${y}-${m}-${d}`;
+  const tasksForSelectedDay = useMemo(() => {
+    const list = (tasksAll || []).filter((t: any) => (t.due_date || '').slice(0,10) === selectedDayIso);
+    return applySortFilter(list);
+  }, [tasksAll, selectedDayIso, query, sort]);
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -82,8 +105,21 @@ export default function PlannerPage() {
           <h2 className="text-3xl font-thin text-foreground tracking-tight">Today</h2>
         </div>
 
-        {/* Row 1: search/sort */}
+        {/* Row 1: Сегодня слева, поиск/сортировка справа */}
         <div className="flex items-center justify-between mb-2">
+          <div>
+            <Button
+              variant="outline"
+              className="h-8 px-3"
+              onClick={() => {
+                const today = new Date();
+                setSelectedDate(today);
+                setWeekStart(getWeekStart(today));
+              }}
+            >
+              Сегодня
+            </Button>
+          </div>
           <div className="flex items-center gap-2">
             <button
               aria-label="Поиск"
@@ -104,21 +140,57 @@ export default function PlannerPage() {
               <span className="text-[10px]">{sort==='priority'?'P':'D'}</span>
             </button>
           </div>
-          {/* правый блок временно пустой, кнопки "+" находятся у заголовков секций */}
         </div>
 
-        {/* Row 2: tabs */}
-        <div className="flex items-center gap-2 mb-4">
-          {(['today','week','all'] as const).map(k => (
+        {/* Row 2: 7‑дневный календарь */}
+        <div className="mb-4 card-soft rounded-xl p-3">
+          <div className="flex items-center justify-between mb-2">
             <button
-              key={k}
-              onClick={() => setTab(k)}
-              className={`px-3 py-1.5 rounded-full border text-sm ${tab===k ? 'bg-accent text-white border-accent' : 'border-border text-foreground'}`}
+              className="p-1 text-muted-foreground hover:text-accent"
+              aria-label="Предыдущая неделя"
+              onClick={() => {
+                const prev = new Date(weekStart);
+                prev.setDate(prev.getDate() - 7);
+                setWeekStart(prev);
+              }}
             >
-              {k==='today'?'Сегодня':k==='week'?'Неделя':'Все'}
+              <ChevronLeft className="w-5 h-5" />
             </button>
-          ))}
+            <div className="text-center text-foreground font-light">
+              {selectedDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}
+            </div>
+            <button
+              className="p-1 text-muted-foreground hover:text-accent"
+              aria-label="Следующая неделя"
+              onClick={() => {
+                const next = new Date(weekStart);
+                next.setDate(next.getDate() + 7);
+                setWeekStart(next);
+              }}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="grid grid-cols-7 gap-1 text-center">
+            {['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((d) => (
+              <div key={d} className="text-[11px] text-muted-foreground">{d}</div>
+            ))}
+            {weekDays.map((d) => {
+              const isSelected = d.toDateString() === selectedDate.toDateString();
+              return (
+                <button
+                  key={d.toISOString()}
+                  onClick={() => setSelectedDate(new Date(d))}
+                  className={`mt-1 aspect-square flex items-center justify-center rounded-full text-sm transition-colors ${isSelected ? 'bg-accent text-white' : 'text-foreground hover:bg-secondary/30'}`}
+                >
+                  {d.getDate()}
+                </button>
+              );
+            })}
+          </div>
         </div>
+
+        {/* tabs скрыты по макету; см. документацию как вернуть */}
 
         {/* Create/Edit modals */}
         <TaskModal
