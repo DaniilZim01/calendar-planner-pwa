@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useRoute } from 'wouter';
+import { useParams } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { api, type ApiEvent } from '@/lib/api';
 import { useDeleteEvent } from '@/lib/hooks';
 
 export default function EventPage() {
-  const [, params] = useRoute('/event/:id');
-  const id = params?.id as string;
+  const params = useParams<{ id: string }>();
+  const id = params?.id;
   const [event, setEvent] = useState<ApiEvent | null>(null);
   const [loading, setLoading] = useState(true);
   const del = useDeleteEvent();

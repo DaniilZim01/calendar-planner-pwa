@@ -10,6 +10,7 @@ import GoalsPage from "./pages/goals";
 import WellbeingPage from "./pages/wellbeing";
 import PlannerPage from "./pages/planner";
 import CalendarPage from "./pages/calendar";
+import EventPage from "./pages/event";
 import ProfilePage from "./pages/profile";
 import ProtectedRoute from "@/components/auth/ProtectedRoute.tsx";
 import AuthPage from "./pages/auth";
@@ -24,6 +25,7 @@ function Router() {
         <Route path="/wellbeing" component={WellbeingPage} />
         <Route path="/planner" component={PlannerPage} />
         <Route path="/calendar" component={CalendarPage} />
+        <Route path="/event/:id">{() => <EventPage />}</Route>
         <Route path="/profile">
           {() => (
             <ProtectedRoute>
