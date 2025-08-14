@@ -1,4 +1,4 @@
-const CACHE_NAME = "planner-cache-v3"; // bump to invalidate old caches
+const CACHE_NAME = "planner-cache-v4"; // bump to invalidate old caches
 const urlsToCache = [
   "/",
   "/manifest.json",
