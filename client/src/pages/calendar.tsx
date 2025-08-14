@@ -110,7 +110,7 @@ export default function CalendarPage() {
     const time = `${String(start.getHours()).padStart(2, '0')}:${String(start.getMinutes()).padStart(2, '0')}`;
     const timeEnd = `${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`;
     return (
-      <div className="flex items-center gap-3 p-3 card-element rounded-lg">
+      <a href={`/event/${event.id}`} className="flex items-center gap-3 p-3 card-element rounded-lg cursor-pointer hover:bg-accent/10 active:bg-accent/20 transition-colors">
         <div className="w-3 h-3 rounded-full bg-accent"></div>
         <div className="flex-1">
           <h4 className="font-medium text-foreground text-sm">{event.title}</h4>
@@ -126,7 +126,10 @@ export default function CalendarPage() {
             )}
           </p>
         </div>
-      </div>
+        <div className="w-7 h-7 rounded-full bg-card-element flex items-center justify-center text-muted-foreground">
+          <span className="inline-block rotate-0">›</span>
+        </div>
+      </a>
     );
   };
 

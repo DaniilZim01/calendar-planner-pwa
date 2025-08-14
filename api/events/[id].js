@@ -36,6 +36,23 @@ export default async function handler(req, res) {
   const { id } = req.query;
   if (!id) return res.status(400).json({ success: false, message: 'Event id is required' });
 
+  if (req.method === 'GET') {
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('id, user_id, title, description, start_time, end_time, timezone, location, is_all_day, created_at, updated_at')
+        .eq('id', id)
+        .eq('user_id', req.user.userId)
+        .single();
+      if (error) throw error;
+      if (!data) return res.status(404).json({ success: false, message: 'Event not found' });
+      return res.status(200).json({ success: true, data });
+    } catch (error) {
+      console.error('Event fetch error:', error);
+      return res.status(500).json({ success: false, message: 'Failed to fetch event' });
+    }
+  }
+
   if (req.method === 'PATCH') {
     try {
       const parseResult = updateSchema.safeParse(req.body || {});

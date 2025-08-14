@@ -234,7 +234,7 @@ export default function PlannerPage() {
                   const start = new Date(ev.start_time);
                   const time = `${String(start.getHours()).padStart(2,'0')}:${String(start.getMinutes()).padStart(2,'0')}`;
                   return (
-                    <div key={ev.id} className="flex items-center gap-3 p-3 card-element rounded-lg">
+                    <a href={`/event/${ev.id}`} key={ev.id} className="flex items-center gap-3 p-3 card-element rounded-lg cursor-pointer hover:bg-accent/10 active:bg-accent/20 transition-colors">
                       <div className="w-2.5 h-2.5 rounded-full bg-accent" />
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
@@ -245,7 +245,10 @@ export default function PlannerPage() {
                           <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{ev.description}</div>
                         ) : null}
                       </div>
-                    </div>
+                      <div className="w-7 h-7 rounded-full bg-card-element flex items-center justify-center text-muted-foreground">
+                        <span className="inline-block rotate-0">›</span>
+                      </div>
+                    </a>
                   );
                 })}
               </div>
