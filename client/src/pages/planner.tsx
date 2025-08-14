@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useTasks, useToggleTask, useCreateTask, useDeleteTask, useUpdateTask } from '@/lib/hooks';
+import { useTasks, useToggleTask, useCreateTask, useDeleteTask, useUpdateTask, useEvents, useCreateEvent } from '@/lib/hooks';
 import { TaskForm } from '@/components/tasks/TaskForm';
 import { TaskModal } from '@/components/tasks/TaskModal';
 import { TaskList } from '@/components/tasks/TaskList';
+import EventDialog from '@/components/EventDialog';
+import type { ApiEvent } from '@/lib/api';
 
 export default function PlannerPage() {
   const { data: tasksToday, isLoading: isLoadingTasksToday } = useTasks('today');
@@ -16,6 +18,17 @@ export default function PlannerPage() {
   const [tab, setTab] = useState<'today' | 'week' | 'all'>('today');
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<'priority' | 'due'>('priority');
+  
+  // Events: Today range (local day → ISO)
+  const todayRange = useMemo(() => {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+    return { from: start.toISOString(), to: end.toISOString() };
+  }, []);
+  const { data: eventsToday = [], isLoading: isLoadingEventsToday } = useEvents({ from: todayRange.from, to: todayRange.to });
+  const createEvent = useCreateEvent({ from: todayRange.from, to: todayRange.to });
 
   const applySortFilter = (items?: any[]) => {
     const base = (items || []).filter(t =>
@@ -32,6 +45,30 @@ export default function PlannerPage() {
   const allFiltered = useMemo(()=>applySortFilter(tasksAll), [tasksAll, query, sort]);
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Add event (from EventDialog local shape → API shape)
+  const handleAddEvent = (newEvent: any) => {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const [y, m, d] = String(newEvent.date).split('-').map((v: string) => parseInt(v, 10));
+    const parseHM = (t?: string) => {
+      if (!t) return { hh: 0, mm: 0 };
+      const [hh, mm] = t.split(':').map((v: string) => parseInt(v, 10));
+      return { hh: hh || 0, mm: mm || 0 };
+    };
+    const { hh: sh, mm: sm } = parseHM(newEvent.allDay ? '00:00' : newEvent.time);
+    const { hh: eh, mm: em } = parseHM(newEvent.allDay ? '23:59' : (newEvent.endTime || newEvent.time));
+    const start = new Date(y, (m || 1) - 1, d || 1, sh, sm, 0, 0).toISOString();
+    const end = new Date(y, (m || 1) - 1, d || 1, eh, em, 0, 0).toISOString();
+    createEvent.mutate({
+      title: newEvent.title,
+      description: null,
+      startTime: start,
+      endTime: end,
+      timezone: tz,
+      location: newEvent.location || null,
+      isAllDay: Boolean(newEvent.allDay),
+    });
+  };
 
   return (
     <div className="app-container animate-fade-in">
@@ -103,19 +140,62 @@ export default function PlannerPage() {
           onSubmit={async (v) => { await updateTask.mutateAsync({ id: editingId!, input: v }); setEditingId(null); }}
         />
 
-        {/* Lists */}
+        {/* Today: Events + Tasks */}
         {tab==='today' && (
-          <div className="space-y-2 mb-8">
-            {isLoadingTasksToday ? (
-              <div className="text-sm text-muted-foreground">Загрузка...</div>
-            ) : (
-              <TaskList
-                items={todayFiltered||[]}
-                onToggle={(id)=>toggleTask.mutate(id)}
-                onEdit={(id)=>{ setEditingId(id); setIsCreating(false); }}
-                onDelete={(id)=>deleteTask.mutate(id)}
-              />
-            )}
+          <div className="space-y-6 mb-8">
+            {/* Events section */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-base font-light text-foreground">События</h3>
+                <EventDialog onAddEvent={handleAddEvent} selectedDate={new Date().toISOString().slice(0,10)}>
+                  <Button className="bg-accent hover:bg-accent/90 text-white px-3 py-1 h-8">+ Добавить</Button>
+                </EventDialog>
+              </div>
+              {isLoadingEventsToday ? (
+                <div className="text-sm text-muted-foreground">Загрузка...</div>
+              ) : (eventsToday as ApiEvent[]).length > 0 ? (
+                <div className="space-y-2">
+                  {(eventsToday as ApiEvent[]).map((ev) => {
+                    const start = new Date(ev.start_time);
+                    const time = `${String(start.getHours()).padStart(2,'0')}:${String(start.getMinutes()).padStart(2,'0')}`;
+                    return (
+                      <div key={ev.id} className="flex items-center gap-3 p-3 card-element rounded-lg">
+                        <div className="w-2.5 h-2.5 rounded-full bg-accent" />
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-foreground">{ev.title}</span>
+                            <span className="text-xs text-muted-foreground">{ev.is_all_day ? 'ВЕСЬ ДЕНЬ' : time}</span>
+                          </div>
+                          {ev.description ? (
+                            <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{ev.description}</div>
+                          ) : null}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground">Нет событий на сегодня</div>
+              )}
+            </div>
+
+            {/* Tasks section */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-base font-light text-foreground">Задачи</h3>
+                <Button onClick={() => { setIsCreating(true); setEditingId(null); }} className="bg-accent hover:bg-accent/90 text-white px-3 py-1 h-8">+ Задача</Button>
+              </div>
+              {isLoadingTasksToday ? (
+                <div className="text-sm text-muted-foreground">Загрузка...</div>
+              ) : (
+                <TaskList
+                  items={todayFiltered||[]}
+                  onToggle={(id)=>toggleTask.mutate(id)}
+                  onEdit={(id)=>{ setEditingId(id); setIsCreating(false); }}
+                  onDelete={(id)=>deleteTask.mutate(id)}
+                />
+              )}
+            </div>
           </div>
         )}
         {tab==='week' && (
