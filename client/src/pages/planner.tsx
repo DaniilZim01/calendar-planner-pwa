@@ -6,6 +6,8 @@ import { TaskModal } from '@/components/tasks/TaskModal';
 import { TaskList } from '@/components/tasks/TaskList';
 import EventDialog from '@/components/EventDialog';
 import type { ApiEvent } from '@/lib/api';
+import { Plus } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 export default function PlannerPage() {
   const { data: tasksToday, isLoading: isLoadingTasksToday } = useTasks('today');
@@ -80,7 +82,7 @@ export default function PlannerPage() {
           <h2 className="text-3xl font-thin text-foreground tracking-tight">Today</h2>
         </div>
 
-        {/* Row 1: search/sort (left) + add task (right) */}
+        {/* Row 1: search/sort */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <button
@@ -102,7 +104,7 @@ export default function PlannerPage() {
               <span className="text-[10px]">{sort==='priority'?'P':'D'}</span>
             </button>
           </div>
-          <Button onClick={() => { setIsCreating(true); setEditingId(null); }} className="bg-accent hover:bg-accent/90 text-white">+ Задача</Button>
+          {/* правый блок временно пустой, кнопки "+" находятся у заголовков секций */}
         </div>
 
         {/* Row 2: tabs */}
@@ -148,7 +150,9 @@ export default function PlannerPage() {
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-base font-light text-foreground">События</h3>
                 <EventDialog onAddEvent={handleAddEvent} selectedDate={new Date().toISOString().slice(0,10)}>
-                  <Button className="bg-accent hover:bg-accent/90 text-white px-3 py-1 h-8">+ Добавить</Button>
+                  <Button aria-label="Добавить событие" className="bg-accent hover:bg-accent/90 text-white w-8 h-8 p-0 rounded-full flex items-center justify-center">
+                    <Plus className="w-4 h-4" />
+                  </Button>
                 </EventDialog>
               </div>
               {isLoadingEventsToday ? (
@@ -183,7 +187,9 @@ export default function PlannerPage() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-base font-light text-foreground">Задачи</h3>
-                <Button onClick={() => { setIsCreating(true); setEditingId(null); }} className="bg-accent hover:bg-accent/90 text-white px-3 py-1 h-8">+ Задача</Button>
+                <Button aria-label="Добавить задачу" onClick={() => { setIsCreating(true); setEditingId(null); }} className="bg-accent hover:bg-accent/90 text-white w-8 h-8 p-0 rounded-full flex items-center justify-center">
+                  <Plus className="w-4 h-4" />
+                </Button>
               </div>
               {isLoadingTasksToday ? (
                 <div className="text-sm text-muted-foreground">Загрузка...</div>
@@ -239,8 +245,8 @@ export default function PlannerPage() {
               : now.getHours() < 18
               ? 'Добрый день! Продолжаем работать над задачами!'
               : 'Добрый вечер! Время подводить итоги дня!';
-            
-            alert(message);
+
+            toast({ title: 'Начать день', description: message });
           }}
         >
           Начать день
