@@ -2,8 +2,8 @@ const CACHE_NAME = "planner-cache-v4"; // bump to invalidate old caches
 const urlsToCache = [
   "/",
   "/manifest.json",
-  "/icons/icon-192.png",
-  "/icons/icon-512.png",
+  "/icons/flow_daily_logo_192.png",
+  "/icons/flow_daily_logo_512.png",
 ];
 
 self.addEventListener("install", (event) => {
