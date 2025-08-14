@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Plus } from 'lucide-react';
 import { Event } from '../types';
 import { getCurrentDateString } from '../utils/dateUtils';
@@ -28,6 +29,14 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
     return map[category] || '#93B69C';
   });
   const [allDay, setAllDay] = useState(false);
+
+  // Подставлять сохранённый цвет при смене категории
+  useEffect(() => {
+    try {
+      const map = JSON.parse(localStorage.getItem('event_category_colors') || '{}');
+      if (map[category]) setCategoryColor(map[category]);
+    } catch {}
+  }, [category]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,44 +166,49 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
             <Label htmlFor="category" className="text-sm font-light text-foreground">
               Категория
             </Label>
-            <Select value={category} onValueChange={(value: 'work' | 'personal' | 'health' | 'other') => setCategory(value)}>
-              <SelectTrigger className="bg-input border-border">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="work">Работа</SelectItem>
-                <SelectItem value="personal">Личное</SelectItem>
-                <SelectItem value="health">Здоровье</SelectItem>
-                <SelectItem value="other">Другое</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-sm font-light text-foreground">Цвет категории</Label>
-            <div className="flex flex-wrap gap-2">
-              {[
-                '#7FB9D6', // Sky Blue
-                '#E9A7B6', // Blush Pink
-                '#93B69C', // Sage Green
-                '#E9C46A', // Warm Honey
-                '#5873A6', // Indigo Blue
-                '#B296C7', // Lavender Plum
-              ].map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => {
-                    setCategoryColor(c);
-                    const map = JSON.parse(localStorage.getItem('event_category_colors') || '{}');
-                    map[category] = c;
-                    localStorage.setItem('event_category_colors', JSON.stringify(map));
-                  }}
-                  aria-label={`Выбрать цвет ${c}`}
-                  className={`w-6 h-6 rounded-full border ${categoryColor === c ? 'ring-2 ring-accent' : ''}`}
-                  style={{ backgroundColor: c }}
-                />
-              ))}
+            <div className="flex items-center gap-3">
+              <Select value={category} onValueChange={(value: 'work' | 'personal' | 'health' | 'other') => setCategory(value)}>
+                <SelectTrigger className="bg-input border-border flex-1 h-10">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="work">Работа</SelectItem>
+                  <SelectItem value="personal">Личное</SelectItem>
+                  <SelectItem value="health">Здоровье</SelectItem>
+                  <SelectItem value="other">Другое</SelectItem>
+                </SelectContent>
+              </Select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="Выбрать цвет категории"
+                    className="w-10 h-10 rounded-full border"
+                    style={{ backgroundColor: categoryColor }}
+                  />
+                </PopoverTrigger>
+                <PopoverContent className="w-auto bg-background border-border">
+                  <div className="flex flex-wrap gap-2">
+                    {['#7FB9D6','#E9A7B6','#93B69C','#E9C46A','#5873A6','#B296C7'].map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => {
+                          setCategoryColor(c);
+                          try {
+                            const map = JSON.parse(localStorage.getItem('event_category_colors') || '{}');
+                            map[category] = c;
+                            localStorage.setItem('event_category_colors', JSON.stringify(map));
+                          } catch {}
+                        }}
+                        aria-label={`Выбрать цвет ${c}`}
+                        className={`w-6 h-6 rounded-full border ${categoryColor === c ? 'ring-2 ring-accent' : ''}`}
+                        style={{ backgroundColor: c }}
+                      />
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
