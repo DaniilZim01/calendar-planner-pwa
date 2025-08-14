@@ -214,96 +214,66 @@ export default function PlannerPage() {
           onSubmit={async (v) => { await updateTask.mutateAsync({ id: editingId!, input: v }); setEditingId(null); }}
         />
 
-        {/* Today: Events + Tasks */}
-        {tab==='today' && (
-          <div className="space-y-6 mb-8">
-            {/* Events section */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-base font-light text-foreground">События</h3>
-                <EventDialog onAddEvent={handleAddEvent} selectedDate={new Date().toISOString().slice(0,10)}>
-                  <Button aria-label="Добавить событие" className="bg-accent hover:bg-accent/90 text-white w-8 h-8 p-0 rounded-full flex items-center justify-center">
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </EventDialog>
-              </div>
-              {isLoadingEventsToday ? (
-                <div className="text-sm text-muted-foreground">Загрузка...</div>
-              ) : (eventsToday as ApiEvent[]).length > 0 ? (
-                <div className="space-y-2">
-                  {(eventsToday as ApiEvent[]).map((ev) => {
-                    const start = new Date(ev.start_time);
-                    const time = `${String(start.getHours()).padStart(2,'0')}:${String(start.getMinutes()).padStart(2,'0')}`;
-                    return (
-                      <div key={ev.id} className="flex items-center gap-3 p-3 card-element rounded-lg">
-                        <div className="w-2.5 h-2.5 rounded-full bg-accent" />
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-foreground">{ev.title}</span>
-                            <span className="text-xs text-muted-foreground">{ev.is_all_day ? 'ВЕСЬ ДЕНЬ' : time}</span>
-                          </div>
-                          {ev.description ? (
-                            <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{ev.description}</div>
-                          ) : null}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-sm text-muted-foreground">Нет событий на сегодня</div>
-              )}
-            </div>
-
-            {/* Tasks section */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-base font-light text-foreground">Задачи</h3>
-                <Button aria-label="Добавить задачу" onClick={() => { setIsCreating(true); setEditingId(null); }} className="bg-accent hover:bg-accent/90 text-white w-8 h-8 p-0 rounded-full flex items-center justify-center">
+        {/* Events + Tasks for selected day */}
+        <div className="space-y-6 mb-8">
+          {/* Events section */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-base font-light text-foreground">События</h3>
+              <EventDialog onAddEvent={handleAddEvent} selectedDate={new Date(selectedDate).toISOString().slice(0,10)}>
+                <Button aria-label="Добавить событие" className="bg-accent hover:bg-accent/90 text-white w-8 h-8 p-0 rounded-full flex items-center justify-center">
                   <Plus className="w-4 h-4" />
                 </Button>
-              </div>
-              {isLoadingTasksToday ? (
-                <div className="text-sm text-muted-foreground">Загрузка...</div>
-              ) : (
-                <TaskList
-                  items={todayFiltered||[]}
-                  onToggle={(id)=>toggleTask.mutate(id)}
-                  onEdit={(id)=>{ setEditingId(id); setIsCreating(false); }}
-                  onDelete={(id)=>deleteTask.mutate(id)}
-                />
-              )}
+              </EventDialog>
             </div>
-          </div>
-        )}
-        {tab==='week' && (
-          <div className="space-y-2 mb-8">
-            {isLoadingTasksWeek ? (
+            {isLoadingEventsToday ? (
               <div className="text-sm text-muted-foreground">Загрузка...</div>
+            ) : (eventsToday as ApiEvent[]).length > 0 ? (
+              <div className="space-y-2">
+                {(eventsToday as ApiEvent[]).map((ev) => {
+                  const start = new Date(ev.start_time);
+                  const time = `${String(start.getHours()).padStart(2,'0')}:${String(start.getMinutes()).padStart(2,'0')}`;
+                  return (
+                    <div key={ev.id} className="flex items-center gap-3 p-3 card-element rounded-lg">
+                      <div className="w-2.5 h-2.5 rounded-full bg-accent" />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-foreground">{ev.title}</span>
+                          <span className="text-xs text-muted-foreground">{ev.is_all_day ? 'ВЕСЬ ДЕНЬ' : time}</span>
+                        </div>
+                        {ev.description ? (
+                          <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{ev.description}</div>
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             ) : (
-              <TaskList
-                items={weekFiltered||[]}
-                onToggle={(id)=>toggleTask.mutate(id)}
-                onEdit={(id)=>{ setEditingId(id); setIsCreating(false); }}
-                onDelete={(id)=>deleteTask.mutate(id)}
-              />
+              <div className="text-sm text-muted-foreground">Нет событий на выбранную дату</div>
             )}
           </div>
-        )}
-        {tab==='all' && (
-          <div className="space-y-2 mb-8">
+
+          {/* Tasks section */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-base font-light text-foreground">Задачи</h3>
+              <Button aria-label="Добавить задачу" onClick={() => { setIsCreating(true); setEditingId(null); }} className="bg-accent hover:bg-accent/90 text-white w-8 h-8 p-0 rounded-full flex items-center justify-center">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
             {isLoadingTasksAll ? (
               <div className="text-sm text-muted-foreground">Загрузка...</div>
             ) : (
               <TaskList
-                items={allFiltered||[]}
+                items={tasksForSelectedDay||[]}
                 onToggle={(id)=>toggleTask.mutate(id)}
                 onEdit={(id)=>{ setEditingId(id); setIsCreating(false); }}
                 onDelete={(id)=>deleteTask.mutate(id)}
               />
             )}
           </div>
-        )}
+        </div>
 
         {/* Блок пустых событий временно скрыт */}
 
