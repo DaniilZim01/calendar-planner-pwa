@@ -10,7 +10,7 @@ export function ReflectBarChart({ values, labels, max, className }: { values: nu
           return (
             <div key={i} className="flex flex-col items-center justify-end gap-1">
               <div className="w-5 rounded-md bg-accent/30" style={{ height: `${h}px` }} />
-              <div className="text-[10px] text-muted-foreground">{labels[i]}</div>
+              <div className="text-[10px] text-muted-foreground">{labels[i] ?? ''}</div>
             </div>
           );
         })}

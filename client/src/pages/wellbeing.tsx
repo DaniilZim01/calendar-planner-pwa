@@ -20,6 +20,7 @@ export default function WellbeingPage() {
   const range = useReflectRange(rangeFrom, rangeTo);
   const waterValues = useMemo(() => (range.data || []).map(d => d.water ?? 0), [range.data]);
   const sleepValues = useMemo(() => (range.data || []).map(d => d.sleep ?? 0), [range.data]);
+  const currentDay = day.data || { water: 0, sleep: 0, steps: 0, mood: 0, journal: null } as any;
 
   // Календарь для выбора дня
   const renderMiniCalendar = () => {
@@ -87,7 +88,7 @@ export default function WellbeingPage() {
             </Button>
           </div>
           <div className="text-2xl font-bold text-foreground mb-1">
-            {currentData.waterIntake.toFixed(1)} литра
+            {(currentDay.water ?? 0).toFixed ? (currentDay.water as number).toFixed(1) : Number(currentDay.water||0).toFixed(1)} литра
           </div>
           <div className="text-xs text-muted-foreground mb-4">
             Сколько воды вы выпили на этой неделе?
@@ -100,6 +101,17 @@ export default function WellbeingPage() {
               <span key={day}>{day}</span>
             ))}
           </div>
+          <div className="mt-3">
+            <Input
+              type="number"
+              step="0.1"
+              min={0}
+              max={10}
+              defaultValue={currentDay.water ?? 0}
+              onBlur={(e) => patch.mutate({ date: selectedDate, water: Number(e.target.value||0) })}
+              className="w-full bg-white rounded-lg text-sm border-0"
+            />
+          </div>
         </div>
 
         {/* Трекер сна */}
@@ -111,7 +123,7 @@ export default function WellbeingPage() {
             </Button>
           </div>
           <div className="text-2xl font-bold text-foreground mb-1">
-            {currentData.sleepHours.toFixed(1)} часов
+            {(currentDay.sleep ?? 0).toFixed ? (currentDay.sleep as number).toFixed(1) : Number(currentDay.sleep||0).toFixed(1)} часов
           </div>
           <div className="text-xs text-muted-foreground mb-4">
             Сколько часов вы спали на этой неделе?
@@ -123,6 +135,17 @@ export default function WellbeingPage() {
             {getWeekDays().map((day) => (
               <span key={day}>{day}</span>
             ))}
+          </div>
+          <div className="mt-3">
+            <Input
+              type="number"
+              step="0.1"
+              min={0}
+              max={24}
+              defaultValue={currentDay.sleep ?? 0}
+              onBlur={(e) => patch.mutate({ date: selectedDate, sleep: Number(e.target.value||0) })}
+              className="w-full bg-white rounded-lg text-sm border-0"
+            />
           </div>
         </div>
 
