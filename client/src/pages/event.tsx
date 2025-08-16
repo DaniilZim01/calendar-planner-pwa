@@ -32,9 +32,8 @@ export default function EventPage() {
   const start = new Date(event.start_time);
   const end = new Date(event.end_time);
   const dateStr = start.toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' });
-  const timeStr = event.is_all_day
-    ? 'ВЕСЬ ДЕНЬ'
-    : `${String(start.getHours()).padStart(2,'0')}:${String(start.getMinutes()).padStart(2,'0')} — ${String(end.getHours()).padStart(2,'0')}:${String(end.getMinutes()).padStart(2,'0')}`;
+  const fmt = new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  const timeStr = event.is_all_day ? 'ВЕСЬ ДЕНЬ' : `${fmt.format(start)} — ${fmt.format(end)}`;
 
   return (
     <div className="app-container animate-fade-in">
