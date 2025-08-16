@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { api, type ApiEvent } from '@/lib/api';
@@ -51,12 +51,12 @@ export default function EventPage() {
   const fmt = new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit' });
   const timeStr = event.is_all_day ? 'ВЕСЬ ДЕНЬ' : `${fmt.format(start)} — ${fmt.format(end)}`;
 
-  const categoryLabel = useMemo(() => {
+  function getCategoryLabel(): string {
     try {
       const map = JSON.parse(localStorage.getItem('event_category_by_id') || '{}');
       return map[event.id]?.category || '—';
     } catch { return '—'; }
-  }, [event.id]);
+  }
 
   function beginEdit() {
     setEditing(true);
@@ -181,7 +181,7 @@ export default function EventPage() {
             )}
             <div className="card-element rounded-lg p-4 space-y-2" onClick={beginEdit} role="button">
               <div className="text-sm text-muted-foreground">Категория</div>
-              <div className="text-foreground">{categoryLabel}</div>
+              <div className="text-foreground">{getCategoryLabel()}</div>
             </div>
           </>
         )}
