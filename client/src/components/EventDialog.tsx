@@ -7,11 +7,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Plus } from 'lucide-react';
-import { Event } from '../types';
 import { getCurrentDateString } from '../utils/dateUtils';
 
 interface EventDialogProps {
-  onAddEvent: (event: Omit<Event, 'id' | 'createdAt'>) => void;
+  onAddEvent: (event: {
+    title: string;
+    location?: string;
+    date: string;
+    endDate?: string;
+    time?: string;
+    endTime?: string;
+    category: 'work' | 'personal' | 'health' | 'other';
+    allDay: boolean;
+  }) => void;
   selectedDate?: string;
   children?: React.ReactNode;
 }
@@ -21,11 +29,13 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
   const [date, setDate] = useState(selectedDate || getCurrentDateString());
+  const [endDate, setEndDate] = useState(selectedDate || getCurrentDateString());
   const [time, setTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [category, setCategory] = useState<'work' | 'personal' | 'health' | 'other'>('other');
   const [categoryColor, setCategoryColor] = useState<string>('#93B69C');
   const [allDay, setAllDay] = useState(false);
+  const [timeError, setTimeError] = useState<string>('');
 
   // Подставлять сохранённый цвет при смене категории
   useEffect(() => {
@@ -39,10 +49,22 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
     e.preventDefault();
     if (!title.trim()) return;
 
+    // Validate time range when not all-day
+    if (!allDay) {
+      const startIso = new Date(`${date}T${time || '00:00'}:00`).toISOString();
+      const endIso = new Date(`${endDate || date}T${endTime || time || '00:00'}:00`).toISOString();
+      if (new Date(endIso).getTime() <= new Date(startIso).getTime()) {
+        setTimeError('Время окончания должно быть позже времени начала');
+        return;
+      }
+    }
+    setTimeError('');
+
     onAddEvent({
       title: title.trim(),
       location: location.trim() || undefined,
       date,
+      endDate,
       time: allDay ? undefined : time || undefined,
       endTime: allDay ? undefined : endTime || undefined,
       category,
@@ -55,11 +77,49 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
     setDate(selectedDate || getCurrentDateString());
     setTime('');
     setEndTime('');
+    setEndDate(selectedDate || getCurrentDateString());
     setCategory('other');
     setCategoryColor('#93B69C');
     setAllDay(false);
     setOpen(false);
   };
+
+  // Keep endDate >= date
+  useEffect(() => {
+    if (endDate < date) {
+      setEndDate(date);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [date]);
+
+  // When start time changes, default end time to +1h if empty or not later than start
+  useEffect(() => {
+    if (allDay) return;
+    if (!time) return;
+    const [sh, sm] = time.split(':').map((v) => parseInt(v || '0', 10));
+    let eh = sh + 1;
+    let em = sm;
+    let nextEndDate = endDate;
+    if (eh >= 24) {
+      eh = eh - 24;
+      // bump end date by +1 day if currently equal to start date
+      const d0 = new Date(date);
+      const d1 = new Date(endDate);
+      if (d1 <= d0) {
+        const bump = new Date(d0);
+        bump.setDate(bump.getDate() + 1);
+        nextEndDate = bump.toISOString().slice(0, 10);
+      }
+    }
+    const suggested = `${String(eh).padStart(2, '0')}:${String(em).padStart(2, '0')}`;
+    const endComparable = new Date(`${endDate}T${endTime || '00:00'}:00`).getTime();
+    const startComparable = new Date(`${date}T${time || '00:00'}:00`).getTime();
+    if (!endTime || endComparable <= startComparable) {
+      setEndTime(suggested);
+      setEndDate(nextEndDate);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [time]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -103,17 +163,32 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="date" className="text-sm font-light text-foreground">
-              Дата
-            </Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="bg-input border-border focus:ring-accent"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="date" className="text-sm font-light text-foreground">
+                Дата начала
+              </Label>
+              <Input
+                id="date"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="bg-input border-border focus:ring-accent"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="endDate" className="text-sm font-light text-foreground">
+                Дата окончания
+              </Label>
+              <Input
+                id="endDate"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                min={date}
+                className="bg-input border-border focus:ring-accent"
+              />
+            </div>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -154,6 +229,9 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                   onChange={(e) => setEndTime(e.target.value)}
                   className="bg-input border-border focus:ring-accent"
                 />
+                {timeError && (
+                  <div className="text-xs text-red-500">{timeError}</div>
+                )}
               </div>
             </div>
           )}

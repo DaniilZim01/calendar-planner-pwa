@@ -76,6 +76,7 @@ export default function PlannerPage() {
   const handleAddEvent = (newEvent: any) => {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const [y, m, d] = String(newEvent.date).split('-').map((v: string) => parseInt(v, 10));
+    const [ey, emon, ed] = String(newEvent.endDate || newEvent.date).split('-').map((v: string) => parseInt(v, 10));
     const parseHM = (t?: string) => {
       if (!t) return { hh: 0, mm: 0 };
       const [hh, mm] = t.split(':').map((v: string) => parseInt(v, 10));
@@ -84,7 +85,7 @@ export default function PlannerPage() {
     const { hh: sh, mm: sm } = parseHM(newEvent.allDay ? '00:00' : newEvent.time);
     const { hh: eh, mm: em } = parseHM(newEvent.allDay ? '23:59' : (newEvent.endTime || newEvent.time));
     const start = new Date(y, (m || 1) - 1, d || 1, sh, sm, 0, 0).toISOString();
-    const end = new Date(y, (m || 1) - 1, d || 1, eh, em, 0, 0).toISOString();
+    const end = new Date(ey, (emon || 1) - 1, ed || 1, eh, em, 0, 0).toISOString();
     const map = JSON.parse(localStorage.getItem('event_category_colors') || '{}');
     const color = map[newEvent.category] || undefined;
     createEvent.mutate({
