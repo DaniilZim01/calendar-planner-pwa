@@ -26,7 +26,14 @@ export function TaskForm({
   const [title, setTitle] = useState(initialValues?.title ?? '');
   const [description, setDescription] = useState(initialValues?.description ?? '');
   const [priority, setPriority] = useState<number>(initialValues?.priority ?? 2);
-  const [dueLocal, setDueLocal] = useState<string>('');
+  const [dueLocal, setDueLocal] = useState<string>(() => {
+    // default: today 23:59 local
+    if (initialValues?.dueDate) return '';
+    const now = new Date();
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 0, 0);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  });
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -36,6 +43,12 @@ export function TaskForm({
       const pad = (n: number) => String(n).padStart(2, '0');
       const local = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
       setDueLocal(local);
+    } else if (!dueLocal) {
+      // if no initial value and field empty → set default EOD today
+      const now = new Date();
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 0, 0);
+      const pad = (n: number) => String(n).padStart(2, '0');
+      setDueLocal(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`);
     }
   }, [initialValues?.dueDate]);
 
@@ -51,11 +64,19 @@ export function TaskForm({
     if (!title.trim()) return;
     setSubmitting(true);
     try {
+      // If user left due empty, apply default 23:59 today
+      let effectiveLocal = dueLocal;
+      if (!effectiveLocal) {
+        const now = new Date();
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 0, 0);
+        const pad = (n: number) => String(n).padStart(2, '0');
+        effectiveLocal = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      }
       await onSubmit({
         title: title.trim(),
         description: description?.trim() ? description.trim() : undefined,
         priority,
-        dueDate: toIsoOrNull(dueLocal),
+        dueDate: toIsoOrNull(effectiveLocal),
       });
     } finally {
       setSubmitting(false);
