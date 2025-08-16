@@ -21,11 +21,39 @@ function Router() {
     <div className="relative">
       <Switch>
         <Route path="/auth" component={AuthPage} />
-        <Route path="/" component={GoalsPage} />
-        <Route path="/wellbeing" component={WellbeingPage} />
-        <Route path="/planner" component={PlannerPage} />
-        <Route path="/calendar" component={CalendarPage} />
-        <Route path="/event/:id">{() => <EventPage />}</Route>
+        <Route path="/">
+          {() => (
+            <ProtectedRoute>
+              <PlannerPage />
+            </ProtectedRoute>
+          )}
+        </Route>
+        <Route path="/wellbeing">
+          {() => (
+            <ProtectedRoute>
+              <WellbeingPage />
+            </ProtectedRoute>
+          )}
+        </Route>
+        <Route path="/planner">
+          {() => (
+            <ProtectedRoute>
+              <PlannerPage />
+            </ProtectedRoute>
+          )}
+        </Route>
+        <Route path="/calendar">
+          {() => (
+            <ProtectedRoute>
+              <CalendarPage />
+            </ProtectedRoute>
+          )}
+        </Route>
+        <Route path="/event/:id">{() => (
+          <ProtectedRoute>
+            <EventPage />
+          </ProtectedRoute>
+        )}</Route>
         <Route path="/profile">
           {() => (
             <ProtectedRoute>

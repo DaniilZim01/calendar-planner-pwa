@@ -9,7 +9,7 @@ import { TaskForm } from '@/components/tasks/TaskForm';
 import { TaskModal } from '@/components/tasks/TaskModal';
 
 export default function GoalsPage() {
-  const [filter, setFilter] = React.useState<'all' | 'today' | 'overdue'>('all');
+  const [filter, setFilter] = React.useState<'all' | 'today' | 'overdue'>('today');
   const [isCreating, setIsCreating] = React.useState(false);
   const [editingId, setEditingId] = React.useState<string | null>(null);
 

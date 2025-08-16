@@ -62,9 +62,9 @@ const ProfileIcon = ({ className }: { className?: string }) => (
 );
 
 const navigationItems = [
-  { id: 'goals', label: 'Цели', path: '/', icon: GoalsIcon },
+  { id: 'planner', label: 'Today', path: '/', icon: PlannerIcon },
+  { id: 'goals', label: 'Цели', path: '/goals', icon: GoalsIcon },
   { id: 'wellbeing', label: 'Reflect', path: '/wellbeing', icon: WellbeingIcon },
-  { id: 'planner', label: 'Today', path: '/planner', icon: PlannerIcon },
   { id: 'calendar', label: 'Календарь', path: '/calendar', icon: CalendarIcon },
   { id: 'profile', label: 'Профиль', path: '/profile', icon: ProfileIcon },
 ];
