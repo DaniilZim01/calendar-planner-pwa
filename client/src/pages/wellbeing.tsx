@@ -1,66 +1,25 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Edit3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import WaterChart from '../components/WaterChart';
-import SleepChart from '../components/SleepChart';
-import { useAppData } from '../hooks/useLocalStorage';
-import { WellbeingData, ChartDataPoint } from '../types';
 import { getCurrentDateString, getWeekDays } from '../utils/dateUtils';
+import { ReflectBarChart } from '@/components/reflect/ReflectBarChart';
+import { useReflectDay, useReflectRange, usePatchReflect, useSaveReflect } from '@/lib/hooks';
 
 export default function WellbeingPage() {
-  const { wellbeingData, setWellbeingData } = useAppData();
   const [selectedDate, setSelectedDate] = useState(getCurrentDateString());
-  const [mood, setMood] = useState('');
-  const [activity, setActivity] = useState('');
-
-  const getCurrentData = () => {
-    return wellbeingData.find((data: WellbeingData) => data.date === selectedDate) || {
-      waterIntake: 0,
-      sleepHours: 0,
-      mood: '',
-      activity: '',
-    };
-  };
-
-  const currentData = getCurrentData();
-
-  const generateWeekData = (type: 'water' | 'sleep'): ChartDataPoint[] => {
-    const weekDays = getWeekDays();
-    return weekDays.map((day, index) => ({
-      day,
-      value: type === 'water' 
-        ? Math.random() * 3 + 0.5 // Демо данные для воды
-        : Math.random() * 3 + 6.5, // Демо данные для сна
-    }));
-  };
-
-  const waterChartData = generateWeekData('water');
-  const sleepChartData = generateWeekData('sleep');
-
-  const updateWellbeingData = (updates: Partial<WellbeingData>) => {
-    setWellbeingData((prevData: WellbeingData[]) => {
-      const existingIndex = prevData.findIndex((data: WellbeingData) => data.date === selectedDate);
-      const updatedData = {
-        id: Math.random().toString(36),
-        date: selectedDate,
-        waterIntake: currentData.waterIntake,
-        sleepHours: currentData.sleepHours,
-        mood: currentData.mood,
-        activity: currentData.activity,
-        createdAt: new Date().toISOString(),
-        ...updates,
-      };
-
-      if (existingIndex >= 0) {
-        const newData = [...prevData];
-        newData[existingIndex] = { ...newData[existingIndex], ...updatedData };
-        return newData;
-      } else {
-        return [...prevData, updatedData];
-      }
-    });
-  };
+  const day = useReflectDay(selectedDate);
+  const save = useSaveReflect();
+  const patch = usePatchReflect();
+  const weekLabels = getWeekDays();
+  const end = new Date(selectedDate);
+  const start = new Date(end);
+  start.setDate(end.getDate() - 6);
+  const rangeFrom = `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`;
+  const rangeTo = selectedDate;
+  const range = useReflectRange(rangeFrom, rangeTo);
+  const waterValues = useMemo(() => (range.data || []).map(d => d.water ?? 0), [range.data]);
+  const sleepValues = useMemo(() => (range.data || []).map(d => d.sleep ?? 0), [range.data]);
 
   // Календарь для выбора дня
   const renderMiniCalendar = () => {
@@ -134,7 +93,7 @@ export default function WellbeingPage() {
             Сколько воды вы выпили на этой неделе?
           </div>
           
-          <WaterChart data={waterChartData} />
+          <ReflectBarChart values={waterValues} labels={weekLabels} max={4} />
           
           <div className="flex justify-between text-xs text-muted-foreground">
             {getWeekDays().map((day) => (
@@ -158,7 +117,7 @@ export default function WellbeingPage() {
             Сколько часов вы спали на этой неделе?
           </div>
           
-          <SleepChart data={sleepChartData} />
+          <ReflectBarChart values={sleepValues} labels={weekLabels} max={10} />
           
           <div className="flex justify-between text-xs text-muted-foreground">
             {getWeekDays().map((day) => (
@@ -171,23 +130,23 @@ export default function WellbeingPage() {
         <div className="grid grid-cols-2 gap-4">
           <div className="card-element p-4">
             <h3 className="font-medium text-foreground mb-2">Настроение</h3>
-            <Input
-              type="text"
-              placeholder="Как дела?"
-              value={mood}
-              onChange={(e) => setMood(e.target.value)}
-              onBlur={() => updateWellbeingData({ mood })}
-              className="w-full bg-white rounded-lg text-sm border-0"
-            />
+            <div className="flex items-center gap-3">
+              {[0,1,2,3,4].map(m => (
+                <button key={m} onClick={() => patch.mutate({ date: selectedDate, mood: m })} className={`w-9 h-9 rounded-full border ${day.data?.mood===m?'bg-accent text-white border-accent':'bg-background'}`}>
+                  {['😞','🙁','😐','🙂','😄'][m]}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="card-element p-4">
-            <h3 className="font-medium text-foreground mb-2">Активность</h3>
+            <h3 className="font-medium text-foreground mb-2">Шаги</h3>
             <Input
-              type="text"
-              placeholder="Что делали?"
-              value={activity}
-              onChange={(e) => setActivity(e.target.value)}
-              onBlur={() => updateWellbeingData({ activity })}
+              type="number"
+              min={0}
+              max={100000}
+              placeholder="Количество шагов"
+              defaultValue={day.data?.steps ?? 0}
+              onBlur={(e) => patch.mutate({ date: selectedDate, steps: Number(e.target.value||0) })}
               className="w-full bg-white rounded-lg text-sm border-0"
             />
           </div>
