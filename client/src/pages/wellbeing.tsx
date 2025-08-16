@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Edit3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,7 +29,7 @@ export default function WellbeingPage() {
   const [stepsEdit, setStepsEdit] = useState<number>(Number(currentDay.steps || 0));
 
   // Sync local state when selected day data changes
-  React.useEffect(() => {
+  useEffect(() => {
     setWaterEdit(Number(currentDay.water || 0));
     setSleepEdit(Number(currentDay.sleep || 0));
     setStepsEdit(Number(currentDay.steps || 0));
