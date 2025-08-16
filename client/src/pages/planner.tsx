@@ -9,6 +9,7 @@ import type { ApiEvent } from '@/lib/api';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'wouter';
 import { toast } from '@/hooks/use-toast';
+import { toUtcIso } from '@/utils/dateUtils';
 
 export default function PlannerPage() {
   // Загружаем все задачи и фильтруем по выбранной дате локально
@@ -41,11 +42,13 @@ export default function PlannerPage() {
 
   // Events: диапазон = выбранный день
   const dayRange = useMemo(() => {
-    const start = new Date(selectedDate);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(selectedDate);
-    end.setHours(23, 59, 59, 999);
-    return { from: start.toISOString(), to: end.toISOString() };
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const y = selectedDate.getFullYear();
+    const m = String(selectedDate.getMonth() + 1).padStart(2, '0');
+    const d = String(selectedDate.getDate()).padStart(2, '0');
+    const from = toUtcIso(`${y}-${m}-${d}T00:00:00`, tz);
+    const to = toUtcIso(`${y}-${m}-${d}T23:59:59`, tz);
+    return { from, to };
   }, [selectedDate]);
   const { data: eventsToday = [], isLoading: isLoadingEventsToday } = useEvents({ from: dayRange.from, to: dayRange.to });
   const createEvent = useCreateEvent({ from: dayRange.from, to: dayRange.to });
@@ -75,19 +78,10 @@ export default function PlannerPage() {
   // Add event (from EventDialog local shape → API shape)
   const handleAddEvent = (newEvent: any) => {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const [y, m, d] = String(newEvent.date).split('-').map((v: string) => parseInt(v, 10));
-    const [ey, emon, ed] = String(newEvent.endDate || newEvent.date).split('-').map((v: string) => parseInt(v, 10));
-    const parseHM = (t?: string) => {
-      if (!t) return { hh: 0, mm: 0 };
-      const [hh, mm] = t.split(':').map((v: string) => parseInt(v, 10));
-      return { hh: hh || 0, mm: mm || 0 };
-    };
-    const { hh: sh, mm: sm } = parseHM(newEvent.allDay ? '00:00' : newEvent.time);
-    const { hh: eh, mm: em } = parseHM(newEvent.allDay ? '23:59' : (newEvent.endTime || newEvent.time));
-    const start = new Date(y, (m || 1) - 1, d || 1, sh, sm, 0, 0).toISOString();
-    const end = new Date(ey, (emon || 1) - 1, ed || 1, eh, em, 0, 0).toISOString();
-    const map = JSON.parse(localStorage.getItem('event_category_colors') || '{}');
-    const color = map[newEvent.category] || undefined;
+    const startLocal = `${newEvent.date}T${newEvent.allDay ? '00:00' : (newEvent.time || '00:00')}:00`;
+    const endLocal = `${newEvent.endDate || newEvent.date}T${newEvent.allDay ? '23:59' : (newEvent.endTime || newEvent.time || '00:00')}:00`;
+    const start = toUtcIso(startLocal, tz);
+    const end = toUtcIso(endLocal, tz);
     createEvent.mutate({
       title: newEvent.title,
       description: null,
@@ -97,7 +91,7 @@ export default function PlannerPage() {
       location: newEvent.location || null,
       isAllDay: Boolean(newEvent.allDay),
       category: newEvent.category || null,
-      category_color: newEvent.category_color || color || null,
+      category_color: null,
     });
   };
 
@@ -238,7 +232,7 @@ export default function PlannerPage() {
               <div className="space-y-2">
                 {(eventsToday as ApiEvent[]).map((ev) => {
                   const start = new Date(ev.start_time);
-                  const time = `${String(start.getHours()).padStart(2,'0')}:${String(start.getMinutes()).padStart(2,'0')}`;
+                  const time = new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit' }).format(start);
                   return (
                     <Link href={`/event/${ev.id}`} key={ev.id} className="flex items-center gap-3 p-3 card-element rounded-lg cursor-pointer hover:bg-accent/10 active:bg-accent/20 transition-colors">
                       <div className="w-2.5 h-2.5 rounded-full bg-accent" />

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { getMonthName, generateCalendarDates, formatDate } from '../utils/dateUtils';
+import { getMonthName, generateCalendarDates, formatDate, toUtcIso } from '../utils/dateUtils';
 import EventDialog from '../components/EventDialog';
 import { useCreateEvent, useEvents } from '@/lib/hooks';
 import type { ApiEvent } from '@/lib/api';
@@ -16,11 +16,14 @@ export default function CalendarPage() {
   const gridStart = calendarDates[0];
   const gridEnd = calendarDates[calendarDates.length - 1];
   const range = useMemo(() => {
-    const start = new Date(gridStart);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(gridEnd);
-    end.setHours(23, 59, 59, 999);
-    return { from: start.toISOString(), to: end.toISOString() };
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const y1 = gridStart.getFullYear();
+    const m1 = String(gridStart.getMonth() + 1).padStart(2, '0');
+    const d1 = String(gridStart.getDate()).padStart(2, '0');
+    const y2 = gridEnd.getFullYear();
+    const m2 = String(gridEnd.getMonth() + 1).padStart(2, '0');
+    const d2 = String(gridEnd.getDate()).padStart(2, '0');
+    return { from: toUtcIso(`${y1}-${m1}-${d1}T00:00:00`, tz), to: toUtcIso(`${y2}-${m2}-${d2}T23:59:59`, tz) };
   }, [gridStart, gridEnd]);
 
   const { data: events = [], isLoading } = useEvents({ from: range.from, to: range.to });
@@ -41,23 +44,14 @@ export default function CalendarPage() {
   }, [events, selectedDateString]);
 
   const addEvent = (newEvent: any) => {
-    // newEvent: { title, location?, date: 'yyyy-MM-dd', time?, endTime?, category, allDay }
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const [y, m, d] = String(newEvent.date).split('-').map((v: string) => parseInt(v, 10));
-    const parseHM = (t?: string) => {
-      if (!t) return { hh: 0, mm: 0 };
-      const [hh, mm] = t.split(':').map((v: string) => parseInt(v, 10));
-      return { hh: hh || 0, mm: mm || 0 };
-    };
-    const { hh: sh, mm: sm } = parseHM(newEvent.allDay ? '00:00' : newEvent.time);
-    const { hh: eh, mm: em } = parseHM(newEvent.allDay ? '23:59' : (newEvent.endTime || newEvent.time));
-    const start = new Date(y, (m || 1) - 1, d || 1, sh, sm, 0, 0).toISOString();
-    const end = new Date(y, (m || 1) - 1, d || 1, eh, em, 0, 0).toISOString();
+    const startLocal = `${newEvent.date}T${newEvent.allDay ? '00:00' : (newEvent.time || '00:00')}:00`;
+    const endLocal = `${newEvent.endDate || newEvent.date}T${newEvent.allDay ? '23:59' : (newEvent.endTime || newEvent.time || '00:00')}:00`;
     createEventMutation.mutate({
       title: newEvent.title,
       description: null,
-      startTime: start,
-      endTime: end,
+      startTime: toUtcIso(startLocal, tz),
+      endTime: toUtcIso(endLocal, tz),
       timezone: tz,
       location: newEvent.location || null,
       isAllDay: Boolean(newEvent.allDay),
@@ -112,8 +106,8 @@ export default function CalendarPage() {
   const EventItem = ({ event }: { event: ApiEvent }) => {
     const start = new Date(event.start_time);
     const end = new Date(event.end_time);
-    const time = `${String(start.getHours()).padStart(2, '0')}:${String(start.getMinutes()).padStart(2, '0')}`;
-    const timeEnd = `${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`;
+    const time = new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit' }).format(start);
+    const timeEnd = new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit' }).format(end);
     return (
       <Link href={`/event/${event.id}`} className="flex items-center gap-3 p-3 card-element rounded-lg cursor-pointer hover:bg-accent/10 active:bg-accent/20 transition-colors">
         <div className="w-3 h-3 rounded-full bg-accent"></div>
