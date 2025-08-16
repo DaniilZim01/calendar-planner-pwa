@@ -75,28 +75,10 @@ export const generateCalendarDates = (year: number, month: number): Date[] => {
 };
 
 // Helpers for timezone-safe calendar event conversion
-export function toUtcIso(localDateTimeIso: string, timeZone: string): string {
-  // localDateTimeIso is ISO string interpreted in provided IANA timeZone
-  // Convert to UTC ISO
-  const date = new Date(localDateTimeIso);
-  // Create formatter offset by timezone
-  const tzDate = new Date(
-    new Intl.DateTimeFormat('en-US', {
-      timeZone,
-      year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-    })
-      .formatToParts(date)
-      .reduce((acc: any, p) => { acc[p.type] = p.value; return acc; }, {} as Record<string, string>)
-  );
-  return new Date(Date.UTC(
-    Number((tzDate as any).getUTCFullYear?.() ?? date.getUTCFullYear()),
-    Number((tzDate as any).getUTCMonth?.() ?? date.getUTCMonth()),
-    Number((tzDate as any).getUTCDate?.() ?? date.getUTCDate()),
-    Number((tzDate as any).getUTCHours?.() ?? date.getUTCHours()),
-    Number((tzDate as any).getUTCMinutes?.() ?? date.getUTCMinutes()),
-    Number((tzDate as any).getUTCSeconds?.() ?? date.getUTCSeconds())
-  )).toISOString();
+export function toUtcIso(localDateTimeIso: string, _timeZone: string): string {
+  // Interpret the given string as local time on the user's device and convert to UTC ISO.
+  // Example: '2025-08-03T23:00:00' (local) -> '2025-08-03T20:00:00.000Z' for Europe/Moscow (+03)
+  return new Date(localDateTimeIso).toISOString();
 }
 
 export function fromUtcIsoToTz(utcIso: string, timeZone: string): string {
