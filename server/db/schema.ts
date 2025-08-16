@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, boolean, integer, date, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, timestamp, boolean, integer, date, index, real } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 
@@ -87,11 +87,29 @@ export const wellbeingData = pgTable('wellbeing_data', {
   dateIdx: index('wellbeing_date_idx').on(table.date),
 }));
 
+// Reflect days (new normalized table replacing adhoc wellbeing)
+export const reflectDays = pgTable('reflect_days', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  date: date('date').notNull(),
+  water: real('water').default(0),
+  sleep: real('sleep').default(0),
+  steps: integer('steps').default(0),
+  mood: integer('mood').default(0), // 0..4
+  journal: text('journal'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  reflectUserIdx: index('reflect_days_user_id_idx').on(table.userId),
+  reflectDateIdx: index('reflect_days_date_idx').on(table.date),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   tasks: many(tasks),
   events: many(events),
   wellbeingData: many(wellbeingData),
+  reflectDays: many(reflectDays),
   periods: many(periods),
   userTasks: many(userTasks),
 }));
@@ -114,6 +132,13 @@ export const eventsRelations = relations(events, ({ one }) => ({
 export const wellbeingDataRelations = relations(wellbeingData, ({ one }) => ({
   user: one(users, {
     fields: [wellbeingData.userId],
+    references: [users.id],
+  }),
+}));
+
+export const reflectDaysRelations = relations(reflectDays, ({ one }) => ({
+  user: one(users, {
+    fields: [reflectDays.userId],
     references: [users.id],
   }),
 }));
@@ -145,6 +170,8 @@ export type Event = typeof events.$inferSelect;
 export type NewEvent = typeof events.$inferInsert;
 export type WellbeingData = typeof wellbeingData.$inferSelect;
 export type NewWellbeingData = typeof wellbeingData.$inferInsert;
+export type ReflectDay = typeof reflectDays.$inferSelect;
+export type NewReflectDay = typeof reflectDays.$inferInsert;
 export type Period = typeof periods.$inferSelect;
 export type NewPeriod = typeof periods.$inferInsert;
 
@@ -157,5 +184,6 @@ export const eventSchema = createSelectSchema(events);
 export const newEventSchema = createInsertSchema(events);
 export const wellbeingDataSchema = createSelectSchema(wellbeingData);
 export const newWellbeingDataSchema = createInsertSchema(wellbeingData);
+// Zod for reflectDays can be derived on demand in API layer
 export const periodSchema = createSelectSchema(periods);
 export const newPeriodSchema = createInsertSchema(periods); 
