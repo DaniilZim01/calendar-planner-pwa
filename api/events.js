@@ -80,12 +80,15 @@ export default async function handler(req, res) {
       }
       const body = parseResult.data;
 
+      // If client sent naive local string (without 'Z'), treat as UTC already
+      const normalize = (iso) => (/[zZ]$/.test(iso) ? iso : `${iso}Z`);
+
       const payload = {
         user_id: req.user.userId,
         title: body.title.trim(),
         description: body.description ?? null,
-        start_time: new Date(body.startTime).toISOString(),
-        end_time: new Date(body.endTime).toISOString(),
+        start_time: new Date(normalize(body.startTime)).toISOString(),
+        end_time: new Date(normalize(body.endTime)).toISOString(),
         timezone: body.timezone,
         location: body.location ?? null,
         is_all_day: Boolean(body.isAllDay),
@@ -118,8 +121,8 @@ export default async function handler(req, res) {
       const updateData = { updated_at: new Date().toISOString() };
       if (body.title !== undefined) updateData.title = String(body.title).trim();
       if (body.description !== undefined) updateData.description = body.description ?? null;
-      if (body.startTime !== undefined) updateData.start_time = new Date(body.startTime).toISOString();
-      if (body.endTime !== undefined) updateData.end_time = new Date(body.endTime).toISOString();
+      if (body.startTime !== undefined) updateData.start_time = new Date(normalize(body.startTime)).toISOString();
+      if (body.endTime !== undefined) updateData.end_time = new Date(normalize(body.endTime)).toISOString();
       if (body.timezone !== undefined) updateData.timezone = body.timezone;
       if (body.location !== undefined) updateData.location = body.location ?? null;
       if (body.isAllDay !== undefined) updateData.is_all_day = Boolean(body.isAllDay);

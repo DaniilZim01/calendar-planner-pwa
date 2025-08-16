@@ -29,8 +29,8 @@ export default function EventPage() {
   if (loading) return <div className="app-container"><div className="screen-container"><div className="text-sm text-muted-foreground">Загрузка…</div></div></div>;
   if (!event) return <div className="app-container"><div className="screen-container"><div className="text-sm text-muted-foreground">Событие не найдено</div></div></div>;
 
-  const start = new Date(event.start_time);
-  const end = new Date(event.end_time);
+  const start = new Date((event.start_time || '') + 'Z');
+  const end = new Date((event.end_time || '') + 'Z');
   const dateStr = start.toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' });
   const fmt = new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit' });
   const timeStr = event.is_all_day ? 'ВЕСЬ ДЕНЬ' : `${fmt.format(start)} — ${fmt.format(end)}`;

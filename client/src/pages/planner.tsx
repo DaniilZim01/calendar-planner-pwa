@@ -236,7 +236,7 @@ export default function PlannerPage() {
             ) : (eventsToday as ApiEvent[]).length > 0 ? (
               <div className="space-y-2">
                 {(eventsToday as ApiEvent[]).map((ev) => {
-                  const start = new Date(ev.start_time);
+                  const start = new Date((ev.start_time || '') + 'Z');
                   const time = new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit' }).format(start);
                   return (
                     <Link href={`/event/${ev.id}`} key={ev.id} className="flex items-center gap-3 p-3 card-element rounded-lg cursor-pointer hover:bg-accent/10 active:bg-accent/20 transition-colors">

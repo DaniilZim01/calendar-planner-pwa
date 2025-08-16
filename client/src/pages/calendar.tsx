@@ -110,8 +110,8 @@ export default function CalendarPage() {
   };
 
   const EventItem = ({ event }: { event: ApiEvent }) => {
-    const start = new Date(event.start_time);
-    const end = new Date(event.end_time);
+    const start = new Date((event.start_time || '') + 'Z');
+    const end = new Date((event.end_time || '') + 'Z');
     const time = new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit' }).format(start);
     const timeEnd = new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit' }).format(end);
     return (
