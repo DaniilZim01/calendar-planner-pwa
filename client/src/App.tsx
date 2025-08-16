@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
@@ -24,7 +24,14 @@ function Router() {
         <Route path="/">
           {() => (
             <ProtectedRoute>
-              <PlannerPage />
+              <Redirect to="/planner" />
+            </ProtectedRoute>
+          )}
+        </Route>
+        <Route path="/goals">
+          {() => (
+            <ProtectedRoute>
+              <GoalsPage />
             </ProtectedRoute>
           )}
         </Route>

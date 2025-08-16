@@ -62,9 +62,9 @@ const ProfileIcon = ({ className }: { className?: string }) => (
 );
 
 const navigationItems = [
-  { id: 'planner', label: 'Today', path: '/', icon: PlannerIcon },
   { id: 'goals', label: 'Цели', path: '/goals', icon: GoalsIcon },
   { id: 'wellbeing', label: 'Reflect', path: '/wellbeing', icon: WellbeingIcon },
+  { id: 'planner', label: 'Today', path: '/planner', icon: PlannerIcon },
   { id: 'calendar', label: 'Календарь', path: '/calendar', icon: CalendarIcon },
   { id: 'profile', label: 'Профиль', path: '/profile', icon: ProfileIcon },
 ];
@@ -76,7 +76,7 @@ export default function BottomNavigation() {
     <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-sm border-t border-border bg-background" >
       <div className="grid grid-cols-5 h-20 px-1">
         {navigationItems.map((item, idx) => {
-          const isActive = location === item.path;
+          const isActive = location === item.path || (item.path === '/planner' && location === '/');
           const IconComponent = item.icon;
           return (
             <button
