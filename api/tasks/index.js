@@ -38,6 +38,15 @@ export default async function handler(req, res) {
         .select('id, title, description, due_date, completed, priority, created_at, updated_at')
         .in('id', taskIds);
 
+      // Hide completed tasks older than 7 days by due_date (client-friendly filtering)
+      const hideOldCompleted = (req.query?.hideOldCompleted ?? '1') !== '0';
+      if (hideOldCompleted) {
+        const thresholdIso = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        // Include everything that is not completed OR has due_date >= threshold OR has no due_date
+        // This effectively hides only completed tasks with due_date < threshold
+        query = query.or(`completed.eq.false,due_date.gte.${thresholdIso},due_date.is.null`);
+      }
+
       if (scope === 'today') {
         const today = new Date();
         const start = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), 0, 0, 0));
