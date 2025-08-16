@@ -19,6 +19,10 @@ import {
   createEvent,
   updateEvent,
   deleteEvent,
+  fetchReflectDay,
+  fetchReflectRange,
+  saveReflect,
+  patchReflect,
 } from './api';
 
 export function useLogin() {
@@ -292,4 +296,80 @@ export function useDeleteEvent(listKeyParams?: { from?: string; to?: string }) {
   });
 }
 
+
+// Reflect hooks
+export function useReflectDay(date?: string) {
+  return useQuery({
+    queryKey: ['reflect', 'day', date || 'today'],
+    queryFn: () => fetchReflectDay(date),
+    select: (res) => res.data,
+  });
+}
+
+export function useReflectRange(from: string, to: string) {
+  return useQuery({
+    queryKey: ['reflect', 'range', from, to],
+    queryFn: () => fetchReflectRange(from, to),
+    select: (res) => res.data,
+    enabled: Boolean(from && to),
+  });
+}
+
+export function useSaveReflect() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: saveReflect,
+    onMutate: async (input) => {
+      await qc.cancelQueries({ queryKey: ['reflect'], exact: false });
+      const snapshots = qc.getQueriesData<any>({ queryKey: ['reflect'] }).map(([key, prev]) => ({ key, prev }));
+      // optimistic for day
+      const dayKey = ['reflect', 'day', input.date || 'today'];
+      const prevDay = qc.getQueryData<any>(dayKey);
+      const nowIso = new Date().toISOString();
+      const optimistic = {
+        date: input.date || new Date().toISOString().slice(0,10),
+        water: input.water ?? prevDay?.water ?? 0,
+        sleep: input.sleep ?? prevDay?.sleep ?? 0,
+        steps: input.steps ?? prevDay?.steps ?? 0,
+        mood: input.mood ?? prevDay?.mood ?? 0,
+        journal: input.journal ?? prevDay?.journal ?? null,
+        created_at: prevDay?.created_at || nowIso,
+        updated_at: nowIso,
+      };
+      qc.setQueryData(dayKey, optimistic);
+      return { snapshots };
+    },
+    onError: (_err, _vars, ctx) => {
+      ctx?.snapshots?.forEach((s: any) => qc.setQueryData(s.key as any, s.prev));
+    },
+    onSettled: (_res, _e, vars) => {
+      qc.invalidateQueries({ queryKey: ['reflect', 'day', vars?.date || 'today'] });
+      qc.invalidateQueries({ queryKey: ['reflect', 'range'], exact: false });
+    },
+  });
+}
+
+export function usePatchReflect() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: patchReflect,
+    onMutate: async (input) => {
+      await qc.cancelQueries({ queryKey: ['reflect'], exact: false });
+      const snapshots = qc.getQueriesData<any>({ queryKey: ['reflect'] }).map(([key, prev]) => ({ key, prev }));
+      const dayKey = ['reflect', 'day', input.date || 'today'];
+      const prevDay = qc.getQueryData<any>(dayKey);
+      if (prevDay) {
+        qc.setQueryData(dayKey, { ...prevDay, ...input, updated_at: new Date().toISOString() });
+      }
+      return { snapshots };
+    },
+    onError: (_err, _vars, ctx) => {
+      ctx?.snapshots?.forEach((s: any) => qc.setQueryData(s.key as any, s.prev));
+    },
+    onSettled: (_res, _e, vars) => {
+      qc.invalidateQueries({ queryKey: ['reflect', 'day', vars?.date || 'today'] });
+      qc.invalidateQueries({ queryKey: ['reflect', 'range'], exact: false });
+    },
+  });
+}
 

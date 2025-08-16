@@ -264,3 +264,43 @@ export async function deleteEvent(id: string): Promise<ApiSuccess<{ message?: st
 }
 
 
+
+// Reflect API
+export type ReflectDay = {
+  date: string; // YYYY-MM-DD
+  water: number;
+  sleep: number;
+  steps: number;
+  mood: number; // 0..4
+  journal: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export async function fetchReflectDay(date?: string): Promise<ApiSuccess<ReflectDay | null>> {
+  const qs = new URLSearchParams();
+  if (date) qs.set('date', date);
+  const url = `/api/reflect${qs.toString() ? `?${qs.toString()}` : ''}`;
+  const { data } = await api.get<ApiSuccess<ReflectDay | null>>(url);
+  return data;
+}
+
+export async function fetchReflectRange(from: string, to: string): Promise<ApiSuccess<ReflectDay[]>> {
+  const qs = new URLSearchParams();
+  qs.set('from', from);
+  qs.set('to', to);
+  const { data } = await api.get<ApiSuccess<ReflectDay[]>>(`/api/reflect?${qs.toString()}`);
+  return data;
+}
+
+export type ReflectInput = Partial<Pick<ReflectDay, 'water' | 'sleep' | 'steps' | 'mood' | 'journal'>> & { date?: string };
+
+export async function saveReflect(input: ReflectInput): Promise<ApiSuccess<ReflectDay>> {
+  const { data } = await api.post<ApiSuccess<ReflectDay>>('/api/reflect', input);
+  return data;
+}
+
+export async function patchReflect(input: ReflectInput): Promise<ApiSuccess<ReflectDay>> {
+  const { data } = await api.patch<ApiSuccess<ReflectDay>>('/api/reflect', input);
+  return data;
+}
