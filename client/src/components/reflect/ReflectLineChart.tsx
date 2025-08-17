@@ -8,10 +8,11 @@ type Props = {
   yTicks?: number[]; // values to label on Y axis
   overlayIndex?: number;
   overlayValue?: number;
+  todayIndex?: number; // index of today's value to color black
 };
 
 // Simple responsive line chart with connected points for last N days.
-export function ReflectLineChart({ values, max, className, highlightIndex, yTicks, overlayIndex, overlayValue }: Props) {
+export function ReflectLineChart({ values, max, className, highlightIndex, yTicks, overlayIndex, overlayValue, todayIndex }: Props) {
   const safeMax = Math.max(1, max);
   const pointsCount = Array.isArray(values) ? values.length : 0;
   const width = Math.max(1, (pointsCount - 1) * 36 + 64); // spacing 36, more room for y labels
@@ -54,7 +55,14 @@ export function ReflectLineChart({ values, max, className, highlightIndex, yTick
         {/* points */}
         {coords.map(([x, y], i) => (
           <g key={i}>
-            <circle cx={x} cy={y} r={3} fill={i === highlightIndex ? 'hsl(var(--accent))' : 'white'} stroke="hsl(var(--accent))" strokeWidth={2} />
+            <circle
+              cx={x}
+              cy={y}
+              r={3}
+              fill={i === todayIndex ? 'black' : 'hsl(var(--accent))'}
+              stroke="hsl(var(--accent))"
+              strokeWidth={i === todayIndex ? 0 : 2}
+            />
           </g>
         ))}
         {typeof overlayIndex === 'number' && typeof overlayValue === 'number' && overlayIndex >= 0 && overlayIndex < coords.length && (
