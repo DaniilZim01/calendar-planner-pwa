@@ -33,6 +33,7 @@ export default function WellbeingPage() {
   }, [range.data, rangeFrom]);
   const waterValues = useMemo(() => filledRange.map(d => d.water ?? 0), [filledRange]);
   const sleepValues = useMemo(() => filledRange.map(d => d.sleep ?? 0), [filledRange]);
+  const stepsValues = useMemo(() => filledRange.map(d => d.steps ?? 0), [filledRange]);
   const highlightIndex = useMemo(() => filledRange.findIndex(d => d.date === selectedDate), [filledRange, selectedDate]);
 
   // Helper to ensure DB upsert: if записи нет — создаём (POST), иначе частично обновляем (PATCH)
@@ -52,6 +53,7 @@ export default function WellbeingPage() {
   const [stepsEdit, setStepsEdit] = useState<number>(Number(currentDay.steps || 0));
   const [openWater, setOpenWater] = useState(false);
   const [openSleep, setOpenSleep] = useState(false);
+  const [openSteps, setOpenSteps] = useState(false);
 
   // Sync local state when selected day data changes
   useEffect(() => {
@@ -182,8 +184,44 @@ export default function WellbeingPage() {
           </div>
         </div>
 
-        {/* НАСТРОЕНИЕ */}
+        {/* ШАГИ */}
         <div className="card-element p-4 mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-light text-foreground tracking-wide">ШАГИ</h3>
+            <Button variant="ghost" size="sm" className="text-accent p-1"><Edit3 className="h-4 w-4" /></Button>
+          </div>
+          <div className="text-2xl font-bold text-accent mb-1">{Number(stepsEdit).toFixed(0)} шагов</div>
+          <div className="text-xs text-muted-foreground mb-4">Сколько шагов вы прошли сегодня?</div>
+          <ReflectLineChart values={stepsValues.length ? stepsValues : new Array(7).fill(0)} max={30000} className="mb-2" highlightIndex={highlightIndex} yTicks={[5000,10000,15000,20000,25000,30000]} overlayIndex={highlightIndex} overlayValue={stepsEdit} todayIndex={highlightIndex} xLabels={weekLabels} />
+          <div className="mt-3 flex gap-2">
+            <Dialog open={openSteps} onOpenChange={setOpenSteps}>
+              <DialogTrigger asChild>
+                <Button variant="secondary" className="gap-2">Заполнить</Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-sm">
+                <DialogHeader>
+                  <DialogTitle>Шаги</DialogTitle>
+                </DialogHeader>
+                <div className="text-center">
+                  <div className="text-xs text-muted-foreground">Количество</div>
+                  <div className="text-4xl font-semibold my-2">{stepsEdit.toFixed(0)}</div>
+                </div>
+                <div className="mt-2">
+                  <input type="range" min={0} max={30000} step={500} value={stepsEdit} onChange={(e)=> setStepsEdit(parseInt(e.target.value,10))} className="w-full" />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    {[0,5000,10000,15000,20000,25000,30000].map(n => <span key={n}>{n/1000}k</span>)}
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button className="bg-accent text-white w-full" onClick={() => { persistReflect({ steps: Number.isFinite(stepsEdit) ? stepsEdit : 0 }); setOpenSteps(false); toast({ title: 'Сохранено', description: 'Шаги обновлены' }); }}>Сохранить</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        {/* НАСТРОЕНИЕ */}
+        <div className="card-element p-4">
           <h3 className="font-medium text-foreground mb-2">Настроение</h3>
           <div className="flex items-center justify-between gap-1">
             {[0,1,2,3,4].map(m => (
@@ -195,15 +233,6 @@ export default function WellbeingPage() {
                 {['﹀','﹃','—','﹄','︿'][m]}
               </button>
             ))}
-          </div>
-        </div>
-
-        {/* ШАГИ */}
-        <div className="card-element p-4">
-          <h3 className="font-medium text-foreground mb-2">Шаги</h3>
-          <div className="flex gap-2">
-            <Input type="number" min={0} max={100000} placeholder="Количество шагов" value={stepsEdit} onChange={(e) => setStepsEdit(parseInt(e.target.value || '0', 10))} className="w-full bg-white rounded-lg text-sm border-0" />
-            <Button className="bg-accent text-white" onClick={() => { persistReflect({ steps: Number.isFinite(stepsEdit) ? stepsEdit : 0 }); toast({ title: 'Сохранено', description: 'Шаги обновлены' }); }}>Сохранить</Button>
           </div>
         </div>
       </div>
