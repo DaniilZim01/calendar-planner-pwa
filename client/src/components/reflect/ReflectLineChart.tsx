@@ -6,21 +6,27 @@ type Props = {
   className?: string;
   highlightIndex?: number; // index to fill
   yTicks?: number[]; // values to label on Y axis
+  overlayIndex?: number;
+  overlayValue?: number;
 };
 
 // Simple responsive line chart with connected points for last N days.
-export function ReflectLineChart({ values, max, className, highlightIndex, yTicks }: Props) {
+export function ReflectLineChart({ values, max, className, highlightIndex, yTicks, overlayIndex, overlayValue }: Props) {
   const safeMax = Math.max(1, max);
   const pointsCount = Array.isArray(values) ? values.length : 0;
-  const width = Math.max(1, (pointsCount - 1) * 36 + 48); // spacing 36, plus room for y labels
-  const height = 96;
-  const leftPad = 28; // space for Y labels
+  const width = Math.max(1, (pointsCount - 1) * 36 + 64); // spacing 36, more room for y labels
+  const height = 104;
+  const leftAxisX = 12; // draw Y axis slightly inside container
+  const leftPad = 40; // start of plot after labels
   const rightPad = 8;
+  const topPad = 8;
+  const bottomPad = 16;
+  const plotHeight = Math.max(1, height - topPad - bottomPad);
   const stepX = pointsCount > 1 ? (width - leftPad - rightPad) / (pointsCount - 1) : 0;
 
   const toY = (v: number) => {
     const clamped = Math.max(0, Math.min(safeMax, v));
-    return height - Math.round((clamped / safeMax) * height);
+    return topPad + (plotHeight - Math.round((clamped / safeMax) * plotHeight));
   };
 
   const coords = values.map((v, i) => [leftPad + i * stepX, toY(v)] as const);
@@ -28,14 +34,16 @@ export function ReflectLineChart({ values, max, className, highlightIndex, yTick
 
   return (
     <div className={className || ''}>
-      <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="112">
+      <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="120">
+        {/* y axis vertical */}
+        <line x1={leftAxisX} y1={topPad} x2={leftAxisX} y2={height - bottomPad} stroke="hsl(var(--muted-foreground))" strokeWidth={1} opacity={0.25} />
         {/* y grid + labels */}
-        {(yTicks && yTicks.length ? yTicks : [0, safeMax]).map((t, idx) => {
+        {(yTicks && yTicks.length ? yTicks : [safeMax]).map((t, idx) => {
           const y = toY(t);
           return (
             <g key={idx}>
               <line x1={leftPad} y1={y} x2={width - rightPad} y2={y} stroke="hsl(var(--muted-foreground))" strokeWidth={1} opacity={0.15} />
-              <text x={leftPad - 6} y={y + 4} fontSize="10" textAnchor="end" fill="hsl(var(--muted-foreground))">{t}</text>
+              <text x={leftPad - 10} y={y + 4} fontSize="10" textAnchor="end" fill="hsl(var(--muted-foreground))">{t}</text>
             </g>
           );
         })}
@@ -49,6 +57,9 @@ export function ReflectLineChart({ values, max, className, highlightIndex, yTick
             <circle cx={x} cy={y} r={3} fill={i === highlightIndex ? 'hsl(var(--accent))' : 'white'} stroke="hsl(var(--accent))" strokeWidth={2} />
           </g>
         ))}
+        {typeof overlayIndex === 'number' && typeof overlayValue === 'number' && overlayIndex >= 0 && overlayIndex < coords.length && (
+          <circle cx={leftPad + overlayIndex * stepX} cy={toY(overlayValue)} r={4} fill={'hsl(var(--accent))'} />
+        )}
       </svg>
     </div>
   );

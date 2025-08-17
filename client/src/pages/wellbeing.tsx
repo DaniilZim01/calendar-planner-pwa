@@ -48,8 +48,7 @@ export default function WellbeingPage() {
     setWaterEdit(Number(currentDay.water || 0));
     setSleepEdit(Number(currentDay.sleep || 0));
     setStepsEdit(Number(currentDay.steps || 0));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentDay?.date, day.data?.updated_at]);
+  }, [selectedDate, day.data?.water, day.data?.sleep, day.data?.steps]);
 
   // Календарь для выбора дня
   const renderMiniCalendar = () => {
@@ -107,9 +106,9 @@ export default function WellbeingPage() {
             <h3 className="font-light text-foreground tracking-wide">ВОДА</h3>
             <Button variant="ghost" size="sm" className="text-accent p-1"><Edit3 className="h-4 w-4" /></Button>
           </div>
-          <div className="text-2xl font-bold text-foreground mb-1">{Number(waterEdit).toFixed(2)} литра</div>
+          <div className="text-2xl font-bold text-accent mb-1">{Number(waterEdit).toFixed(2)} литра</div>
           <div className="text-xs text-muted-foreground mb-4">Сколько воды вы выпили на этой неделе?</div>
-          <ReflectLineChart values={waterValues.length ? waterValues : new Array(7).fill(0)} max={5} className="mb-4" highlightIndex={highlightIndex} yTicks={[0,1,2,3,4,5]} />
+          <ReflectLineChart values={waterValues.length ? waterValues : new Array(7).fill(0)} max={5} className="mb-4" highlightIndex={highlightIndex} yTicks={[1,2,3,4,5]} overlayIndex={highlightIndex} overlayValue={waterEdit} />
           <div className="flex justify-between text-xs text-muted-foreground">
             {getWeekDays().map((d, i) => (
               <span key={`water-${i}`}>{d}</span>
@@ -148,9 +147,9 @@ export default function WellbeingPage() {
             <h3 className="font-light text-foreground tracking-wide">СОН</h3>
             <Button variant="ghost" size="sm" className="text-accent p-1"><Edit3 className="h-4 w-4" /></Button>
           </div>
-          <div className="text-2xl font-bold text-foreground mb-1">{Number(sleepEdit).toFixed(0)} часов</div>
+          <div className="text-2xl font-bold text-accent mb-1">{Number(sleepEdit).toFixed(0)} часов</div>
           <div className="text-xs text-muted-foreground mb-4">Сколько часов вы спали на этой неделе?</div>
-          <ReflectLineChart values={sleepValues.length ? sleepValues : new Array(7).fill(0)} max={15} className="mb-4" highlightIndex={highlightIndex} yTicks={[0,3,6,9,12,15]} />
+          <ReflectLineChart values={sleepValues.length ? sleepValues : new Array(7).fill(0)} max={15} className="mb-4" highlightIndex={highlightIndex} yTicks={[3,6,9,12,15]} overlayIndex={highlightIndex} overlayValue={sleepEdit} />
           <div className="flex justify-between text-xs text-muted-foreground">
             {getWeekDays().map((d, i) => (
               <span key={`sleep-${i}`}>{d}</span>
