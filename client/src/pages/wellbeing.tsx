@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from '@/components/ui/input';
 import { getCurrentDateString, getWeekDays } from '../utils/dateUtils';
 import { ReflectBarChart } from '@/components/reflect/ReflectBarChart';
+import { ReflectLineChart } from '@/components/reflect/ReflectLineChart';
 import { useReflectDay, useReflectRange, usePatchReflect, useSaveReflect } from '@/lib/hooks';
 import { toast } from '@/hooks/use-toast';
 
@@ -20,8 +21,20 @@ export default function WellbeingPage() {
   const rangeFrom = `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`;
   const rangeTo = selectedDate;
   const range = useReflectRange(rangeFrom, rangeTo);
-  const waterValues = useMemo(() => (range.data || []).map(d => d.water ?? 0), [range.data]);
-  const sleepValues = useMemo(() => (range.data || []).map(d => d.sleep ?? 0), [range.data]);
+  const filledRange = useMemo(() => {
+    // build 7-day array [from..to]
+    const dates: string[] = [];
+    const startDate = new Date(rangeFrom);
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(startDate); d.setDate(startDate.getDate() + i);
+      dates.push(d.toISOString().slice(0,10));
+    }
+    const map = new Map<string, any>((range.data || []).map(d => [d.date, d] as const));
+    return dates.map(date => map.get(date) || { date, water: 0, sleep: 0, steps: 0, mood: 0 });
+  }, [range.data, rangeFrom]);
+  const waterValues = useMemo(() => filledRange.map(d => d.water ?? 0), [filledRange]);
+  const sleepValues = useMemo(() => filledRange.map(d => d.sleep ?? 0), [filledRange]);
+  const highlightIndex = useMemo(() => filledRange.findIndex(d => d.date === selectedDate), [filledRange, selectedDate]);
   const currentDay = day.data || { water: 0, sleep: 0, steps: 0, mood: 0, journal: null } as any;
 
   // Local editable state
@@ -97,6 +110,7 @@ export default function WellbeingPage() {
           </div>
           <div className="text-2xl font-bold text-foreground mb-1">{Number(waterEdit).toFixed(2)} литра</div>
           <div className="text-xs text-muted-foreground mb-4">Сколько воды вы выпили на этой неделе?</div>
+          <ReflectLineChart values={waterValues.length ? waterValues : new Array(7).fill(0)} max={5} className="mb-2" highlightIndex={highlightIndex} />
           <ReflectBarChart values={waterValues} labels={weekLabels} max={5} showDotAtEnd dotValue={waterEdit} />
           <div className="flex justify-between text-xs text-muted-foreground">{getWeekDays().map((d) => (<span key={d}>{d}</span>))}</div>
           <div className="mt-3 flex gap-2">
@@ -134,6 +148,7 @@ export default function WellbeingPage() {
           </div>
           <div className="text-2xl font-bold text-foreground mb-1">{Number(sleepEdit).toFixed(0)} часов</div>
           <div className="text-xs text-muted-foreground mb-4">Сколько часов вы спали на этой неделе?</div>
+          <ReflectLineChart values={sleepValues.length ? sleepValues : new Array(7).fill(0)} max={15} className="mb-2" highlightIndex={highlightIndex} />
           <ReflectBarChart values={sleepValues} labels={weekLabels} max={14} showDotAtEnd dotValue={sleepEdit} />
           <div className="flex justify-between text-xs text-muted-foreground">{getWeekDays().map((d) => (<span key={d}>{d}</span>))}</div>
           <div className="mt-3 flex gap-2">

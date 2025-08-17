@@ -312,6 +312,8 @@ export function useReflectRange(from: string, to: string) {
     queryFn: () => fetchReflectRange(from, to),
     select: (res) => res.data,
     enabled: Boolean(from && to),
+    // ensure we always have 7 days filled with zeros for charts
+    staleTime: 0,
   });
 }
 
