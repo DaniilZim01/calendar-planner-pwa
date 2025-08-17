@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { getCurrentDateString, getWeekDays } from '../utils/dateUtils';
-import { ReflectBarChart } from '@/components/reflect/ReflectBarChart';
 import { ReflectLineChart } from '@/components/reflect/ReflectLineChart';
 import { useReflectDay, useReflectRange, usePatchReflect, useSaveReflect } from '@/lib/hooks';
 import { toast } from '@/hooks/use-toast';
@@ -110,8 +109,7 @@ export default function WellbeingPage() {
           </div>
           <div className="text-2xl font-bold text-foreground mb-1">{Number(waterEdit).toFixed(2)} литра</div>
           <div className="text-xs text-muted-foreground mb-4">Сколько воды вы выпили на этой неделе?</div>
-          <ReflectLineChart values={waterValues.length ? waterValues : new Array(7).fill(0)} max={5} className="mb-2" highlightIndex={highlightIndex} yTicks={[0,1,2,3,4,5]} />
-          <ReflectBarChart values={waterValues} labels={weekLabels} max={5} showDotAtEnd dotValue={waterEdit} />
+          <ReflectLineChart values={waterValues.length ? waterValues : new Array(7).fill(0)} max={5} className="mb-4" highlightIndex={highlightIndex} yTicks={[0,1,2,3,4,5]} />
           <div className="flex justify-between text-xs text-muted-foreground">
             {getWeekDays().map((d, i) => (
               <span key={`water-${i}`}>{d}</span>
@@ -152,8 +150,7 @@ export default function WellbeingPage() {
           </div>
           <div className="text-2xl font-bold text-foreground mb-1">{Number(sleepEdit).toFixed(0)} часов</div>
           <div className="text-xs text-muted-foreground mb-4">Сколько часов вы спали на этой неделе?</div>
-          <ReflectLineChart values={sleepValues.length ? sleepValues : new Array(7).fill(0)} max={15} className="mb-2" highlightIndex={highlightIndex} yTicks={[0,3,6,9,12,15]} />
-          <ReflectBarChart values={sleepValues} labels={weekLabels} max={14} showDotAtEnd dotValue={sleepEdit} />
+          <ReflectLineChart values={sleepValues.length ? sleepValues : new Array(7).fill(0)} max={15} className="mb-4" highlightIndex={highlightIndex} yTicks={[0,3,6,9,12,15]} />
           <div className="flex justify-between text-xs text-muted-foreground">
             {getWeekDays().map((d, i) => (
               <span key={`sleep-${i}`}>{d}</span>
