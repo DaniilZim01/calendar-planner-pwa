@@ -41,33 +41,37 @@ export default function WellbeingPage() {
 
   // Календарь для выбора дня
   const renderMiniCalendar = () => {
-    const today = new Date();
+    const base = new Date(selectedDate);
     const currentWeek = [];
     for (let i = -3; i <= 3; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
+      const date = new Date(base);
+      date.setDate(base.getDate() + i);
       currentWeek.push(date);
     }
     return (
       <div className="card-soft mb-6">
         <div className="flex justify-center gap-4 mb-2">
-          <Button variant="ghost" size="sm" className="text-muted-foreground">
+          <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => {
+            const d = new Date(selectedDate); d.setDate(d.getDate() - 7); setSelectedDate(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+          }}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="font-medium text-foreground">Январь 2025</span>
-          <Button variant="ghost" size="sm" className="text-muted-foreground">
+          <span className="font-medium text-foreground">{new Date(selectedDate).toLocaleDateString(undefined,{ month:'long', year:'numeric' })}</span>
+          <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => {
+            const d = new Date(selectedDate); d.setDate(d.getDate() + 7); setSelectedDate(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+          }}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
         <div className="flex justify-center gap-2">
           {currentWeek.map((date, index) => {
             const dayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-            const isToday = index === 3;
+            const isSelected = date.toISOString().slice(0,10) === selectedDate;
             return (
-              <div key={index} className="text-center p-2">
+              <button key={index} className="text-center p-2" onClick={() => setSelectedDate(date.toISOString().slice(0,10))}>
                 <div className="text-xs text-muted-foreground mb-1">{dayNames[date.getDay()]}</div>
-                <div className={`w-8 h-8 flex items-center justify-center text-sm rounded-full ${isToday ? 'bg-accent text-white' : ''}`}>{date.getDate()}</div>
-              </div>
+                <div className={`w-8 h-8 flex items-center justify-center text-sm rounded-full ${isSelected ? 'bg-accent text-white' : ''}`}>{date.getDate()}</div>
+              </button>
             );
           })}
         </div>
