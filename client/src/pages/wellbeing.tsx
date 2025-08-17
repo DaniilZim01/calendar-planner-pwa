@@ -118,12 +118,7 @@ export default function WellbeingPage() {
           </div>
           <div className="text-2xl font-bold text-accent mb-1">{Number(waterEdit).toFixed(2)} литра</div>
           <div className="text-xs text-muted-foreground mb-4">Сколько воды вы выпили сегодня?</div>
-          <ReflectLineChart values={waterValues.length ? waterValues : new Array(7).fill(0)} max={5} className="mb-2" highlightIndex={highlightIndex} yTicks={[1,2,3,4,5]} overlayIndex={highlightIndex} overlayValue={waterEdit} todayIndex={highlightIndex} />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            {filledRange.map((_, i) => (
-              <span key={`water-${i}`} style={{ width: '36px', textAlign: 'center' }}>{weekLabels[i]}</span>
-            ))}
-          </div>
+          <ReflectLineChart values={waterValues.length ? waterValues : new Array(7).fill(0)} max={5} className="mb-2" highlightIndex={highlightIndex} yTicks={[1,2,3,4,5]} overlayIndex={highlightIndex} overlayValue={waterEdit} todayIndex={highlightIndex} xLabels={weekLabels} />
           <div className="mt-3 flex gap-2">
             <Dialog open={openWater} onOpenChange={setOpenWater}>
               <DialogTrigger asChild>
@@ -159,12 +154,7 @@ export default function WellbeingPage() {
           </div>
           <div className="text-2xl font-bold text-accent mb-1">{Number(sleepEdit).toFixed(0)} часов</div>
           <div className="text-xs text-muted-foreground mb-4">Сколько часов вы спали сегодня?</div>
-          <ReflectLineChart values={sleepValues.length ? sleepValues : new Array(7).fill(0)} max={15} className="mb-2" highlightIndex={highlightIndex} yTicks={[3,6,9,12,15]} overlayIndex={highlightIndex} overlayValue={sleepEdit} todayIndex={highlightIndex} />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            {filledRange.map((_, i) => (
-              <span key={`sleep-${i}`} style={{ width: '36px', textAlign: 'center' }}>{weekLabels[i]}</span>
-            ))}
-          </div>
+          <ReflectLineChart values={sleepValues.length ? sleepValues : new Array(7).fill(0)} max={15} className="mb-2" highlightIndex={highlightIndex} yTicks={[3,6,9,12,15]} overlayIndex={highlightIndex} overlayValue={sleepEdit} todayIndex={highlightIndex} xLabels={weekLabels} />
           <div className="mt-3 flex gap-2">
             <Dialog open={openSleep} onOpenChange={setOpenSleep}>
               <DialogTrigger asChild>

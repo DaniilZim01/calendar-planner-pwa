@@ -9,10 +9,11 @@ type Props = {
   overlayIndex?: number;
   overlayValue?: number;
   todayIndex?: number; // index of today's value to color black
+  xLabels?: string[]; // weekday labels rendered inside SVG to ensure alignment
 };
 
 // Simple responsive line chart with connected points for last N days.
-export function ReflectLineChart({ values, max, className, highlightIndex, yTicks, overlayIndex, overlayValue, todayIndex }: Props) {
+export function ReflectLineChart({ values, max, className, highlightIndex, yTicks, overlayIndex, overlayValue, todayIndex, xLabels }: Props) {
   const safeMax = Math.max(1, max);
   const pointsCount = Array.isArray(values) ? values.length : 0;
   const width = Math.max(1, (pointsCount - 1) * 36 + 64); // spacing 36, more room for y labels
@@ -21,7 +22,7 @@ export function ReflectLineChart({ values, max, className, highlightIndex, yTick
   const leftPad = 40; // start of plot after labels
   const rightPad = 8;
   const topPad = 8;
-  const bottomPad = 16;
+  const bottomPad = 24; // more space for x labels
   const plotHeight = Math.max(1, height - topPad - bottomPad);
   const stepX = pointsCount > 1 ? (width - leftPad - rightPad) / (pointsCount - 1) : 0;
 
@@ -43,7 +44,7 @@ export function ReflectLineChart({ values, max, className, highlightIndex, yTick
           const y = toY(t);
           return (
             <g key={idx}>
-              <line x1={leftPad} y1={y} x2={width - rightPad} y2={y} stroke="hsl(var(--muted-foreground))" strokeWidth={1} opacity={0.15} />
+              <line x1={leftPad} y1={y} x2={width - rightPad} y2={y} stroke="hsl(var(--muted-foreground))" strokeWidth={1} opacity={0.2} />
               <text x={leftPad - 10} y={y + 4} fontSize="10" textAnchor="end" fill="hsl(var(--muted-foreground))">{t}</text>
             </g>
           );
@@ -68,6 +69,10 @@ export function ReflectLineChart({ values, max, className, highlightIndex, yTick
         {typeof overlayIndex === 'number' && typeof overlayValue === 'number' && overlayIndex >= 0 && overlayIndex < coords.length && (
           <circle cx={leftPad + overlayIndex * stepX} cy={toY(overlayValue)} r={4} fill={'hsl(var(--accent))'} />
         )}
+        {/* x labels */}
+        {Array.isArray(xLabels) && xLabels.length === pointsCount && xLabels.map((label, i) => (
+          <text key={`xl-${i}`} x={leftPad + i * stepX} y={height - 6} fontSize="10" textAnchor="middle" fill="hsl(var(--muted-foreground))">{label}</text>
+        ))}
       </svg>
     </div>
   );
