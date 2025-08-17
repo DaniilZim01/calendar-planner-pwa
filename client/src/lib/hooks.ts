@@ -339,6 +339,16 @@ export function useSaveReflect() {
         updated_at: nowIso,
       };
       qc.setQueryData(dayKey, optimistic);
+      // also update any range caches that include this date
+      const dateStr = optimistic.date;
+      qc.getQueriesData<any>({ queryKey: ['reflect', 'range'] }).forEach(([key]) => {
+        const list = qc.getQueryData<any>(key as any) as Array<any> | undefined;
+        if (!Array.isArray(list)) return;
+        const found = list.some((d) => d?.date === dateStr);
+        if (!found) return;
+        const next = list.map((d) => (d.date === dateStr ? { ...d, ...optimistic } : d));
+        qc.setQueryData<any>(key as any, next);
+      });
       return { snapshots };
     },
     onError: (_err, _vars, ctx) => {
@@ -363,6 +373,25 @@ export function usePatchReflect() {
       if (prevDay) {
         qc.setQueryData(dayKey, { ...prevDay, ...input, updated_at: new Date().toISOString() });
       }
+      // Optimistically update any cached ranges that include this date
+      const dateStr = input.date || new Date().toISOString().slice(0, 10);
+      qc.getQueriesData<any>({ queryKey: ['reflect', 'range'] }).forEach(([key]) => {
+        const list = qc.getQueryData<any>(key as any) as Array<any> | undefined;
+        if (!Array.isArray(list)) return;
+        const next = list.map((d) => {
+          if (d?.date !== dateStr) return d;
+          return {
+            ...d,
+            water: input.water ?? d.water,
+            sleep: input.sleep ?? d.sleep,
+            steps: input.steps ?? d.steps,
+            mood: input.mood ?? d.mood,
+            journal: input.journal ?? d.journal,
+            updated_at: new Date().toISOString(),
+          };
+        });
+        qc.setQueryData<any>(key as any, next);
+      });
       return { snapshots };
     },
     onError: (_err, _vars, ctx) => {
