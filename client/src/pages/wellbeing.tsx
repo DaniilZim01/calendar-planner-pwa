@@ -34,6 +34,16 @@ export default function WellbeingPage() {
   const waterValues = useMemo(() => filledRange.map(d => d.water ?? 0), [filledRange]);
   const sleepValues = useMemo(() => filledRange.map(d => d.sleep ?? 0), [filledRange]);
   const highlightIndex = useMemo(() => filledRange.findIndex(d => d.date === selectedDate), [filledRange, selectedDate]);
+
+  // Helper to ensure DB upsert: if записи нет — создаём (POST), иначе частично обновляем (PATCH)
+  const persistReflect = (partial: Partial<{ water: number; sleep: number; steps: number; mood: number; journal: string | null }>) => {
+    const payload = { date: selectedDate, ...partial } as any;
+    if (day.data) {
+      patch.mutate(payload);
+    } else {
+      save.mutate(payload);
+    }
+  };
   const currentDay = day.data || { water: 0, sleep: 0, steps: 0, mood: 0, journal: null } as any;
 
   // Local editable state
@@ -134,7 +144,7 @@ export default function WellbeingPage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button className="bg-accent text-white w-full" onClick={() => { patch.mutate({ date: selectedDate, water: Number(waterEdit || 0) }); setOpenWater(false); toast({ title: 'Сохранено', description: 'Значение воды обновлено' }); }}>Сохранить</Button>
+                  <Button className="bg-accent text-white w-full" onClick={() => { persistReflect({ water: Number(waterEdit || 0) }); setOpenWater(false); toast({ title: 'Сохранено', description: 'Значение воды обновлено' }); }}>Сохранить</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -175,7 +185,7 @@ export default function WellbeingPage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button className="bg-accent text-white w-full" onClick={() => { patch.mutate({ date: selectedDate, sleep: Number.isFinite(sleepEdit) ? sleepEdit : 0 }); setOpenSleep(false); toast({ title: 'Сохранено', description: 'Значение сна обновлено' }); }}>Сохранить</Button>
+                  <Button className="bg-accent text-white w-full" onClick={() => { persistReflect({ sleep: Number.isFinite(sleepEdit) ? sleepEdit : 0 }); setOpenSleep(false); toast({ title: 'Сохранено', description: 'Значение сна обновлено' }); }}>Сохранить</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -189,7 +199,7 @@ export default function WellbeingPage() {
             {[0,1,2,3,4].map(m => (
               <button
                 key={m}
-                onClick={() => { patch.mutate({ date: selectedDate, mood: m }); toast({ title: 'Сохранено', description: 'Настроение обновлено' }); }}
+                onClick={() => { persistReflect({ mood: m }); toast({ title: 'Сохранено', description: 'Настроение обновлено' }); }}
                 className={`w-16 h-10 rounded-md border flex items-center justify-center text-2xl ${day.data?.mood===m?'bg-accent text-white border-accent':'bg-background'}`}
               >
                 {['﹀','﹃','—','﹄','︿'][m]}
@@ -203,7 +213,7 @@ export default function WellbeingPage() {
           <h3 className="font-medium text-foreground mb-2">Шаги</h3>
           <div className="flex gap-2">
             <Input type="number" min={0} max={100000} placeholder="Количество шагов" value={stepsEdit} onChange={(e) => setStepsEdit(parseInt(e.target.value || '0', 10))} className="w-full bg-white rounded-lg text-sm border-0" />
-            <Button className="bg-accent text-white" onClick={() => { patch.mutate({ date: selectedDate, steps: Number.isFinite(stepsEdit) ? stepsEdit : 0 }); toast({ title: 'Сохранено', description: 'Шаги обновлены' }); }}>Сохранить</Button>
+            <Button className="bg-accent text-white" onClick={() => { persistReflect({ steps: Number.isFinite(stepsEdit) ? stepsEdit : 0 }); toast({ title: 'Сохранено', description: 'Шаги обновлены' }); }}>Сохранить</Button>
           </div>
         </div>
       </div>
