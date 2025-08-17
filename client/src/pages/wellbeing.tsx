@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, Edit3 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Edit3, Droplets, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { getCurrentDateString, getWeekDays } from '../utils/dateUtils';
 import { ReflectBarChart } from '@/components/reflect/ReflectBarChart';
@@ -27,6 +28,8 @@ export default function WellbeingPage() {
   const [waterEdit, setWaterEdit] = useState<number>(Number(currentDay.water || 0));
   const [sleepEdit, setSleepEdit] = useState<number>(Number(currentDay.sleep || 0));
   const [stepsEdit, setStepsEdit] = useState<number>(Number(currentDay.steps || 0));
+  const [openWater, setOpenWater] = useState(false);
+  const [openSleep, setOpenSleep] = useState(false);
 
   // Sync local state when selected day data changes
   useEffect(() => {
@@ -88,13 +91,34 @@ export default function WellbeingPage() {
             <h3 className="font-light text-foreground tracking-wide">ВОДА</h3>
             <Button variant="ghost" size="sm" className="text-accent p-1"><Edit3 className="h-4 w-4" /></Button>
           </div>
-          <div className="text-2xl font-bold text-foreground mb-1">{Number(waterEdit).toFixed(1)} литра</div>
+          <div className="text-2xl font-bold text-foreground mb-1">{Number(waterEdit).toFixed(2)} литра</div>
           <div className="text-xs text-muted-foreground mb-4">Сколько воды вы выпили на этой неделе?</div>
           <ReflectBarChart values={waterValues} labels={weekLabels} max={5} showDotAtEnd dotValue={waterEdit} />
           <div className="flex justify-between text-xs text-muted-foreground">{getWeekDays().map((d) => (<span key={d}>{d}</span>))}</div>
           <div className="mt-3 flex gap-2">
-            <Input type="number" step="0.1" min={0} max={10} value={waterEdit} onChange={(e) => setWaterEdit(Number(e.target.value || 0))} className="w-full bg-white rounded-lg text-sm border-0" />
-            <Button className="bg-accent text-white" onClick={() => { patch.mutate({ date: selectedDate, water: Number(waterEdit || 0) }); toast({ title: 'Сохранено', description: 'Значение воды обновлено' }); }}>Сохранить</Button>
+            <Dialog open={openWater} onOpenChange={setOpenWater}>
+              <DialogTrigger asChild>
+                <Button variant="secondary" className="gap-2"><Droplets className="h-4 w-4" />Заполнить</Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-sm">
+                <DialogHeader>
+                  <DialogTitle>Вода</DialogTitle>
+                </DialogHeader>
+                <div className="text-center">
+                  <div className="text-xs text-muted-foreground">Литры</div>
+                  <div className="text-4xl font-semibold my-2">{waterEdit.toFixed(2)}</div>
+                </div>
+                <div className="mt-2">
+                  <input type="range" min={0} max={5} step={0.25} value={waterEdit} onChange={(e)=> setWaterEdit(Number(e.target.value))} className="w-full" />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    {[0,1,2,3,4,5].map(n => <span key={n}>{n.toFixed(0)}{n===5?'.00':''}</span>)}
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button className="bg-accent text-white w-full" onClick={() => { patch.mutate({ date: selectedDate, water: Number(waterEdit || 0) }); setOpenWater(false); toast({ title: 'Сохранено', description: 'Значение воды обновлено' }); }}>Сохранить</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
@@ -109,8 +133,29 @@ export default function WellbeingPage() {
           <ReflectBarChart values={sleepValues} labels={weekLabels} max={14} showDotAtEnd dotValue={sleepEdit} />
           <div className="flex justify-between text-xs text-muted-foreground">{getWeekDays().map((d) => (<span key={d}>{d}</span>))}</div>
           <div className="mt-3 flex gap-2">
-            <Input type="number" step="1" min={0} max={24} value={sleepEdit} onChange={(e) => setSleepEdit(parseInt(e.target.value || '0', 10))} className="w-full bg-white rounded-lg text-sm border-0" />
-            <Button className="bg-accent text-white" onClick={() => { patch.mutate({ date: selectedDate, sleep: Number.isFinite(sleepEdit) ? sleepEdit : 0 }); toast({ title: 'Сохранено', description: 'Значение сна обновлено' }); }}>Сохранить</Button>
+            <Dialog open={openSleep} onOpenChange={setOpenSleep}>
+              <DialogTrigger asChild>
+                <Button variant="secondary" className="gap-2"><Moon className="h-4 w-4" />Заполнить</Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-sm">
+                <DialogHeader>
+                  <DialogTitle>Сон</DialogTitle>
+                </DialogHeader>
+                <div className="text-center">
+                  <div className="text-xs text-muted-foreground">Часы</div>
+                  <div className="text-4xl font-semibold my-2">{sleepEdit.toFixed(0)}</div>
+                </div>
+                <div className="mt-2">
+                  <input type="range" min={0} max={14} step={1} value={sleepEdit} onChange={(e)=> setSleepEdit(parseInt(e.target.value,10))} className="w-full" />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    {[0,2,4,6,8,10,12,14].map(n => <span key={n}>{n}</span>)}
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button className="bg-accent text-white w-full" onClick={() => { patch.mutate({ date: selectedDate, sleep: Number.isFinite(sleepEdit) ? sleepEdit : 0 }); setOpenSleep(false); toast({ title: 'Сохранено', description: 'Значение сна обновлено' }); }}>Сохранить</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
