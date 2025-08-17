@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,12 +34,12 @@ export default function ProfilePage() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [tempProfile, setTempProfile] = useState(profile);
-  // Apply theme on mount from stored profile
-  useState(() => {
+  // Apply theme whenever stored profile changes
+  useEffect(() => {
     const root = document.documentElement;
     root.classList.remove('dark');
     if (profile.theme === 'dark') root.classList.add('dark');
-  });
+  }, [profile.theme]);
   const [authedName, setAuthedName] = useState<string>(user?.name ?? '');
   const [authedPhone, setAuthedPhone] = useState<string>(user?.phone ?? '');
 
@@ -48,9 +48,8 @@ export default function ProfilePage() {
       try {
         await updateProfile.mutateAsync({ name: authedName, phone: authedPhone || undefined });
       } catch {}
-    } else {
-      setProfile(tempProfile);
     }
+    setProfile(tempProfile);
     // Apply theme immediately
     const root = document.documentElement;
     root.classList.remove('dark');
