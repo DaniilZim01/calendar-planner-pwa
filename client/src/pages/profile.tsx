@@ -34,6 +34,12 @@ export default function ProfilePage() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [tempProfile, setTempProfile] = useState(profile);
+  // Apply theme on mount from stored profile
+  useState(() => {
+    const root = document.documentElement;
+    root.classList.remove('dark');
+    if (profile.theme === 'dark') root.classList.add('dark');
+  });
   const [authedName, setAuthedName] = useState<string>(user?.name ?? '');
   const [authedPhone, setAuthedPhone] = useState<string>(user?.phone ?? '');
 
@@ -45,6 +51,10 @@ export default function ProfilePage() {
     } else {
       setProfile(tempProfile);
     }
+    // Apply theme immediately
+    const root = document.documentElement;
+    root.classList.remove('dark');
+    if (tempProfile.theme === 'dark') root.classList.add('dark');
     setIsEditing(false);
   };
 

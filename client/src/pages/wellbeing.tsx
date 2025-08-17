@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Edit3, Droplets, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { getCurrentDateString, getWeekDays } from '../utils/dateUtils';
 import { ReflectLineChart } from '@/components/reflect/ReflectLineChart';
 import { useReflectDay, useReflectRange, usePatchReflect, useSaveReflect } from '@/lib/hooks';
@@ -221,7 +222,7 @@ export default function WellbeingPage() {
         </div>
 
         {/* НАСТРОЕНИЕ */}
-        <div className="card-element p-4">
+        <div className="card-element p-4 mb-4">
           <h3 className="font-medium text-foreground mb-2">Настроение</h3>
           <div className="flex items-center justify-between gap-1">
             {[0,1,2,3,4].map(m => (
@@ -234,6 +235,22 @@ export default function WellbeingPage() {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* ДНЕВНИК */}
+        <div className="card-element p-4">
+          <h3 className="font-medium text-foreground mb-2">Дневник</h3>
+          <Textarea
+            placeholder="Запишите мысли, итоги и заметки за день..."
+            className="min-h-[140px] text-sm"
+            defaultValue={day.data?.journal ?? ''}
+            onBlur={(e) => {
+              const value = e.target.value || '';
+              persistReflect({ journal: value });
+              if (value.trim()) toast({ title: 'Сохранено', description: 'Дневник обновлен' });
+            }}
+          />
+          <div className="text-xs text-muted-foreground mt-2">Сохраняется при уходе с поля</div>
         </div>
       </div>
     </div>
