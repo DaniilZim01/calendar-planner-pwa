@@ -46,7 +46,7 @@ export default function TaskDialog({ onAddTask, children }: TaskDialogProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-background border border-border">
+      <DialogContent className="sm:max-w-[425px] bg-background border border-border max-h-[85svh] overflow-y-auto overscroll-contain pb-4">
         <DialogHeader>
           <DialogTitle className="font-light text-foreground">Новая цель</DialogTitle>
         </DialogHeader>

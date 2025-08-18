@@ -131,7 +131,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-background border border-border max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[425px] bg-background border border-border max-h-[85svh] overflow-y-auto overscroll-contain pb-4">
         <DialogHeader>
           <DialogTitle className="font-light text-foreground">Новое событие</DialogTitle>
         </DialogHeader>

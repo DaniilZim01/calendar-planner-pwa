@@ -19,7 +19,7 @@ export function TaskModal({
 }) {
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="sm:max-w-[480px] max-h-[85svh] overflow-y-auto overscroll-contain pb-4">
         <DialogHeader>
           <DialogTitle className="font-light text-foreground">{title}</DialogTitle>
         </DialogHeader>
