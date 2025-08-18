@@ -163,8 +163,8 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="date" className="text-sm font-light text-foreground">
                 Дата начала
               </Label>
@@ -173,10 +173,10 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="bg-input border-border focus:ring-accent"
+                className="bg-input border-border focus:ring-accent w-full"
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="endDate" className="text-sm font-light text-foreground">
                 Дата окончания
               </Label>
@@ -186,7 +186,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 min={date}
-                className="bg-input border-border focus:ring-accent"
+                className="bg-input border-border focus:ring-accent w-full"
               />
             </div>
           </div>
@@ -204,8 +204,8 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
           </div>
 
           {!allDay && (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2 min-w-0">
                 <Label htmlFor="time" className="text-sm font-light text-foreground">
                   Время начала
                 </Label>
@@ -214,11 +214,11 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                   type="time"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
-                  className="bg-input border-border focus:ring-accent"
+                  className="bg-input border-border focus:ring-accent w-full"
                 />
               </div>
               
-              <div className="space-y-2">
+              <div className="space-y-2 min-w-0">
                 <Label htmlFor="endTime" className="text-sm font-light text-foreground">
                   Время окончания
                 </Label>
@@ -227,7 +227,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                   type="time"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
-                  className="bg-input border-border focus:ring-accent"
+                  className="bg-input border-border focus:ring-accent w-full"
                 />
                 {timeError && (
                   <div className="text-xs text-red-500">{timeError}</div>
