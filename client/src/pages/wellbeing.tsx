@@ -194,7 +194,18 @@ export default function WellbeingPage() {
           </div>
           <div className="text-2xl font-bold text-accent mb-1">{Number(stepsEdit).toFixed(0)} шагов</div>
           <div className="text-xs text-muted-foreground mb-4">Сколько шагов вы прошли сегодня?</div>
-          <ReflectLineChart values={stepsValues.length ? stepsValues : new Array(7).fill(0)} max={30000} className="mb-2" highlightIndex={highlightIndex} yTicks={[5000,10000,15000,20000,25000,30000]} overlayIndex={highlightIndex} overlayValue={stepsEdit} todayIndex={highlightIndex} xLabels={weekLabels} />
+          <ReflectLineChart
+            values={stepsValues.length ? stepsValues : new Array(7).fill(0)}
+            max={35000}
+            className="mb-2"
+            highlightIndex={highlightIndex}
+            yTicks={[5000,10000,15000,20000,25000,30000,35000]}
+            yTickFormatter={(v) => `${Math.round(v/1000)}k`}
+            overlayIndex={highlightIndex}
+            overlayValue={stepsEdit}
+            todayIndex={highlightIndex}
+            xLabels={weekLabels}
+          />
           <div className="mt-3 flex gap-2">
             <Dialog open={openSteps} onOpenChange={setOpenSteps}>
               <DialogTrigger asChild>
@@ -209,9 +220,9 @@ export default function WellbeingPage() {
                   <div className="text-4xl font-semibold my-2">{stepsEdit.toFixed(0)}</div>
                 </div>
                 <div className="mt-2">
-                  <input type="range" min={0} max={30000} step={500} value={stepsEdit} onChange={(e)=> setStepsEdit(parseInt(e.target.value,10))} className="w-full" />
+                  <input type="range" min={0} max={35000} step={500} value={stepsEdit} onChange={(e)=> setStepsEdit(parseInt(e.target.value,10))} className="w-full" />
                   <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    {[0,5000,10000,15000,20000,25000,30000].map(n => <span key={n}>{n/1000}k</span>)}
+                    {[0,5000,10000,15000,20000,25000,30000,35000].map(n => <span key={n}>{n/1000}k</span>)}
                   </div>
                 </div>
                 <DialogFooter>
