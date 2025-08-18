@@ -5,21 +5,21 @@
 @tailwind utilities;
 
 :root {
-  /* Более приглушенная и эстетичная цветовая схема TT Interphases Pro */
-  --background: #F7F4EF; /* основной светлый беж */
+  /* Light theme experiment */
+  --background: #FEFDFA; /* was #F7F4EF */
   --foreground: hsl(20, 12%, 28%); /* #4A453F - тёмный коричневый */
-  --card: hsl(45, 18%, 93%);
+  --card: hsl(0, 0%, 100%);
   --card-foreground: hsl(20, 12%, 28%);
-  --popover: hsl(45, 18%, 93%);
+  --popover: hsl(0, 0%, 100%);
   --popover-foreground: hsl(20, 12%, 28%);
   --primary: hsl(25, 18%, 45%); /* #7B6B5D - приглушенный коричневый */
   --primary-foreground: hsl(0, 0%, 98%);
-  --secondary: hsl(42, 20%, 80%); /* #D9D1C4 - светло-бежевый */
+  --secondary: hsl(0, 0%, 100%);
   --secondary-foreground: hsl(20, 12%, 28%);
-  --muted: hsl(42, 16%, 85%); /* #E0D8CD - очень светлый бежевый */
+  --muted: hsl(42, 16%, 90%);
   --muted-foreground: hsl(20, 8%, 50%); /* #7A7067 - серо-коричневый */
-  --accent: hsl(28, 16%, 52%); /* #8B7D6F - мягкий акцентный коричневый */
-  --accent-foreground: hsl(0, 0%, 98%);
+  --accent: 300 14% 82%; /* ~ #D9CBD9 */
+  --accent-foreground: hsl(20, 12%, 28%);
   --destructive: hsl(350, 25%, 60%); /* #B38A8A - приглушенный красный */
   --destructive-foreground: hsl(0, 0%, 98%);
   --success: hsl(85, 12%, 55%); /* #8A9480 - приглушенный зеленый */
@@ -27,9 +27,9 @@
   --warning: hsl(38, 28%, 58%); /* #C5A572 - приглушенный оранжевый */
   --warning-foreground: hsl(20, 12%, 28%);
   --border: hsl(42, 16%, 75%); /* #CFC3B6 */
-  --input: hsl(42, 16%, 85%);
-  --ring: hsl(25, 18%, 45%);
-  --radius: 0.75rem;
+  --input: hsl(42, 16%, 90%);
+  --ring: 300 14% 82%;
+  --radius: 0;
 }
 
 .dark {
@@ -62,6 +62,8 @@
   * {
     @apply border-border;
   }
+  /* Remove border-radius globally for experiment */
+  *, *::before, *::after { border-radius: 0 !important; }
   
   body {
     @apply bg-background text-foreground font-sans antialiased;
@@ -97,13 +99,12 @@
   }
   
   .card-soft {
-    background: rgba(217, 209, 196, 0.4);
-    @apply rounded-xl p-4;
+    background: #FFFFFF;
+    @apply p-4;
   }
   
   .card-element {
-    background: rgba(217, 209, 196, 0.22);
-    @apply rounded-lg;
+    background: #FFFFFF;
   }
   
   .nav-icon {
