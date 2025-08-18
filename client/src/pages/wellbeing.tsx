@@ -31,7 +31,7 @@ export default function WellbeingPage() {
       dates.push(d.toISOString().slice(0,10));
     }
     const map = new Map<string, any>((range.data || []).map(d => [d.date, d] as const));
-    return dates.map(date => map.get(date) || { date, water: 0, sleep: 0, steps: 0, mood: 0 });
+    return dates.map(date => map.get(date) || { date, water: 0, sleep: 0, steps: 0, mood: null });
   }, [range.data, rangeFrom]);
   const waterValues = useMemo(() => filledRange.map(d => d.water ?? 0), [filledRange]);
   const sleepValues = useMemo(() => filledRange.map(d => d.sleep ?? 0), [filledRange]);
@@ -47,7 +47,7 @@ export default function WellbeingPage() {
       save.mutate(payload);
     }
   };
-  const currentDay = day.data || { water: 0, sleep: 0, steps: 0, mood: 0, journal: null } as any;
+  const currentDay = day.data || { water: 0, sleep: 0, steps: 0, mood: null, journal: null } as any;
 
   // Local editable state
   const [waterEdit, setWaterEdit] = useState<number>(Number(currentDay.water || 0));
