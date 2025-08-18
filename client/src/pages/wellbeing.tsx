@@ -8,6 +8,7 @@ import { getCurrentDateString, getWeekDays } from '../utils/dateUtils';
 import { ReflectLineChart } from '@/components/reflect/ReflectLineChart';
 import { useReflectDay, useReflectRange, usePatchReflect, useSaveReflect } from '@/lib/hooks';
 import { toast } from '@/hooks/use-toast';
+import { Smile1, Smile2, Smile3, Smile4, Smile5 } from '@/components/icons/Smiles';
 
 export default function WellbeingPage() {
   const [selectedDate, setSelectedDate] = useState(getCurrentDateString());
@@ -225,15 +226,20 @@ export default function WellbeingPage() {
         <div className="card-element p-4 mb-4">
           <h3 className="font-medium text-foreground mb-2">Настроение</h3>
           <div className="flex items-center justify-between gap-1">
-            {[0,1,2,3,4].map(m => (
-              <button
-                key={m}
-                onClick={() => { persistReflect({ mood: m }); toast({ title: 'Сохранено', description: 'Настроение обновлено' }); }}
-                className={`w-16 h-10 rounded-md border flex items-center justify-center text-2xl ${day.data?.mood===m?'bg-accent text-white border-accent':'bg-background'}`}
-              >
-                {['﹀','﹃','—','﹄','︿'][m]}
-              </button>
-            ))}
+            {[0,1,2,3,4].map(m => {
+              const Icon = [Smile1, Smile2, Smile3, Smile4, Smile5][m];
+              const isActive = day.data?.mood === m;
+              return (
+                <button
+                  key={m}
+                  aria-label={`Настроение ${m+1}`}
+                  onClick={() => { persistReflect({ mood: m }); toast({ title: 'Сохранено', description: 'Настроение обновлено' }); }}
+                  className={`w-16 h-12 rounded-md border flex items-center justify-center ${isActive ? 'bg-accent text-white border-accent' : 'bg-background text-foreground'}`}
+                >
+                  <Icon className="w-8 h-8" />
+                </button>
+              );
+            })}
           </div>
         </div>
 
