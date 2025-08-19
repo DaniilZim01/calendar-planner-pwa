@@ -164,7 +164,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
           </div>
 
           <div className="grid gap-4 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] max-w-full">
-            <div className="space-y-2 min-w-0 max-w-full overflow-hidden">
+            <div className="space-y-2 min-w-0 max-w-full overflow-visible">
               <Label htmlFor="date" className="text-sm font-light text-foreground">
                 Дата начала
               </Label>
@@ -176,7 +176,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                 className="bg-input border-border focus:ring-accent w-full min-w-0"
               />
             </div>
-            <div className="space-y-2 min-w-0 max-w-full overflow-hidden">
+            <div className="space-y-2 min-w-0 max-w-full overflow-visible">
               <Label htmlFor="endDate" className="text-sm font-light text-foreground">
                 Дата окончания
               </Label>
@@ -205,7 +205,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
 
           {!allDay && (
             <div className="grid gap-4 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] max-w-full">
-              <div className="space-y-2 min-w-0 max-w-full overflow-hidden">
+              <div className="space-y-2 min-w-0 max-w-full overflow-visible">
                 <Label htmlFor="time" className="text-sm font-light text-foreground">
                   Время начала
                 </Label>
@@ -219,7 +219,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                 />
               </div>
               
-              <div className="space-y-2 min-w-0 max-w-full overflow-hidden">
+              <div className="space-y-2 min-w-0 max-w-full overflow-visible">
                 <Label htmlFor="endTime" className="text-sm font-light text-foreground">
                   Время окончания
                 </Label>

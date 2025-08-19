@@ -95,12 +95,12 @@ export function TaskForm({
         <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Короткая заметка" />
       </div>
 
-      <div className="space-y-4">
-        <div className="space-y-2 min-w-0 max-w-full overflow-hidden">
+      <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-4">
+        <div className="space-y-2 min-w-0 max-w-full overflow-visible">
           <Label className="text-sm font-light text-foreground">Срок</Label>
           <Input type="datetime-local" value={dueLocal} onChange={(e) => setDueLocal(e.target.value)} className="w-full min-w-0" />
         </div>
-        <div className="space-y-2 min-w-0 max-w-full overflow-hidden">
+        <div className="space-y-2 min-w-0 max-w-full overflow-visible col-span-2 sm:col-span-1">
           <Label className="text-sm font-light text-foreground">Приоритет</Label>
           <Select value={String(priority)} onValueChange={(v) => setPriority(parseInt(v))}>
             <SelectTrigger className="w-full min-w-0">
