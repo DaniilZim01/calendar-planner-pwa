@@ -96,11 +96,11 @@ export function TaskForm({
       </div>
 
       <div className="space-y-4">
-        <div className="space-y-2 min-w-0">
+        <div className="space-y-2 min-w-0 max-w-full overflow-hidden">
           <Label className="text-sm font-light text-foreground">Срок</Label>
           <Input type="datetime-local" value={dueLocal} onChange={(e) => setDueLocal(e.target.value)} className="w-full min-w-0" />
         </div>
-        <div className="space-y-2 min-w-0">
+        <div className="space-y-2 min-w-0 max-w-full overflow-hidden">
           <Label className="text-sm font-light text-foreground">Приоритет</Label>
           <Select value={String(priority)} onValueChange={(v) => setPriority(parseInt(v))}>
             <SelectTrigger className="w-full min-w-0">
