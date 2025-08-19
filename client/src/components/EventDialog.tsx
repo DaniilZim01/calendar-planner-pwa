@@ -163,7 +163,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4 [grid-auto-columns:1fr]">
+          <div className="grid gap-4 grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             <div className="space-y-2 min-w-0">
               <Label htmlFor="date" className="text-sm font-light text-foreground">
                 Дата начала
@@ -173,7 +173,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="bg-input border-border focus:ring-accent w-full"
+                className="bg-input border-border focus:ring-accent w-full min-w-0"
               />
             </div>
             <div className="space-y-2 min-w-0">
@@ -186,7 +186,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 min={date}
-                className="bg-input border-border focus:ring-accent w-full"
+                className="bg-input border-border focus:ring-accent w-full min-w-0"
               />
             </div>
           </div>
@@ -204,7 +204,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
           </div>
 
           {!allDay && (
-            <div className="grid grid-cols-2 gap-4 [grid-auto-columns:1fr]">
+            <div className="grid gap-4 grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
               <div className="space-y-2 min-w-0">
                 <Label htmlFor="time" className="text-sm font-light text-foreground">
                   Время начала
@@ -215,7 +215,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
                   onBlur={adjustEndFromStart}
-                  className="bg-input border-border focus:ring-accent w-full"
+                  className="bg-input border-border focus:ring-accent w-full min-w-0"
                 />
               </div>
               
@@ -228,7 +228,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                   type="time"
                   value={endTime}
                   onChange={(e) => { setEndTime(e.target.value); setEndTimeAuto(false); }}
-                  className="bg-input border-border focus:ring-accent w-full"
+                  className="bg-input border-border focus:ring-accent w-full min-w-0"
                 />
                 {timeError && (
                   <div className="text-xs text-red-500">{timeError}</div>
