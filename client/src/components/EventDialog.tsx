@@ -32,6 +32,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
   const [endDate, setEndDate] = useState(selectedDate || getCurrentDateString());
   const [time, setTime] = useState('');
   const [endTime, setEndTime] = useState('');
+  const [endTimeAuto, setEndTimeAuto] = useState(true);
   const [category, setCategory] = useState<'work' | 'personal' | 'health' | 'other'>('other');
   const [categoryColor, setCategoryColor] = useState<string>('#93B69C');
   const [allDay, setAllDay] = useState(false);
@@ -77,6 +78,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
     setDate(selectedDate || getCurrentDateString());
     setTime('');
     setEndTime('');
+    setEndTimeAuto(true);
     setEndDate(selectedDate || getCurrentDateString());
     setCategory('other');
     setCategoryColor('#93B69C');
@@ -92,8 +94,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
 
-  // When start time changes, default end time to +1h if empty or not later than start
-  useEffect(() => {
+  function adjustEndFromStart() {
     if (allDay) return;
     if (!time) return;
     const [sh, sm] = time.split(':').map((v) => parseInt(v || '0', 10));
@@ -102,7 +103,6 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
     let nextEndDate = endDate;
     if (eh >= 24) {
       eh = eh - 24;
-      // bump end date by +1 day if currently equal to start date
       const d0 = new Date(date);
       const d1 = new Date(endDate);
       if (d1 <= d0) {
@@ -114,12 +114,12 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
     const suggested = `${String(eh).padStart(2, '0')}:${String(em).padStart(2, '0')}`;
     const endComparable = new Date(`${endDate}T${endTime || '00:00'}:00`).getTime();
     const startComparable = new Date(`${date}T${time || '00:00'}:00`).getTime();
-    if (!endTime || endComparable <= startComparable) {
+    if (endTimeAuto || !endTime || endComparable <= startComparable) {
       setEndTime(suggested);
       setEndDate(nextEndDate);
+      setEndTimeAuto(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [time]);
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -214,6 +214,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                   type="time"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
+                  onBlur={adjustEndFromStart}
                   className="bg-input border-border focus:ring-accent w-full"
                 />
               </div>
@@ -226,7 +227,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                   id="endTime"
                   type="time"
                   value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
+                  onChange={(e) => { setEndTime(e.target.value); setEndTimeAuto(false); }}
                   className="bg-input border-border focus:ring-accent w-full"
                 />
                 {timeError && (
