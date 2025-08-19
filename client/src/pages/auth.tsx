@@ -7,7 +7,7 @@ export default function AuthPage() {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md max-h-[92svh] overflow-y-auto">
+      <Card className="w-full max-w-md max-h-[92svh] overflow-y-auto rounded-lg">
         <CardHeader>
           <CardTitle>{mode === 'login' ? 'Вход' : 'Регистрация'}</CardTitle>
         </CardHeader>

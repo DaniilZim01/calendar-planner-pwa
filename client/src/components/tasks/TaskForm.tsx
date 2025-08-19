@@ -95,7 +95,7 @@ export function TaskForm({
         <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Короткая заметка" />
       </div>
 
-      <div className="grid grid-cols-2 gap-4 items-start">
+      <div className="space-y-4">
         <div className="space-y-2 min-w-0">
           <Label className="text-sm font-light text-foreground">Срок</Label>
           <Input type="datetime-local" value={dueLocal} onChange={(e) => setDueLocal(e.target.value)} className="w-full" />
