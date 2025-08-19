@@ -131,7 +131,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-background border border-border max-h-[85svh] overflow-y-auto overscroll-contain pb-4">
+      <DialogContent className="sm:max-w-[425px] bg-background border border-border max-h-[85svh] overflow-y-auto overscroll-contain">
         <DialogHeader>
           <DialogTitle className="font-light text-foreground">Новое событие</DialogTitle>
         </DialogHeader>
@@ -163,7 +163,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 [grid-auto-columns:1fr]">
             <div className="space-y-2 min-w-0">
               <Label htmlFor="date" className="text-sm font-light text-foreground">
                 Дата начала
@@ -204,7 +204,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
           </div>
 
           {!allDay && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 [grid-auto-columns:1fr]">
               <div className="space-y-2 min-w-0">
                 <Label htmlFor="time" className="text-sm font-light text-foreground">
                   Время начала
