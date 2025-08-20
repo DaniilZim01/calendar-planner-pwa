@@ -42,6 +42,7 @@ export function TaskForm({
   const dueWrapRef = useRef<HTMLDivElement | null>(null);
   const prioWrapRef = useRef<HTMLDivElement | null>(null);
   const dueInputRef = useRef<HTMLInputElement | null>(null);
+  const dueClipRef = useRef<HTMLDivElement | null>(null);
   const [mDue, setMDue] = useState<{ w: number; h: number } | null>(null);
   const [mPrio, setMPrio] = useState<{ w: number; h: number } | null>(null);
 
@@ -62,7 +63,7 @@ export function TaskForm({
   }, [debug, dueLocal, priority]);
 
   // Fit native datetime-local into wrapper on iOS
-  useFitToContainer(dueWrapRef, dueInputRef, { enabled: isIOS(), padding: 2 });
+  useFitToContainer(dueClipRef, dueInputRef, { enabled: isIOS(), padding: 2 });
 
   useEffect(() => {
     if (initialValues?.dueDate) {
@@ -124,16 +125,18 @@ export function TaskForm({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-4">
-        <div ref={dueWrapRef} className={`space-y-2 min-w-0 max-w-full ${ios ? 'overflow-hidden rounded-md' : 'overflow-visible'} ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
+        <div ref={dueWrapRef} className={`space-y-2 min-w-0 max-w-full ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
           <Label className="text-sm font-light text-foreground">Срок</Label>
-          <Input
-            type="datetime-local"
-            value={dueLocal}
-            onChange={(e) => setDueLocal(e.target.value)}
-            className="w-full min-w-0"
-            ref={dueInputRef}
-            style={{ fontSize: 16 }}
-          />
+          <div ref={dueClipRef} className={`${ios ? 'overflow-hidden rounded-md' : ''}`}>
+            <Input
+              type="datetime-local"
+              value={dueLocal}
+              onChange={(e) => setDueLocal(e.target.value)}
+              className="w-full min-w-0"
+              ref={dueInputRef}
+              style={{ fontSize: 16 }}
+            />
+          </div>
           {debug && mDue ? (
             <span className="absolute right-1 top-1 z-10 text-[10px] bg-black/60 text-white px-1">{`W${mDue.w}×H${mDue.h}`}</span>
           ) : null}

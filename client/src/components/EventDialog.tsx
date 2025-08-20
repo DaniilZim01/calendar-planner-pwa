@@ -47,6 +47,10 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
   const endDateWrapRef = useRef<HTMLDivElement | null>(null);
   const timeWrapRef = useRef<HTMLDivElement | null>(null);
   const endTimeWrapRef = useRef<HTMLDivElement | null>(null);
+  const dateClipRef = useRef<HTMLDivElement | null>(null);
+  const endDateClipRef = useRef<HTMLDivElement | null>(null);
+  const timeClipRef = useRef<HTMLDivElement | null>(null);
+  const endTimeClipRef = useRef<HTMLDivElement | null>(null);
   const [mDate, setMDate] = useState<{ w: number; h: number } | null>(null);
   const [mEndDate, setMEndDate] = useState<{ w: number; h: number } | null>(null);
   const [mTime, setMTime] = useState<{ w: number; h: number } | null>(null);
@@ -57,10 +61,10 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
   const endTimeInputRef = useRef<HTMLInputElement | null>(null);
 
   // Auto-fit native controls into their wrappers on iOS
-  useFitToContainer(dateWrapRef, dateInputRef, { enabled: isIOS(), padding: 2 });
-  useFitToContainer(endDateWrapRef, endDateInputRef, { enabled: isIOS(), padding: 2 });
-  useFitToContainer(timeWrapRef, timeInputRef, { enabled: isIOS(), padding: 2 });
-  useFitToContainer(endTimeWrapRef, endTimeInputRef, { enabled: isIOS(), padding: 2 });
+  useFitToContainer(dateClipRef, dateInputRef, { enabled: isIOS(), padding: 2 });
+  useFitToContainer(endDateClipRef, endDateInputRef, { enabled: isIOS(), padding: 2 });
+  useFitToContainer(timeClipRef, timeInputRef, { enabled: isIOS(), padding: 2 });
+  useFitToContainer(endTimeClipRef, endTimeInputRef, { enabled: isIOS(), padding: 2 });
 
   useEffect(() => {
     if (!debug) return;
@@ -206,37 +210,41 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
           </div>
 
           <div className="grid gap-4 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] max-w-full">
-            <div ref={dateWrapRef} className={`space-y-2 min-w-0 max-w-full ${ios ? 'overflow-hidden rounded-md' : 'overflow-visible'} ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
+            <div ref={dateWrapRef} className={`space-y-2 min-w-0 max-w-full ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
               <Label htmlFor="date" className="text-sm font-light text-foreground">
                 Дата начала
               </Label>
-              <Input
-                id="date"
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="bg-input border-border focus:ring-accent w-full min-w-0"
-                ref={dateInputRef}
-                style={{ fontSize: 16 }}
-              />
+              <div ref={dateClipRef} className={`${ios ? 'overflow-hidden rounded-md' : ''}`}>
+                <Input
+                  id="date"
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="bg-input border-border focus:ring-accent w-full min-w-0"
+                  ref={dateInputRef}
+                  style={{ fontSize: 16 }}
+                />
+              </div>
               {debug && mDate ? (
                 <span className="absolute right-1 top-1 z-10 text-[10px] bg-black/60 text-white px-1">{`W${mDate.w}×H${mDate.h}`}</span>
               ) : null}
             </div>
-            <div ref={endDateWrapRef} className={`space-y-2 min-w-0 max-w-full ${ios ? 'overflow-hidden rounded-md' : 'overflow-visible'} ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
+            <div ref={endDateWrapRef} className={`space-y-2 min-w-0 max-w-full ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
               <Label htmlFor="endDate" className="text-sm font-light text-foreground">
                 Дата окончания
               </Label>
-              <Input
-                id="endDate"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                min={date}
-                className="bg-input border-border focus:ring-accent w-full min-w-0"
-                ref={endDateInputRef}
-                style={{ fontSize: 16 }}
-              />
+              <div ref={endDateClipRef} className={`${ios ? 'overflow-hidden rounded-md' : ''}`}>
+                <Input
+                  id="endDate"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  min={date}
+                  className="bg-input border-border focus:ring-accent w-full min-w-0"
+                  ref={endDateInputRef}
+                  style={{ fontSize: 16 }}
+                />
+              </div>
               {debug && mEndDate ? (
                 <span className="absolute right-1 top-1 z-10 text-[10px] bg-black/60 text-white px-1">{`W${mEndDate.w}×H${mEndDate.h}`}</span>
               ) : null}
@@ -257,38 +265,42 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
 
           {!allDay && (
             <div className="grid gap-4 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] max-w-full">
-              <div ref={timeWrapRef} className={`space-y-2 min-w-0 max-w-full ${ios ? 'overflow-hidden rounded-md' : 'overflow-visible'} ${debug ? 'relative outline outline-1 outline-red-400' : ''}`}>
+              <div ref={timeWrapRef} className={`space-y-2 min-w-0 max-w-full ${debug ? 'relative outline outline-1 outline-red-400' : ''}`}>
                 <Label htmlFor="time" className="text-sm font-light text-foreground">
                   Время начала
                 </Label>
-                <Input
-                  id="time"
-                  type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  onBlur={adjustEndFromStart}
-                  className="bg-input border-border focus:ring-accent w-full min-w-0"
-                  ref={timeInputRef}
-                  style={{ fontSize: 16 }}
-                />
+                <div ref={timeClipRef} className={`${ios ? 'overflow-hidden rounded-md' : ''}`}>
+                  <Input
+                    id="time"
+                    type="time"
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
+                    onBlur={adjustEndFromStart}
+                    className="bg-input border-border focus:ring-accent w-full min-w-0"
+                    ref={timeInputRef}
+                    style={{ fontSize: 16 }}
+                  />
+                </div>
                 {debug && mTime ? (
                   <span className="absolute right-1 top-1 z-10 text-[10px] bg-black/60 text-white px-1">{`W${mTime.w}×H${mTime.h}`}</span>
                 ) : null}
               </div>
               
-              <div ref={endTimeWrapRef} className={`space-y-2 min-w-0 max-w-full ${ios ? 'overflow-hidden rounded-md' : 'overflow-visible'} ${debug ? 'relative outline outline-1 outline-red-400' : ''}`}>
+              <div ref={endTimeWrapRef} className={`space-y-2 min-w-0 max-w-full ${debug ? 'relative outline outline-1 outline-red-400' : ''}`}>
                 <Label htmlFor="endTime" className="text-sm font-light text-foreground">
                   Время окончания
                 </Label>
-                <Input
-                  id="endTime"
-                  type="time"
-                  value={endTime}
-                  onChange={(e) => { setEndTime(e.target.value); setEndTimeAuto(false); }}
-                  className="bg-input border-border focus:ring-accent w-full min-w-0"
-                  ref={endTimeInputRef}
-                  style={{ fontSize: 16 }}
-                />
+                <div ref={endTimeClipRef} className={`${ios ? 'overflow-hidden rounded-md' : ''}`}>
+                  <Input
+                    id="endTime"
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => { setEndTime(e.target.value); setEndTimeAuto(false); }}
+                    className="bg-input border-border focus:ring-accent w-full min-w-0"
+                    ref={endTimeInputRef}
+                    style={{ fontSize: 16 }}
+                  />
+                </div>
                 {timeError && (
                   <div className="text-xs text-red-500">{timeError}</div>
                 )}
