@@ -125,7 +125,7 @@ export function TaskForm({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-4">
-        <div ref={dueWrapRef} className={`space-y-2 min-w-0 max-w-full ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
+        <div ref={dueWrapRef} className={`space-y-2 min-w-0 max-w-full col-span-2 sm:col-span-1 ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
           <Label className="text-sm font-light text-foreground">Срок</Label>
           <div ref={dueClipRef} className={`${ios ? 'overflow-hidden rounded-md' : ''}`}>
             <Input
