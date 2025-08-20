@@ -38,6 +38,7 @@ export function TaskForm({
   });
   const [submitting, setSubmitting] = useState(false);
   const debug = isDebugLayoutEnabled();
+  const ios = isIOS();
   const dueWrapRef = useRef<HTMLDivElement | null>(null);
   const prioWrapRef = useRef<HTMLDivElement | null>(null);
   const dueInputRef = useRef<HTMLInputElement | null>(null);
@@ -123,7 +124,7 @@ export function TaskForm({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-4">
-        <div ref={dueWrapRef} className={`space-y-2 min-w-0 max-w-full overflow-visible ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
+        <div ref={dueWrapRef} className={`space-y-2 min-w-0 max-w-full ${ios ? 'overflow-hidden' : 'overflow-visible'} ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
           <Label className="text-sm font-light text-foreground">Срок</Label>
           <Input
             type="datetime-local"
