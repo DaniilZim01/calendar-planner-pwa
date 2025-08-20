@@ -132,7 +132,7 @@ export function TaskForm({
               type="datetime-local"
               value={dueLocal}
               onChange={(e) => setDueLocal(e.target.value)}
-              className="bg-input border-border focus:ring-accent rounded-md w-full min-w-0"
+              className="border-border focus:ring-accent rounded-md w-full min-w-0"
               ref={dueInputRef}
               style={{ fontSize: 16 }}
             />

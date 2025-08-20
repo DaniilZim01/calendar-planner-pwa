@@ -152,7 +152,7 @@ export default function ProfilePage() {
                     else setTempProfile({ ...tempProfile, name: e.target.value });
                   }}
                   placeholder="Введите ваше имя"
-                  className="bg-input border-border focus:ring-accent"
+                  className="border-border focus:ring-accent"
                 />
               </div>
 
@@ -166,7 +166,7 @@ export default function ProfilePage() {
                   value={isAuthenticated ? (user?.email ?? '') : tempProfile.email}
                   onChange={(e) => !isAuthenticated && setTempProfile({ ...tempProfile, email: e.target.value })}
                   placeholder="Введите ваш email"
-                  className="bg-input border-border focus:ring-accent"
+                  className="border-border focus:ring-accent"
                   disabled={isAuthenticated}
                 />
               </div>
@@ -182,7 +182,7 @@ export default function ProfilePage() {
                     value={authedPhone}
                     onChange={(e) => setAuthedPhone(e.target.value)}
                     placeholder="Введите ваш телефон"
-                    className="bg-input border-border focus:ring-accent"
+                    className="border-border focus:ring-accent"
                   />
                 </div>
               )}
@@ -241,7 +241,7 @@ export default function ProfilePage() {
                   setTempProfile({ ...tempProfile, theme: value })
                 }
               >
-                <SelectTrigger className="bg-input border-border">
+                <SelectTrigger className="border-border">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -272,7 +272,7 @@ export default function ProfilePage() {
                   setTempProfile({ ...tempProfile, language: value })
                 }
               >
-                <SelectTrigger className="bg-input border-border">
+                <SelectTrigger className="border-border">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

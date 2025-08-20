@@ -60,7 +60,7 @@ export default function TaskDialog({ onAddTask, children }: TaskDialogProps) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Введите название цели"
-              className="bg-input border-border focus:ring-accent"
+              className="border-border focus:ring-accent"
               required
             />
           </div>
@@ -70,7 +70,7 @@ export default function TaskDialog({ onAddTask, children }: TaskDialogProps) {
               Категория
             </Label>
             <Select value={category} onValueChange={(value: 'work' | 'personal') => setCategory(value)}>
-              <SelectTrigger className="bg-input border-border">
+              <SelectTrigger className="border-border">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -89,7 +89,7 @@ export default function TaskDialog({ onAddTask, children }: TaskDialogProps) {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="bg-input border-border focus:ring-accent"
+              className="border-border focus:ring-accent"
             />
           </div>
 

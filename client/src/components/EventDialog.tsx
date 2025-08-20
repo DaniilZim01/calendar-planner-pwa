@@ -191,7 +191,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Введите название события"
-              className="bg-input border-border focus:ring-accent"
+              className="border-border focus:ring-accent"
               required
             />
           </div>
@@ -205,7 +205,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="Введите место проведения"
-              className="bg-input border-border focus:ring-accent"
+              className="border-border focus:ring-accent"
             />
           </div>
 
@@ -220,7 +220,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="bg-input border-border focus:ring-accent w-full min-w-0"
+                  className="border-border focus:ring-accent w-full min-w-0"
                   ref={dateInputRef}
                   style={{ fontSize: 16 }}
                 />
@@ -240,7 +240,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
                   min={date}
-                  className="bg-input border-border focus:ring-accent w-full min-w-0"
+                  className="border-border focus:ring-accent w-full min-w-0"
                   ref={endDateInputRef}
                   style={{ fontSize: 16 }}
                 />
@@ -276,7 +276,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
                     onBlur={adjustEndFromStart}
-                    className="bg-input border-border focus:ring-accent w-full min-w-0"
+                    className="border-border focus:ring-accent w-full min-w-0"
                     ref={timeInputRef}
                     style={{ fontSize: 16 }}
                   />
@@ -296,7 +296,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                     type="time"
                     value={endTime}
                     onChange={(e) => { setEndTime(e.target.value); setEndTimeAuto(false); }}
-                    className="bg-input border-border focus:ring-accent w-full min-w-0"
+                    className="border-border focus:ring-accent w-full min-w-0"
                     ref={endTimeInputRef}
                     style={{ fontSize: 16 }}
                   />
@@ -317,7 +317,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
             </Label>
             <div className="flex items-center gap-3">
               <Select value={category} onValueChange={(value: 'work' | 'personal' | 'health' | 'other') => setCategory(value)}>
-                <SelectTrigger className="bg-input border-border flex-1 h-10">
+                <SelectTrigger className="border-border flex-1 h-10">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
