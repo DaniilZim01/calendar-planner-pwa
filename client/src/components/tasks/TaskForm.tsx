@@ -120,7 +120,13 @@ export function TaskForm({
       <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-4">
         <div ref={dueWrapRef} className={`space-y-2 min-w-0 max-w-full overflow-visible ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
           <Label className="text-sm font-light text-foreground">Срок</Label>
-          <Input type="datetime-local" value={dueLocal} onChange={(e) => setDueLocal(e.target.value)} className="w-full min-w-0" />
+          <Input
+            type="datetime-local"
+            value={dueLocal}
+            onChange={(e) => setDueLocal(e.target.value)}
+            className="w-full min-w-0"
+            style={{ WebkitTransform: 'scale(0.98)', transform: 'scale(0.98)', WebkitTransformOrigin: 'left center', transformOrigin: 'left center', fontSize: 16 }}
+          />
           {debug && mDue ? (
             <span className="absolute right-1 top-1 z-10 text-[10px] bg-black/60 text-white px-1">{`W${mDue.w}×H${mDue.h}`}</span>
           ) : null}
