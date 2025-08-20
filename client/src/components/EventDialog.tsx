@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Plus } from 'lucide-react';
 import { isDebugLayoutEnabled, measureElement } from '@/lib/debugLayout';
+import { isIOS, useFitToContainer } from '@/lib/useFitToContainer';
 import { getCurrentDateString } from '../utils/dateUtils';
 
 interface EventDialogProps {
@@ -49,6 +50,16 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
   const [mEndDate, setMEndDate] = useState<{ w: number; h: number } | null>(null);
   const [mTime, setMTime] = useState<{ w: number; h: number } | null>(null);
   const [mEndTime, setMEndTime] = useState<{ w: number; h: number } | null>(null);
+  const dateInputRef = useRef<HTMLInputElement | null>(null);
+  const endDateInputRef = useRef<HTMLInputElement | null>(null);
+  const timeInputRef = useRef<HTMLInputElement | null>(null);
+  const endTimeInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Auto-fit native controls into their wrappers on iOS
+  useFitToContainer(dateWrapRef, dateInputRef, { enabled: isIOS(), padding: 2 });
+  useFitToContainer(endDateWrapRef, endDateInputRef, { enabled: isIOS(), padding: 2 });
+  useFitToContainer(timeWrapRef, timeInputRef, { enabled: isIOS(), padding: 2 });
+  useFitToContainer(endTimeWrapRef, endTimeInputRef, { enabled: isIOS(), padding: 2 });
 
   useEffect(() => {
     if (!debug) return;
@@ -204,7 +215,8 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 className="bg-input border-border focus:ring-accent w-full min-w-0"
-                style={{ WebkitTransform: 'scale(0.98)', transform: 'scale(0.98)', WebkitTransformOrigin: 'left center', transformOrigin: 'left center', fontSize: 16 }}
+                ref={dateInputRef}
+                style={{ fontSize: 16 }}
               />
               {debug && mDate ? (
                 <span className="absolute right-1 top-1 z-10 text-[10px] bg-black/60 text-white px-1">{`W${mDate.w}×H${mDate.h}`}</span>
@@ -221,7 +233,8 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                 onChange={(e) => setEndDate(e.target.value)}
                 min={date}
                 className="bg-input border-border focus:ring-accent w-full min-w-0"
-                style={{ WebkitTransform: 'scale(0.98)', transform: 'scale(0.98)', WebkitTransformOrigin: 'left center', transformOrigin: 'left center', fontSize: 16 }}
+                ref={endDateInputRef}
+                style={{ fontSize: 16 }}
               />
               {debug && mEndDate ? (
                 <span className="absolute right-1 top-1 z-10 text-[10px] bg-black/60 text-white px-1">{`W${mEndDate.w}×H${mEndDate.h}`}</span>
@@ -254,7 +267,8 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                   onChange={(e) => setTime(e.target.value)}
                   onBlur={adjustEndFromStart}
                   className="bg-input border-border focus:ring-accent w-full min-w-0"
-                  style={{ WebkitTransform: 'scale(0.98)', transform: 'scale(0.98)', WebkitTransformOrigin: 'left center', transformOrigin: 'left center', fontSize: 16 }}
+                  ref={timeInputRef}
+                  style={{ fontSize: 16 }}
                 />
                 {debug && mTime ? (
                   <span className="absolute right-1 top-1 z-10 text-[10px] bg-black/60 text-white px-1">{`W${mTime.w}×H${mTime.h}`}</span>
@@ -271,7 +285,8 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                   value={endTime}
                   onChange={(e) => { setEndTime(e.target.value); setEndTimeAuto(false); }}
                   className="bg-input border-border focus:ring-accent w-full min-w-0"
-                  style={{ WebkitTransform: 'scale(0.98)', transform: 'scale(0.98)', WebkitTransformOrigin: 'left center', transformOrigin: 'left center', fontSize: 16 }}
+                  ref={endTimeInputRef}
+                  style={{ fontSize: 16 }}
                 />
                 {timeError && (
                   <div className="text-xs text-red-500">{timeError}</div>

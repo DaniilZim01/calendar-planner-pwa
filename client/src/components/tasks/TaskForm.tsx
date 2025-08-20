@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { isIOS, useFitToContainer } from '@/lib/useFitToContainer';
 import { isDebugLayoutEnabled, measureElement } from '@/lib/debugLayout';
 
 export type TaskFormValues = {
@@ -39,6 +40,7 @@ export function TaskForm({
   const debug = isDebugLayoutEnabled();
   const dueWrapRef = useRef<HTMLDivElement | null>(null);
   const prioWrapRef = useRef<HTMLDivElement | null>(null);
+  const dueInputRef = useRef<HTMLInputElement | null>(null);
   const [mDue, setMDue] = useState<{ w: number; h: number } | null>(null);
   const [mPrio, setMPrio] = useState<{ w: number; h: number } | null>(null);
 
@@ -57,6 +59,9 @@ export function TaskForm({
       window.removeEventListener('orientationchange', update);
     };
   }, [debug, dueLocal, priority]);
+
+  // Fit native datetime-local into wrapper on iOS
+  useFitToContainer(dueWrapRef, dueInputRef, { enabled: isIOS(), padding: 2 });
 
   useEffect(() => {
     if (initialValues?.dueDate) {
@@ -125,7 +130,8 @@ export function TaskForm({
             value={dueLocal}
             onChange={(e) => setDueLocal(e.target.value)}
             className="w-full min-w-0"
-            style={{ WebkitTransform: 'scale(0.98)', transform: 'scale(0.98)', WebkitTransformOrigin: 'left center', transformOrigin: 'left center', fontSize: 16 }}
+            ref={dueInputRef}
+            style={{ fontSize: 16 }}
           />
           {debug && mDue ? (
             <span className="absolute right-1 top-1 z-10 text-[10px] bg-black/60 text-white px-1">{`W${mDue.w}×H${mDue.h}`}</span>
