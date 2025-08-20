@@ -206,7 +206,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
           </div>
 
           <div className="grid gap-4 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] max-w-full">
-            <div ref={dateWrapRef} className={`space-y-2 min-w-0 max-w-full ${ios ? 'overflow-hidden' : 'overflow-visible'} ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
+            <div ref={dateWrapRef} className={`space-y-2 min-w-0 max-w-full ${ios ? 'overflow-hidden rounded-md' : 'overflow-visible'} ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
               <Label htmlFor="date" className="text-sm font-light text-foreground">
                 Дата начала
               </Label>
@@ -223,7 +223,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                 <span className="absolute right-1 top-1 z-10 text-[10px] bg-black/60 text-white px-1">{`W${mDate.w}×H${mDate.h}`}</span>
               ) : null}
             </div>
-            <div ref={endDateWrapRef} className={`space-y-2 min-w-0 max-w-full ${ios ? 'overflow-hidden' : 'overflow-visible'} ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
+            <div ref={endDateWrapRef} className={`space-y-2 min-w-0 max-w-full ${ios ? 'overflow-hidden rounded-md' : 'overflow-visible'} ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
               <Label htmlFor="endDate" className="text-sm font-light text-foreground">
                 Дата окончания
               </Label>
@@ -257,7 +257,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
 
           {!allDay && (
             <div className="grid gap-4 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] max-w-full">
-              <div ref={timeWrapRef} className={`space-y-2 min-w-0 max-w-full ${ios ? 'overflow-hidden' : 'overflow-visible'} ${debug ? 'relative outline outline-1 outline-red-400' : ''}`}>
+              <div ref={timeWrapRef} className={`space-y-2 min-w-0 max-w-full ${ios ? 'overflow-hidden rounded-md' : 'overflow-visible'} ${debug ? 'relative outline outline-1 outline-red-400' : ''}`}>
                 <Label htmlFor="time" className="text-sm font-light text-foreground">
                   Время начала
                 </Label>
@@ -276,7 +276,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                 ) : null}
               </div>
               
-              <div ref={endTimeWrapRef} className={`space-y-2 min-w-0 max-w-full ${ios ? 'overflow-hidden' : 'overflow-visible'} ${debug ? 'relative outline outline-1 outline-red-400' : ''}`}>
+              <div ref={endTimeWrapRef} className={`space-y-2 min-w-0 max-w-full ${ios ? 'overflow-hidden rounded-md' : 'overflow-visible'} ${debug ? 'relative outline outline-1 outline-red-400' : ''}`}>
                 <Label htmlFor="endTime" className="text-sm font-light text-foreground">
                   Время окончания
                 </Label>
