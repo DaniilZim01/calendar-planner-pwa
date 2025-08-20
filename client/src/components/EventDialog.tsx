@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Plus } from 'lucide-react';
+import { isDebugLayoutEnabled, measureElement } from '@/lib/debugLayout';
 import { getCurrentDateString } from '../utils/dateUtils';
 
 interface EventDialogProps {
@@ -37,6 +38,35 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
   const [categoryColor, setCategoryColor] = useState<string>('#93B69C');
   const [allDay, setAllDay] = useState(false);
   const [timeError, setTimeError] = useState<string>('');
+  const debug = isDebugLayoutEnabled();
+
+  // Debug refs and measures
+  const dateWrapRef = useRef<HTMLDivElement | null>(null);
+  const endDateWrapRef = useRef<HTMLDivElement | null>(null);
+  const timeWrapRef = useRef<HTMLDivElement | null>(null);
+  const endTimeWrapRef = useRef<HTMLDivElement | null>(null);
+  const [mDate, setMDate] = useState<{ w: number; h: number } | null>(null);
+  const [mEndDate, setMEndDate] = useState<{ w: number; h: number } | null>(null);
+  const [mTime, setMTime] = useState<{ w: number; h: number } | null>(null);
+  const [mEndTime, setMEndTime] = useState<{ w: number; h: number } | null>(null);
+
+  useEffect(() => {
+    if (!debug) return;
+    const update = () => {
+      setMDate(measureElement(dateWrapRef.current) || null);
+      setMEndDate(measureElement(endDateWrapRef.current) || null);
+      setMTime(measureElement(timeWrapRef.current) || null);
+      setMEndTime(measureElement(endTimeWrapRef.current) || null);
+    };
+    const rAF = requestAnimationFrame(update);
+    window.addEventListener('resize', update);
+    window.addEventListener('orientationchange', update);
+    return () => {
+      cancelAnimationFrame(rAF);
+      window.removeEventListener('resize', update);
+      window.removeEventListener('orientationchange', update);
+    };
+  }, [debug, open, date, endDate, time, endTime]);
 
   // Подставлять сохранённый цвет при смене категории
   useEffect(() => {
@@ -164,7 +194,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
           </div>
 
           <div className="grid gap-4 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] max-w-full">
-            <div className="space-y-2 min-w-0 max-w-full overflow-visible">
+            <div ref={dateWrapRef} className={`space-y-2 min-w-0 max-w-full overflow-visible ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
               <Label htmlFor="date" className="text-sm font-light text-foreground">
                 Дата начала
               </Label>
@@ -175,8 +205,11 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                 onChange={(e) => setDate(e.target.value)}
                 className="bg-input border-border focus:ring-accent w-full min-w-0"
               />
+              {debug && mDate ? (
+                <span className="absolute right-1 top-1 z-10 text-[10px] bg-black/60 text-white px-1">{`W${mDate.w}×H${mDate.h}`}</span>
+              ) : null}
             </div>
-            <div className="space-y-2 min-w-0 max-w-full overflow-visible">
+            <div ref={endDateWrapRef} className={`space-y-2 min-w-0 max-w-full overflow-visible ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
               <Label htmlFor="endDate" className="text-sm font-light text-foreground">
                 Дата окончания
               </Label>
@@ -188,6 +221,9 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                 min={date}
                 className="bg-input border-border focus:ring-accent w-full min-w-0"
               />
+              {debug && mEndDate ? (
+                <span className="absolute right-1 top-1 z-10 text-[10px] bg-black/60 text-white px-1">{`W${mEndDate.w}×H${mEndDate.h}`}</span>
+              ) : null}
             </div>
           </div>
 
@@ -205,7 +241,7 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
 
           {!allDay && (
             <div className="grid gap-4 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] max-w-full">
-              <div className="space-y-2 min-w-0 max-w-full overflow-visible">
+              <div ref={timeWrapRef} className={`space-y-2 min-w-0 max-w-full overflow-visible ${debug ? 'relative outline outline-1 outline-red-400' : ''}`}>
                 <Label htmlFor="time" className="text-sm font-light text-foreground">
                   Время начала
                 </Label>
@@ -217,9 +253,12 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                   onBlur={adjustEndFromStart}
                   className="bg-input border-border focus:ring-accent w-full min-w-0"
                 />
+                {debug && mTime ? (
+                  <span className="absolute right-1 top-1 z-10 text-[10px] bg-black/60 text-white px-1">{`W${mTime.w}×H${mTime.h}`}</span>
+                ) : null}
               </div>
               
-              <div className="space-y-2 min-w-0 max-w-full overflow-visible">
+              <div ref={endTimeWrapRef} className={`space-y-2 min-w-0 max-w-full overflow-visible ${debug ? 'relative outline outline-1 outline-red-400' : ''}`}>
                 <Label htmlFor="endTime" className="text-sm font-light text-foreground">
                   Время окончания
                 </Label>
@@ -233,6 +272,9 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                 {timeError && (
                   <div className="text-xs text-red-500">{timeError}</div>
                 )}
+                {debug && mEndTime ? (
+                  <span className="absolute right-1 top-1 z-10 text-[10px] bg-black/60 text-white px-1">{`W${mEndTime.w}×H${mEndTime.h}`}</span>
+                ) : null}
               </div>
             </div>
           )}

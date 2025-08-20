@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { isDebugLayoutEnabled, measureElement } from '@/lib/debugLayout';
 
 export type TaskFormValues = {
   title: string;
@@ -35,6 +36,27 @@ export function TaskForm({
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   });
   const [submitting, setSubmitting] = useState(false);
+  const debug = isDebugLayoutEnabled();
+  const dueWrapRef = useRef<HTMLDivElement | null>(null);
+  const prioWrapRef = useRef<HTMLDivElement | null>(null);
+  const [mDue, setMDue] = useState<{ w: number; h: number } | null>(null);
+  const [mPrio, setMPrio] = useState<{ w: number; h: number } | null>(null);
+
+  useEffect(() => {
+    if (!debug) return;
+    const update = () => {
+      setMDue(measureElement(dueWrapRef.current));
+      setMPrio(measureElement(prioWrapRef.current));
+    };
+    const rAF = requestAnimationFrame(update);
+    window.addEventListener('resize', update);
+    window.addEventListener('orientationchange', update);
+    return () => {
+      cancelAnimationFrame(rAF);
+      window.removeEventListener('resize', update);
+      window.removeEventListener('orientationchange', update);
+    };
+  }, [debug, dueLocal, priority]);
 
   useEffect(() => {
     if (initialValues?.dueDate) {
@@ -96,11 +118,14 @@ export function TaskForm({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-4">
-        <div className="space-y-2 min-w-0 max-w-full overflow-visible">
+        <div ref={dueWrapRef} className={`space-y-2 min-w-0 max-w-full overflow-visible ${debug ? 'relative outline outline-1 outline-blue-400' : ''}`}>
           <Label className="text-sm font-light text-foreground">Срок</Label>
           <Input type="datetime-local" value={dueLocal} onChange={(e) => setDueLocal(e.target.value)} className="w-full min-w-0" />
+          {debug && mDue ? (
+            <span className="absolute right-1 top-1 z-10 text-[10px] bg-black/60 text-white px-1">{`W${mDue.w}×H${mDue.h}`}</span>
+          ) : null}
         </div>
-        <div className="space-y-2 min-w-0 max-w-full overflow-visible col-span-2 sm:col-span-1">
+        <div ref={prioWrapRef} className={`space-y-2 min-w-0 max-w-full overflow-visible col-span-2 sm:col-span-1 ${debug ? 'relative outline outline-1 outline-red-400' : ''}`}>
           <Label className="text-sm font-light text-foreground">Приоритет</Label>
           <Select value={String(priority)} onValueChange={(v) => setPriority(parseInt(v))}>
             <SelectTrigger className="w-full min-w-0">
@@ -112,6 +137,9 @@ export function TaskForm({
               <SelectItem value="3">Высокий</SelectItem>
             </SelectContent>
           </Select>
+          {debug && mPrio ? (
+            <span className="absolute right-1 top-1 z-10 text-[10px] bg-black/60 text-white px-1">{`W${mPrio.w}×H${mPrio.h}`}</span>
+          ) : null}
         </div>
       </div>
 
