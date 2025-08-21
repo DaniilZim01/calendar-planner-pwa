@@ -36,7 +36,8 @@ export default function WellbeingPage() {
   const waterValues = useMemo(() => filledRange.map(d => d.water ?? 0), [filledRange]);
   const sleepValues = useMemo(() => filledRange.map(d => d.sleep ?? 0), [filledRange]);
   const stepsValues = useMemo(() => filledRange.map(d => d.steps ?? 0), [filledRange]);
-  const highlightIndex = useMemo(() => filledRange.findIndex(d => d.date === selectedDate), [filledRange, selectedDate]);
+  // Индекс выбранного дня — всегда последний (ретроспектива за 7 дней)
+  const highlightIndex = useMemo(() => Math.max(0, filledRange.length - 1), [filledRange]);
 
   // Динамические подписи оси X по дням недели для текущего 7-дневного диапазона
   const xLabels = useMemo(() => {
