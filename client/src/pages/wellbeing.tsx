@@ -100,9 +100,11 @@ export default function WellbeingPage() {
             className="p-1 text-muted-foreground hover:text-accent"
             aria-label="Предыдущая неделя"
             onClick={() => {
-              const prev = new Date(weekStartLocal);
-              prev.setDate(prev.getDate() - 7);
-              setSelectedDate(prev.toISOString().slice(0,10));
+              const prevStart = new Date(weekStartLocal);
+              prevStart.setDate(prevStart.getDate() - 7);
+              const prevEnd = new Date(prevStart);
+              prevEnd.setDate(prevStart.getDate() + 6);
+              setSelectedDate(prevEnd.toISOString().slice(0,10));
             }}
           >
             <ChevronLeft className="w-5 h-5" />
@@ -114,9 +116,11 @@ export default function WellbeingPage() {
             className="p-1 text-muted-foreground hover:text-accent"
             aria-label="Следующая неделя"
             onClick={() => {
-              const next = new Date(weekStartLocal);
-              next.setDate(next.getDate() + 7);
-              setSelectedDate(next.toISOString().slice(0,10));
+              const nextStart = new Date(weekStartLocal);
+              nextStart.setDate(nextStart.getDate() + 7);
+              const nextEnd = new Date(nextStart);
+              nextEnd.setDate(nextStart.getDate() + 6);
+              setSelectedDate(nextEnd.toISOString().slice(0,10));
             }}
           >
             <ChevronRight className="w-5 h-5" />

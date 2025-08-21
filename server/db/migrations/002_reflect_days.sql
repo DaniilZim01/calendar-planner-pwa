@@ -24,3 +24,7 @@ CREATE INDEX IF NOT EXISTS "reflect_days_date_idx" ON "reflect_days" ("date");
 -- Comments
 COMMENT ON TABLE "reflect_days" IS 'Per-user daily reflect data: water (L), sleep (h), steps, mood (0..4), journal';
 
+
+
+
+
