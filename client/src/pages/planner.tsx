@@ -243,8 +243,8 @@ export default function PlannerPage() {
                       <div className="w-2.5 h-2.5 rounded-full bg-accent" />
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-base text-foreground">{ev.title}</span>
-                          <span className="text-base font-semibold text-foreground">{ev.is_all_day ? 'ВЕСЬ ДЕНЬ' : time}</span>
+                          <span className="text-sm text-foreground">{ev.title}</span>
+                          <span className="text-xs font-semibold text-muted-foreground">{ev.is_all_day ? 'ВЕСЬ ДЕНЬ' : time}</span>
                         </div>
                         {ev.description ? (
                           <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{ev.description}</div>
