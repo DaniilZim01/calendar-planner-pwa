@@ -23,12 +23,17 @@ export default function WellbeingPage() {
   const rangeTo = selectedDate;
   const range = useReflectRange(rangeFrom, rangeTo);
   const filledRange = useMemo(() => {
-    // build 7-day array [from..to]
+    // build 7-day array [from..to] using LOCAL date strings to avoid TZ shifts
     const dates: string[] = [];
-    const startDate = new Date(rangeFrom);
+    const [sy, sm, sd] = rangeFrom.split('-').map((v) => parseInt(v, 10));
+    const startDateLocal = new Date(sy, (sm || 1) - 1, sd || 1);
     for (let i = 0; i < 7; i++) {
-      const d = new Date(startDate); d.setDate(startDate.getDate() + i);
-      dates.push(d.toISOString().slice(0,10));
+      const d = new Date(startDateLocal);
+      d.setDate(startDateLocal.getDate() + i);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      dates.push(`${y}-${m}-${day}`);
     }
     const map = new Map<string, any>((range.data || []).map(d => [d.date, d] as const));
     return dates.map(date => map.get(date) || { date, water: 0, sleep: 0, steps: 0, mood: null });
@@ -43,7 +48,8 @@ export default function WellbeingPage() {
   const xLabels = useMemo(() => {
     const names = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
     return filledRange.map((d) => {
-      const dt = new Date(d.date);
+      const [y, m, day] = d.date.split('-').map((v) => parseInt(v, 10));
+      const dt = new Date(y, (m || 1) - 1, day || 1);
       return names[dt.getDay()];
     });
   }, [filledRange]);
