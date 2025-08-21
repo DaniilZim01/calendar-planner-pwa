@@ -214,13 +214,13 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
               <Label htmlFor="date" className="text-sm font-light text-foreground">
                 Дата начала
               </Label>
-              <div ref={dateClipRef} className={`${ios ? 'overflow-hidden rounded-md' : ''}`}>
+              <div ref={dateClipRef} className="overflow-hidden rounded-md border border-border bg-background">
                 <Input
                   id="date"
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="border-border focus:ring-accent w-full min-w-0"
+                  className="border-0 bg-transparent focus:ring-accent w-full min-w-0"
                   ref={dateInputRef}
                   style={{ fontSize: 16 }}
                 />
@@ -233,14 +233,14 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
               <Label htmlFor="endDate" className="text-sm font-light text-foreground">
                 Дата окончания
               </Label>
-              <div ref={endDateClipRef} className={`${ios ? 'overflow-hidden rounded-md' : ''}`}>
+              <div ref={endDateClipRef} className="overflow-hidden rounded-md border border-border bg-background">
                 <Input
                   id="endDate"
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
                   min={date}
-                  className="border-border focus:ring-accent w-full min-w-0"
+                  className="border-0 bg-transparent focus:ring-accent w-full min-w-0"
                   ref={endDateInputRef}
                   style={{ fontSize: 16 }}
                 />
@@ -269,14 +269,14 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                 <Label htmlFor="time" className="text-sm font-light text-foreground">
                   Время начала
                 </Label>
-                <div ref={timeClipRef} className={`${ios ? 'overflow-hidden rounded-md' : ''}`}>
+                <div ref={timeClipRef} className="overflow-hidden rounded-md border border-border bg-background">
                   <Input
                     id="time"
                     type="time"
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
                     onBlur={adjustEndFromStart}
-                    className="border-border focus:ring-accent w-full min-w-0"
+                    className="border-0 bg-transparent focus:ring-accent w-full min-w-0"
                     ref={timeInputRef}
                     style={{ fontSize: 16 }}
                   />
@@ -290,13 +290,13 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
                 <Label htmlFor="endTime" className="text-sm font-light text-foreground">
                   Время окончания
                 </Label>
-                <div ref={endTimeClipRef} className={`${ios ? 'overflow-hidden rounded-md' : ''}`}>
+                <div ref={endTimeClipRef} className="overflow-hidden rounded-md border border-border bg-background">
                   <Input
                     id="endTime"
                     type="time"
                     value={endTime}
                     onChange={(e) => { setEndTime(e.target.value); setEndTimeAuto(false); }}
-                    className="border-border focus:ring-accent w-full min-w-0"
+                    className="border-0 bg-transparent focus:ring-accent w-full min-w-0"
                     ref={endTimeInputRef}
                     style={{ fontSize: 16 }}
                   />
