@@ -49,6 +49,28 @@ export default function PlannerPage() {
     return { from: start.toISOString(), to: end.toISOString() };
   }, [selectedDate]);
   const { data: eventsToday = [], isLoading: isLoadingEventsToday } = useEvents({ from: dayRange.from, to: dayRange.to });
+  // Events for the visible week to show dots in the header
+  const weekRange = useMemo(() => {
+    const start = new Date(weekStart);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(weekStart);
+    end.setDate(end.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+    return { from: start.toISOString(), to: end.toISOString() };
+  }, [weekStart]);
+  const { data: eventsWeek = [] } = useEvents({ from: weekRange.from, to: weekRange.to });
+  const eventDaysSet = useMemo(() => {
+    const s = new Set<string>();
+    (eventsWeek as any[]).forEach((ev) => {
+      if (!ev?.start_time) return;
+      const dt = new Date(String(ev.start_time) + 'Z');
+      const yyyy = dt.getFullYear();
+      const mm = String(dt.getMonth() + 1).padStart(2, '0');
+      const dd = String(dt.getDate()).padStart(2, '0');
+      s.add(`${yyyy}-${mm}-${dd}`);
+    });
+    return s;
+  }, [eventsWeek]);
   const createEvent = useCreateEvent({ from: dayRange.from, to: dayRange.to });
 
   const applySortFilter = (items?: any[]) => {
@@ -182,13 +204,21 @@ export default function PlannerPage() {
             ))}
             {weekDays.map((d) => {
               const isSelected = d.toDateString() === selectedDate.toDateString();
+              const yyyy = d.getFullYear();
+              const mm = String(d.getMonth() + 1).padStart(2, '0');
+              const dd = String(d.getDate()).padStart(2, '0');
+              const isoDay = `${yyyy}-${mm}-${dd}`;
+              const hasEvents = eventDaysSet.has(isoDay);
               return (
                 <button
                   key={d.toISOString()}
                   onClick={() => setSelectedDate(new Date(d))}
                   className={`mt-1 aspect-square flex items-center justify-center rounded-full text-sm transition-colors ${isSelected ? 'bg-accent text-white' : 'text-foreground hover:bg-secondary/30'}`}
                 >
-                  {d.getDate()}
+                  <div className="flex flex-col items-center justify-center leading-none">
+                    <span>{d.getDate()}</span>
+                    {hasEvents ? <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-accent" /> : <span className="mt-0.5 h-1.5" />}
+                  </div>
                 </button>
               );
             })}

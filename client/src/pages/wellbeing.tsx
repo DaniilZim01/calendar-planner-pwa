@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { getCurrentDateString, getWeekDays } from '../utils/dateUtils';
 import { ReflectLineChart } from '@/components/reflect/ReflectLineChart';
-import { useReflectDay, useReflectRange, usePatchReflect, useSaveReflect } from '@/lib/hooks';
+import { useReflectDay, useReflectRange, usePatchReflect, useSaveReflect, useEvents } from '@/lib/hooks';
 import { toast } from '@/hooks/use-toast';
 import { Smile1, Smile2, Smile3, Smile4, Smile5 } from '@/components/icons/Smiles';
 
@@ -64,38 +64,76 @@ export default function WellbeingPage() {
     setStepsEdit(Number(currentDay.steps || 0));
   }, [selectedDate, day.data?.water, day.data?.sleep, day.data?.steps]);
 
-  // Календарь для выбора дня
+  // Календарь для выбора дня — унифицированный с Today
   const renderMiniCalendar = () => {
-    const base = new Date(selectedDate);
-    const currentWeek = [];
-    for (let i = -3; i <= 3; i++) {
-      const date = new Date(base);
-      date.setDate(base.getDate() + i);
-      currentWeek.push(date);
-    }
+    const weekStartLocal = (() => {
+      const d = new Date(selectedDate);
+      const day = d.getDay();
+      const diff = (day === 0 ? -6 : 1) - day;
+      d.setDate(d.getDate() + diff);
+      d.setHours(0,0,0,0);
+      return d;
+    })();
+    // События недели для точек
+    const weekFromIso = new Date(weekStartLocal).toISOString();
+    const weekEnd = new Date(weekStartLocal); weekEnd.setDate(weekEnd.getDate() + 6); weekEnd.setHours(23,59,59,999);
+    const weekToIso = weekEnd.toISOString();
+    // Хуки нельзя вызывать внутри функции рендера мини‑календаря — перенесём наружу ниже
+    const days: Date[] = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(weekStartLocal);
+      d.setDate(d.getDate() + i);
+      return d;
+    });
     return (
-      <div className="card-soft mb-6">
-        <div className="flex justify-center gap-4 mb-2">
-          <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => {
-            const d = new Date(selectedDate); d.setDate(d.getDate() - 7); setSelectedDate(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
-          }}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="font-medium text-foreground">{new Date(selectedDate).toLocaleDateString(undefined,{ month:'long', year:'numeric' })}</span>
-          <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => {
-            const d = new Date(selectedDate); d.setDate(d.getDate() + 7); setSelectedDate(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
-          }}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+      <div className="mb-4 card-soft rounded-xl p-3">
+        <div className="flex items-center justify-between mb-2">
+          <button
+            className="p-1 text-muted-foreground hover:text-accent"
+            aria-label="Предыдущая неделя"
+            onClick={() => {
+              const prev = new Date(weekStartLocal);
+              prev.setDate(prev.getDate() - 7);
+              setSelectedDate(prev.toISOString().slice(0,10));
+            }}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <div className="text-center text-foreground font-light">
+            {new Date(selectedDate).toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}
+          </div>
+          <button
+            className="p-1 text-muted-foreground hover:text-accent"
+            aria-label="Следующая неделя"
+            onClick={() => {
+              const next = new Date(weekStartLocal);
+              next.setDate(next.getDate() + 7);
+              setSelectedDate(next.toISOString().slice(0,10));
+            }}
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
         </div>
-        <div className="flex justify-center gap-2">
-          {currentWeek.map((date, index) => {
-            const dayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-            const isSelected = date.toISOString().slice(0,10) === selectedDate;
+        <div className="grid grid-cols-7 gap-1 text-center">
+          {['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((d) => (
+            <div key={d} className="text-[11px] text-muted-foreground">{d}</div>
+          ))}
+          {days.map((d) => {
+            const isSelected = d.toISOString().slice(0,10) === selectedDate;
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            const isoDay = `${yyyy}-${mm}-${dd}`;
+            const hasEvents = eventDaysSet.has(isoDay);
             return (
-              <button key={index} className="text-center p-2" onClick={() => setSelectedDate(date.toISOString().slice(0,10))}>
-                <div className="text-xs text-muted-foreground mb-1">{dayNames[date.getDay()]}</div>
-                <div className={`w-8 h-8 flex items-center justify-center text-sm rounded-full ${isSelected ? 'bg-accent text-white' : ''}`}>{date.getDate()}</div>
+              <button
+                key={d.toISOString()}
+                onClick={() => setSelectedDate(new Date(d).toISOString().slice(0,10))}
+                className={`mt-1 aspect-square flex items-center justify-center rounded-full text-sm transition-colors ${isSelected ? 'bg-accent text-white' : 'text-foreground hover:bg-secondary/30'}`}
+              >
+                <div className="flex flex-col items-center justify-center leading-none">
+                  <span>{d.getDate()}</span>
+                  {hasEvents ? <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-accent" /> : <span className="mt-0.5 h-1.5" />}
+                </div>
               </button>
             );
           })}
@@ -103,6 +141,34 @@ export default function WellbeingPage() {
       </div>
     );
   };
+
+  // ВЫЧИСЛЕНИЕ НЕДЕЛИ И СОБЫТИЙ ДЛЯ ТОЧЕК (вне функции рендера)
+  const weekStartForSelected = useMemo(() => {
+    const d = new Date(selectedDate);
+    const day = d.getDay();
+    const diff = (day === 0 ? -6 : 1) - day;
+    d.setDate(d.getDate() + diff);
+    d.setHours(0,0,0,0);
+    return d;
+  }, [selectedDate]);
+  const eventsWeekRange = useMemo(() => {
+    const start = new Date(weekStartForSelected);
+    const end = new Date(weekStartForSelected); end.setDate(end.getDate() + 6); end.setHours(23,59,59,999);
+    return { from: start.toISOString(), to: end.toISOString() };
+  }, [weekStartForSelected]);
+  const { data: eventsWeek = [] } = useEvents({ from: eventsWeekRange.from, to: eventsWeekRange.to });
+  const eventDaysSet = useMemo(() => {
+    const s = new Set<string>();
+    (eventsWeek as any[]).forEach((ev) => {
+      if (!ev?.start_time) return;
+      const dt = new Date(String(ev.start_time) + 'Z');
+      const yyyy = dt.getFullYear();
+      const mm = String(dt.getMonth() + 1).padStart(2, '0');
+      const dd = String(dt.getDate()).padStart(2, '0');
+      s.add(`${yyyy}-${mm}-${dd}`);
+    });
+    return s;
+  }, [eventsWeek]);
 
   return (
     <div className="app-container animate-fade-in">
