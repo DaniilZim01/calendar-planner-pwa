@@ -48,12 +48,14 @@ export default function WellbeingPage() {
   // Динамические подписи оси X по дням недели для текущего 7-дневного диапазона
   const xLabels = useMemo(() => {
     const names = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-    return filledRange.map((d) => {
-      const [y, m, day] = d.date.split('-').map((v: string) => parseInt(v, 10));
-      const dt = new Date(y, (m || 1) - 1, day || 1);
-      return names[dt.getDay()];
+    const [y, m, d] = selectedDate.split('-').map((v: string) => parseInt(v, 10));
+    const sel = new Date(y, (m || 1) - 1, d || 1).getDay();
+    const n = filledRange.length || 7;
+    return Array.from({ length: n }, (_, i) => {
+      const idx = (sel - (n - 1 - i) + 14) % 7; // ensure non-negative
+      return names[idx];
     });
-  }, [filledRange]);
+  }, [selectedDate, filledRange.length]);
 
   // Helper to ensure DB upsert: if записи нет — создаём (POST), иначе частично обновляем (PATCH)
   const persistReflect = (partial: Partial<{ water: number; sleep: number; steps: number; mood: number; journal: string | null }>) => {
@@ -110,7 +112,10 @@ export default function WellbeingPage() {
               prevStart.setDate(prevStart.getDate() - 7);
               const prevEnd = new Date(prevStart);
               prevEnd.setDate(prevStart.getDate() + 6);
-              setSelectedDate(prevEnd.toISOString().slice(0,10));
+              const y = prevEnd.getFullYear();
+              const m = String(prevEnd.getMonth() + 1).padStart(2, '0');
+              const d = String(prevEnd.getDate()).padStart(2, '0');
+              setSelectedDate(`${y}-${m}-${d}`);
             }}
           >
             <ChevronLeft className="w-5 h-5" />
@@ -126,7 +131,10 @@ export default function WellbeingPage() {
               nextStart.setDate(nextStart.getDate() + 7);
               const nextEnd = new Date(nextStart);
               nextEnd.setDate(nextStart.getDate() + 6);
-              setSelectedDate(nextEnd.toISOString().slice(0,10));
+              const y = nextEnd.getFullYear();
+              const m = String(nextEnd.getMonth() + 1).padStart(2, '0');
+              const d = String(nextEnd.getDate()).padStart(2, '0');
+              setSelectedDate(`${y}-${m}-${d}`);
             }}
           >
             <ChevronRight className="w-5 h-5" />
@@ -146,7 +154,12 @@ export default function WellbeingPage() {
             return (
               <button
                 key={d.toISOString()}
-                onClick={() => setSelectedDate(new Date(d).toISOString().slice(0,10))}
+                onClick={() => {
+                  const y = d.getFullYear();
+                  const m = String(d.getMonth() + 1).padStart(2, '0');
+                  const dd = String(d.getDate()).padStart(2, '0');
+                  setSelectedDate(`${y}-${m}-${dd}`);
+                }}
                 className={`mt-1 aspect-square flex items-center justify-center rounded-full text-sm transition-colors ${isSelected ? 'bg-accent text-white' : 'text-foreground hover:bg-secondary/30'}`}
               >
                 <div className="flex flex-col items-center justify-center leading-none">
