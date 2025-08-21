@@ -38,6 +38,15 @@ export default function WellbeingPage() {
   const stepsValues = useMemo(() => filledRange.map(d => d.steps ?? 0), [filledRange]);
   const highlightIndex = useMemo(() => filledRange.findIndex(d => d.date === selectedDate), [filledRange, selectedDate]);
 
+  // Динамические подписи оси X по дням недели для текущего 7-дневного диапазона
+  const xLabels = useMemo(() => {
+    const names = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+    return filledRange.map((d) => {
+      const dt = new Date(d.date);
+      return names[dt.getDay()];
+    });
+  }, [filledRange]);
+
   // Helper to ensure DB upsert: if записи нет — создаём (POST), иначе частично обновляем (PATCH)
   const persistReflect = (partial: Partial<{ water: number; sleep: number; steps: number; mood: number; journal: string | null }>) => {
     const payload = { date: selectedDate, ...partial } as any;
@@ -188,7 +197,7 @@ export default function WellbeingPage() {
           </div>
           <div className="text-2xl font-bold text-accent mb-1">{Number(waterEdit).toFixed(2)} литра</div>
           <div className="text-xs text-muted-foreground mb-4">Сколько воды вы выпили сегодня?</div>
-          <ReflectLineChart values={waterValues.length ? waterValues : new Array(7).fill(0)} max={5} className="mb-2" highlightIndex={highlightIndex} yTicks={[1,2,3,4,5]} overlayIndex={highlightIndex} overlayValue={waterEdit} todayIndex={highlightIndex} xLabels={weekLabels} />
+          <ReflectLineChart values={waterValues.length ? waterValues : new Array(7).fill(0)} max={5} className="mb-2" highlightIndex={highlightIndex} yTicks={[1,2,3,4,5]} overlayIndex={highlightIndex} overlayValue={waterEdit} todayIndex={highlightIndex} xLabels={xLabels} />
           <div className="mt-3 flex gap-2">
             <Dialog open={openWater} onOpenChange={setOpenWater}>
               <DialogTrigger asChild>
@@ -224,7 +233,7 @@ export default function WellbeingPage() {
           </div>
           <div className="text-2xl font-bold text-accent mb-1">{Number(sleepEdit).toFixed(0)} часов</div>
           <div className="text-xs text-muted-foreground mb-4">Сколько часов вы спали сегодня?</div>
-          <ReflectLineChart values={sleepValues.length ? sleepValues : new Array(7).fill(0)} max={15} className="mb-2" highlightIndex={highlightIndex} yTicks={[3,6,9,12,15]} overlayIndex={highlightIndex} overlayValue={sleepEdit} todayIndex={highlightIndex} xLabels={weekLabels} />
+          <ReflectLineChart values={sleepValues.length ? sleepValues : new Array(7).fill(0)} max={15} className="mb-2" highlightIndex={highlightIndex} yTicks={[3,6,9,12,15]} overlayIndex={highlightIndex} overlayValue={sleepEdit} todayIndex={highlightIndex} xLabels={xLabels} />
           <div className="mt-3 flex gap-2">
             <Dialog open={openSleep} onOpenChange={setOpenSleep}>
               <DialogTrigger asChild>
@@ -270,7 +279,7 @@ export default function WellbeingPage() {
             overlayIndex={highlightIndex}
             overlayValue={stepsEdit}
             todayIndex={highlightIndex}
-            xLabels={weekLabels}
+            xLabels={xLabels}
           />
           <div className="mt-3 flex gap-2">
             <Dialog open={openSteps} onOpenChange={setOpenSteps}>
