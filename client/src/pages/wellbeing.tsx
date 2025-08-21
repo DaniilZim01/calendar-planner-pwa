@@ -221,7 +221,7 @@ export default function WellbeingPage() {
           </div>
           <div className="text-2xl font-bold text-accent mb-1">{Number(waterEdit).toFixed(2)} литра</div>
           <div className="text-xs text-muted-foreground mb-4">Сколько воды вы выпили сегодня?</div>
-          <ReflectLineChart values={waterValues.length ? waterValues : new Array(7).fill(0)} max={5} className="mb-2" highlightIndex={highlightIndex} yTicks={[1,2,3,4,5]} overlayIndex={highlightIndex} overlayValue={waterEdit} todayIndex={highlightIndex} xLabels={xLabels} />
+          <ReflectLineChart values={waterValues.length ? waterValues : new Array(7).fill(0)} max={3} className="mb-2" highlightIndex={highlightIndex} yTicks={[1,2,3]} overlayIndex={highlightIndex} overlayValue={waterEdit} todayIndex={highlightIndex} xLabels={xLabels} />
           <div className="mt-3 flex gap-2">
             <Dialog open={openWater} onOpenChange={setOpenWater}>
               <DialogTrigger asChild>
@@ -257,7 +257,7 @@ export default function WellbeingPage() {
           </div>
           <div className="text-2xl font-bold text-accent mb-1">{Number(sleepEdit).toFixed(0)} часов</div>
           <div className="text-xs text-muted-foreground mb-4">Сколько часов вы спали сегодня?</div>
-          <ReflectLineChart values={sleepValues.length ? sleepValues : new Array(7).fill(0)} max={15} className="mb-2" highlightIndex={highlightIndex} yTicks={[3,6,9,12,15]} overlayIndex={highlightIndex} overlayValue={sleepEdit} todayIndex={highlightIndex} xLabels={xLabels} />
+          <ReflectLineChart values={sleepValues.length ? sleepValues : new Array(7).fill(0)} max={12} className="mb-2" highlightIndex={highlightIndex} yTicks={[3,6,9,12]} overlayIndex={highlightIndex} overlayValue={sleepEdit} todayIndex={highlightIndex} xLabels={xLabels} />
           <div className="mt-3 flex gap-2">
             <Dialog open={openSleep} onOpenChange={setOpenSleep}>
               <DialogTrigger asChild>
@@ -295,10 +295,10 @@ export default function WellbeingPage() {
           <div className="text-xs text-muted-foreground mb-4">Сколько шагов вы прошли сегодня?</div>
           <ReflectLineChart
             values={stepsValues.length ? stepsValues : new Array(7).fill(0)}
-            max={35000}
+            max={20000}
             className="mb-2"
             highlightIndex={highlightIndex}
-            yTicks={[5000,10000,15000,20000,25000,30000,35000]}
+            yTicks={[5000,10000,15000,20000]}
             yTickFormatter={(v) => `${Math.round(v/1000)}k`}
             overlayIndex={highlightIndex}
             overlayValue={stepsEdit}

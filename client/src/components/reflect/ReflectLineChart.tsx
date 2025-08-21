@@ -52,7 +52,7 @@ export function ReflectLineChart({ values, max, className, highlightIndex, yTick
         })}
         {/* line */}
         {coords.length > 1 && (
-          <polyline points={poly} fill="none" stroke="hsl(var(--accent))" strokeWidth={2} />
+          <polyline points={poly} fill="none" stroke="hsl(var(--accent))" strokeWidth={1.25} />
         )}
         {/* points */}
         {coords.map(([x, y], i) => (
@@ -63,7 +63,7 @@ export function ReflectLineChart({ values, max, className, highlightIndex, yTick
               r={3}
               fill={i === todayIndex ? 'black' : 'hsl(var(--accent))'}
               stroke="hsl(var(--accent))"
-              strokeWidth={i === todayIndex ? 0 : 2}
+              strokeWidth={i === todayIndex ? 0 : 1.5}
             />
           </g>
         ))}
