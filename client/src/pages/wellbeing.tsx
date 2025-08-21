@@ -2,9 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Edit3, Droplets, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { getCurrentDateString, getWeekDays } from '../utils/dateUtils';
+import { getCurrentDateString } from '../utils/dateUtils';
 import { ReflectLineChart } from '@/components/reflect/ReflectLineChart';
 import { useReflectDay, useReflectRange, usePatchReflect, useSaveReflect, useEvents } from '@/lib/hooks';
 import { toast } from '@/hooks/use-toast';
@@ -15,17 +14,19 @@ export default function WellbeingPage() {
   const day = useReflectDay(selectedDate);
   const save = useSaveReflect();
   const patch = usePatchReflect();
-  const weekLabels = getWeekDays();
-  const end = new Date(selectedDate);
-  const start = new Date(end);
-  start.setDate(end.getDate() - 6);
-  const rangeFrom = `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`;
+  // const weekLabels = getWeekDays();
+  // Build 7-day range in LOCAL time (selected day is the last day)
+  const [ey, em, ed] = selectedDate.split('-').map((v: string) => parseInt(v, 10));
+  const endLocal = new Date(ey, (em || 1) - 1, ed || 1);
+  const startLocal = new Date(endLocal);
+  startLocal.setDate(endLocal.getDate() - 6);
+  const rangeFrom = `${startLocal.getFullYear()}-${String(startLocal.getMonth()+1).padStart(2,'0')}-${String(startLocal.getDate()).padStart(2,'0')}`;
   const rangeTo = selectedDate;
   const range = useReflectRange(rangeFrom, rangeTo);
   const filledRange = useMemo(() => {
     // build 7-day array [from..to] using LOCAL date strings to avoid TZ shifts
     const dates: string[] = [];
-    const [sy, sm, sd] = rangeFrom.split('-').map((v) => parseInt(v, 10));
+    const [sy, sm, sd] = rangeFrom.split('-').map((v: string) => parseInt(v, 10));
     const startDateLocal = new Date(sy, (sm || 1) - 1, sd || 1);
     for (let i = 0; i < 7; i++) {
       const d = new Date(startDateLocal);
@@ -48,7 +49,7 @@ export default function WellbeingPage() {
   const xLabels = useMemo(() => {
     const names = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
     return filledRange.map((d) => {
-      const [y, m, day] = d.date.split('-').map((v) => parseInt(v, 10));
+      const [y, m, day] = d.date.split('-').map((v: string) => parseInt(v, 10));
       const dt = new Date(y, (m || 1) - 1, day || 1);
       return names[dt.getDay()];
     });
@@ -91,9 +92,7 @@ export default function WellbeingPage() {
       return d;
     })();
     // События недели для точек
-    const weekFromIso = new Date(weekStartLocal).toISOString();
-    const weekEnd = new Date(weekStartLocal); weekEnd.setDate(weekEnd.getDate() + 6); weekEnd.setHours(23,59,59,999);
-    const weekToIso = weekEnd.toISOString();
+    //
     // Хуки нельзя вызывать внутри функции рендера мини‑календаря — перенесём наружу ниже
     const days: Date[] = Array.from({ length: 7 }, (_, i) => {
       const d = new Date(weekStartLocal);
@@ -164,9 +163,10 @@ export default function WellbeingPage() {
 
   // ВЫЧИСЛЕНИЕ НЕДЕЛИ И СОБЫТИЙ ДЛЯ ТОЧЕК (вне функции рендера)
   const weekStartForSelected = useMemo(() => {
-    const d = new Date(selectedDate);
-    const day = d.getDay();
-    const diff = (day === 0 ? -6 : 1) - day;
+    const [y, m, dd] = selectedDate.split('-').map((v) => parseInt(v, 10));
+    const d = new Date(y, (m || 1) - 1, dd || 1);
+    const w = d.getDay();
+    const diff = (w === 0 ? -6 : 1) - w; // shift to Monday
     d.setDate(d.getDate() + diff);
     d.setHours(0,0,0,0);
     return d;
