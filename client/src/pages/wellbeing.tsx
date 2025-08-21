@@ -48,14 +48,12 @@ export default function WellbeingPage() {
   // Динамические подписи оси X по дням недели для текущего 7-дневного диапазона
   const xLabels = useMemo(() => {
     const names = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-    const [y, m, d] = selectedDate.split('-').map((v: string) => parseInt(v, 10));
-    const sel = new Date(y, (m || 1) - 1, d || 1).getDay();
-    const n = filledRange.length || 7;
-    return Array.from({ length: n }, (_, i) => {
-      const idx = (sel - (n - 1 - i) + 14) % 7; // ensure non-negative
-      return names[idx];
+    return filledRange.map((d) => {
+      const [y, m, dd] = d.date.split('-').map((v: string) => parseInt(v, 10));
+      const w = new Date(y, (m || 1) - 1, dd || 1).getDay();
+      return names[w];
     });
-  }, [selectedDate, filledRange.length]);
+  }, [filledRange]);
 
   // Helper to ensure DB upsert: if записи нет — создаём (POST), иначе частично обновляем (PATCH)
   const persistReflect = (partial: Partial<{ water: number; sleep: number; steps: number; mood: number; journal: string | null }>) => {
@@ -86,9 +84,10 @@ export default function WellbeingPage() {
   // Календарь для выбора дня — унифицированный с Today
   const renderMiniCalendar = () => {
     const weekStartLocal = (() => {
-      const d = new Date(selectedDate);
-      const day = d.getDay();
-      const diff = (day === 0 ? -6 : 1) - day;
+      const [y, m, dd] = selectedDate.split('-').map((v: string) => parseInt(v, 10));
+      const d = new Date(y, (m || 1) - 1, dd || 1);
+      const w = d.getDay();
+      const diff = (w === 0 ? -6 : 1) - w;
       d.setDate(d.getDate() + diff);
       d.setHours(0,0,0,0);
       return d;
@@ -145,7 +144,8 @@ export default function WellbeingPage() {
             <div key={d} className="text-[11px] text-muted-foreground">{d}</div>
           ))}
           {days.map((d) => {
-            const isSelected = d.toISOString().slice(0,10) === selectedDate;
+            const ymd = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            const isSelected = ymd === selectedDate;
             const yyyy = d.getFullYear();
             const mm = String(d.getMonth() + 1).padStart(2, '0');
             const dd = String(d.getDate()).padStart(2, '0');
