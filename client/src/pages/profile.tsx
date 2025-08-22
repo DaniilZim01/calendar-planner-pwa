@@ -9,6 +9,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { User, Settings, Moon, Sun, LogIn } from 'lucide-react';
 import { useIsAuthenticated, useUpdateProfile } from '@/lib/hooks';
+import { requestPermission, subscribePush, unsubscribePush, getExistingSubscription, toDTO } from '@/lib/push';
+import { savePushSubscription, removePushSubscription, api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UserProfile {
@@ -34,6 +36,7 @@ export default function ProfilePage() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [tempProfile, setTempProfile] = useState(profile);
+  const [pushEnabled, setPushEnabled] = useState<boolean>(false);
   // Apply theme whenever stored profile changes
   useEffect(() => {
     const root = document.documentElement;
@@ -58,6 +61,34 @@ export default function ProfilePage() {
     if (tempProfile.theme === 'dark') root.classList.add('dark');
     root.setAttribute('lang', tempProfile.language || 'ru');
     setIsEditing(false);
+  };
+
+  useEffect(() => {
+    (async () => {
+      const sub = await getExistingSubscription();
+      setPushEnabled(Boolean(sub));
+    })();
+  }, []);
+
+  const handleTogglePush = async () => {
+    if (!pushEnabled) {
+      // fetch VAPID public key
+      const { data } = await api.get<{ success: boolean; data: { publicKey: string } }>('/api/push?vapid=1');
+      const pub = data?.data?.publicKey || '';
+      const permission = await requestPermission();
+      if (permission !== 'granted') return;
+      const sub = await subscribePush(pub);
+      if (sub) {
+        await savePushSubscription(toDTO(sub));
+        setPushEnabled(true);
+      }
+    } else {
+      const sub = await getExistingSubscription();
+      const endpoint = (sub && (sub as any).endpoint) || '';
+      await unsubscribePush();
+      if (endpoint) await removePushSubscription(endpoint);
+      setPushEnabled(false);
+    }
   };
 
   const handleCancel = () => {
@@ -234,6 +265,15 @@ export default function ProfilePage() {
             <CardTitle className="font-light text-foreground">Настройки</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-light text-foreground">Push‑уведомления</Label>
+              <div className="flex items-center gap-3">
+                <Button variant={pushEnabled ? 'default' : 'outline'} className={pushEnabled ? 'bg-accent text-white' : ''} onClick={handleTogglePush}>
+                  {pushEnabled ? 'Отключить' : 'Включить'}
+                </Button>
+                <span className="text-xs text-muted-foreground">Работают в фоне (при поддержке браузера)</span>
+              </div>
+            </div>
             <div className="space-y-2">
               <Label className="text-sm font-light text-foreground">
                 Тема оформления
