@@ -39,6 +39,8 @@ export default function ProfilePage() {
     const root = document.documentElement;
     root.classList.remove('dark');
     if (profile.theme === 'dark') root.classList.add('dark');
+    // Apply language immediately as well
+    root.setAttribute('lang', profile.language || 'ru');
   }, [profile.theme]);
   const [authedName, setAuthedName] = useState<string>(user?.name ?? '');
   const [authedPhone, setAuthedPhone] = useState<string>(user?.phone ?? '');
@@ -50,10 +52,11 @@ export default function ProfilePage() {
       } catch {}
     }
     setProfile(tempProfile);
-    // Apply theme immediately
+    // Apply theme and language immediately
     const root = document.documentElement;
     root.classList.remove('dark');
     if (tempProfile.theme === 'dark') root.classList.add('dark');
+    root.setAttribute('lang', tempProfile.language || 'ru');
     setIsEditing(false);
   };
 
@@ -309,9 +312,8 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-sm text-muted-foreground">
-              <p>Календарь-планировщик InCharge</p>
+              <p>FlowDaily — это больше, чем просто планировщик. Это твое личное пространство, где каждый день становится осознанным выбором в пользу себя.</p>
               <p>Версия 1.0.0</p>
-              <p>Создано для эффективного планирования и достижения целей</p>
             </div>
           </CardContent>
         </Card>
