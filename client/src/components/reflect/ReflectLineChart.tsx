@@ -39,20 +39,20 @@ export function ReflectLineChart({ values, max, className, highlightIndex, yTick
     <div className={className || ''}>
       <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="120">
         {/* y axis vertical */}
-        <line x1={leftAxisX} y1={topPad} x2={leftAxisX} y2={height - bottomPad} stroke="hsl(var(--muted-foreground))" strokeWidth={1} opacity={0.25} />
+        <line x1={leftAxisX} y1={topPad} x2={leftAxisX} y2={height - bottomPad} stroke="var(--muted-foreground)" strokeWidth={1} opacity={0.25} />
         {/* y grid + labels */}
         {(yTicks && yTicks.length ? yTicks : [safeMax]).map((t, idx) => {
           const y = toY(t);
           return (
             <g key={idx}>
-              <line x1={leftPad} y1={y} x2={width - rightPad} y2={y} stroke="hsl(var(--muted-foreground))" strokeWidth={1} opacity={0.2} />
-              <text x={leftPad - 10} y={y + 4} fontSize="10" textAnchor="end" fill="hsl(var(--muted-foreground))">{yTickFormatter ? yTickFormatter(t) : t}</text>
+              <line x1={leftPad} y1={y} x2={width - rightPad} y2={y} stroke="var(--muted-foreground)" strokeWidth={1} opacity={0.2} />
+              <text x={leftPad - 10} y={y + 4} fontSize="10" textAnchor="end" fill="var(--muted-foreground)">{yTickFormatter ? yTickFormatter(t) : t}</text>
             </g>
           );
         })}
         {/* line */}
         {coords.length > 1 && (
-          <polyline points={poly} fill="none" stroke="hsl(var(--accent))" strokeWidth={1.25} />
+          <polyline points={poly} fill="none" stroke="var(--accent)" strokeWidth={1.25} />
         )}
         {/* points */}
         {coords.map(([x, y], i) => (
@@ -61,18 +61,18 @@ export function ReflectLineChart({ values, max, className, highlightIndex, yTick
               cx={x}
               cy={y}
               r={3}
-              fill={i === todayIndex ? 'black' : 'hsl(var(--accent))'}
-              stroke="hsl(var(--accent))"
-              strokeWidth={i === todayIndex ? 0 : 1.5}
+              fill={'var(--accent)'}
+              stroke={'var(--accent)'}
+              strokeWidth={1.5}
             />
           </g>
         ))}
         {typeof overlayIndex === 'number' && typeof overlayValue === 'number' && overlayIndex >= 0 && overlayIndex < coords.length && (
-          <circle cx={leftPad + overlayIndex * stepX} cy={toY(overlayValue)} r={4} fill={'hsl(var(--accent))'} />
+          <circle cx={leftPad + overlayIndex * stepX} cy={toY(overlayValue)} r={4} fill={'var(--accent)'} />
         )}
         {/* x labels */}
         {Array.isArray(xLabels) && xLabels.length === pointsCount && xLabels.map((label, i) => (
-          <text key={`xl-${i}`} x={leftPad + i * stepX} y={height - 6} fontSize="10" textAnchor="middle" fill="hsl(var(--muted-foreground))">{label}</text>
+          <text key={`xl-${i}`} x={leftPad + i * stepX} y={height - 6} fontSize="10" textAnchor="middle" fill="var(--muted-foreground)">{label}</text>
         ))}
       </svg>
     </div>
