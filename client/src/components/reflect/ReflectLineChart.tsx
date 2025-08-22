@@ -36,7 +36,7 @@ export function ReflectLineChart({ values, max, className, highlightIndex, yTick
   const poly = coords.map(([x, y]) => `${x},${y}`).join(' ');
 
   // Build smooth cubic Bezier path using Catmull-Rom to Bezier conversion
-  const buildSmoothPath = (points: ReadonlyArray<readonly [number, number]>, tension: number = 0.5): string => {
+  const buildSmoothPath = (points: ReadonlyArray<readonly [number, number]>, tension: number = 0.85): string => {
     if (!points.length) return '';
     if (points.length === 1) return `M ${points[0][0]} ${points[0][1]}`;
     if (points.length === 2) return `M ${points[0][0]} ${points[0][1]} L ${points[1][0]} ${points[1][1]}`;
