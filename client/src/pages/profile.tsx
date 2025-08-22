@@ -10,7 +10,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { User, Settings, Moon, Sun, LogIn } from 'lucide-react';
 import { useIsAuthenticated, useUpdateProfile } from '@/lib/hooks';
 import { requestPermission, subscribePush, unsubscribePush, getExistingSubscription, toDTO } from '@/lib/push';
-import { savePushSubscription, removePushSubscription, api } from '@/lib/api';
+import { savePushSubscription, removePushSubscription, api, sendTestPush } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UserProfile {
@@ -271,6 +271,11 @@ export default function ProfilePage() {
                 <Button variant={pushEnabled ? 'default' : 'outline'} className={pushEnabled ? 'bg-accent text-white' : ''} onClick={handleTogglePush}>
                   {pushEnabled ? 'Отключить' : 'Включить'}
                 </Button>
+                {pushEnabled && (
+                  <Button variant="outline" onClick={() => sendTestPush({ title: 'Тест', body: 'Проверка уведомлений', url: '/' })}>
+                    Отправить тест
+                  </Button>
+                )}
                 <span className="text-xs text-muted-foreground">Работают в фоне (при поддержке браузера)</span>
               </div>
             </div>

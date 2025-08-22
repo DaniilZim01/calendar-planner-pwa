@@ -309,16 +309,16 @@ export async function patchReflect(input: ReflectInput): Promise<ApiSuccess<Refl
 export type PushSubscriptionDTO = { endpoint: string; keys: { p256dh: string; auth: string } };
 
 export async function savePushSubscription(input: PushSubscriptionDTO): Promise<ApiSuccess<{ ok: boolean }>> {
-  const { data } = await api.post<ApiSuccess<{ ok: boolean }>>('/api/push/subscribe', input);
+  const { data } = await api.post<ApiSuccess<{ ok: boolean }>>('/api/push', { action: 'subscribe', subscription: input });
   return data;
 }
 
 export async function removePushSubscription(endpoint: string): Promise<ApiSuccess<{ ok: boolean }>> {
-  const { data } = await api.post<ApiSuccess<{ ok: boolean }>>('/api/push/unsubscribe', { endpoint });
+  const { data } = await api.post<ApiSuccess<{ ok: boolean }>>('/api/push', { action: 'unsubscribe', endpoint });
   return data;
 }
 
 export async function sendTestPush(input: { title?: string; body?: string; url?: string }): Promise<ApiSuccess<{ ok: boolean }>> {
-  const { data } = await api.post<ApiSuccess<{ ok: boolean }>>('/api/push/send', input);
+  const { data } = await api.post<ApiSuccess<{ ok: boolean }>>('/api/push', { action: 'send', ...input });
   return data;
 }
