@@ -38,8 +38,6 @@ export function ReflectLineChart({ values, max, className, highlightIndex, yTick
   return (
     <div className={className || ''}>
       <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="120">
-        {/* y axis vertical */}
-        <line x1={leftAxisX} y1={topPad} x2={leftAxisX} y2={height - bottomPad} stroke="var(--muted-foreground)" strokeWidth={1} opacity={0.25} />
         {/* y grid + labels */}
         {(yTicks && yTicks.length ? yTicks : [safeMax]).map((t, idx) => {
           const y = toY(t);
@@ -50,6 +48,8 @@ export function ReflectLineChart({ values, max, className, highlightIndex, yTick
             </g>
           );
         })}
+        {/* baseline at y=0 */}
+        <line x1={leftPad} y1={toY(0)} x2={width - rightPad} y2={toY(0)} stroke="var(--muted-foreground)" strokeWidth={1} opacity={0.3} />
         {/* line */}
         {coords.length > 1 && (
           <polyline points={poly} fill="none" stroke="var(--accent)" strokeWidth={1.25} />
