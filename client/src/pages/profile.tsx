@@ -11,6 +11,7 @@ import { User, Settings, Moon, Sun, LogIn } from 'lucide-react';
 import { useIsAuthenticated, useUpdateProfile } from '@/lib/hooks';
 import { requestPermission, subscribePush, unsubscribePush, getExistingSubscription, toDTO } from '@/lib/push';
 import { savePushSubscription, removePushSubscription, api, sendTestPush } from '@/lib/api';
+import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UserProfile {
@@ -37,6 +38,7 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [tempProfile, setTempProfile] = useState(profile);
   const [pushEnabled, setPushEnabled] = useState<boolean>(false);
+  const [pushBusy, setPushBusy] = useState<boolean>(false);
   // Apply theme whenever stored profile changes
   useEffect(() => {
     const root = document.documentElement;
@@ -71,23 +73,47 @@ export default function ProfilePage() {
   }, []);
 
   const handleTogglePush = async () => {
-    if (!pushEnabled) {
-      // fetch VAPID public key
-      const { data } = await api.get<{ success: boolean; data: { publicKey: string } }>('/api/push?vapid=1');
-      const pub = data?.data?.publicKey || '';
-      const permission = await requestPermission();
-      if (permission !== 'granted') return;
-      const sub = await subscribePush(pub);
-      if (sub) {
+    if (pushBusy) return;
+    setPushBusy(true);
+    try {
+      if (!pushEnabled) {
+        // Capability checks
+        if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+          toast({ title: 'Недоступно', description: 'Браузер не поддерживает уведомления или сервис‑воркеры' });
+          return;
+        }
+        // fetch VAPID public key
+        const resp = await api.get<{ success: boolean; data: { publicKey: string } }>('/api/push?vapid=1');
+        const pub = resp?.data?.data?.publicKey || '';
+        if (!pub) {
+          toast({ title: 'Не настроено', description: 'VAPID ключ не задан на сервере' });
+          return;
+        }
+        const permission = await requestPermission();
+        if (permission !== 'granted') {
+          toast({ title: 'Разрешение отклонено', description: 'Разрешите уведомления в настройках браузера' });
+          return;
+        }
+        const sub = await subscribePush(pub);
+        if (!sub) {
+          toast({ title: 'Ошибка подписки', description: 'Не удалось оформить подписку' });
+          return;
+        }
         await savePushSubscription(toDTO(sub));
         setPushEnabled(true);
+        toast({ title: 'Готово', description: 'Push‑уведомления включены' });
+      } else {
+        const sub = await getExistingSubscription();
+        const endpoint = (sub && (sub as any).endpoint) || '';
+        await unsubscribePush();
+        if (endpoint) await removePushSubscription(endpoint);
+        setPushEnabled(false);
+        toast({ title: 'Отключено', description: 'Push‑уведомления отключены' });
       }
-    } else {
-      const sub = await getExistingSubscription();
-      const endpoint = (sub && (sub as any).endpoint) || '';
-      await unsubscribePush();
-      if (endpoint) await removePushSubscription(endpoint);
-      setPushEnabled(false);
+    } catch (e: any) {
+      toast({ title: 'Ошибка', description: e?.message || 'Не удалось изменить статус уведомлений' });
+    } finally {
+      setPushBusy(false);
     }
   };
 
@@ -268,11 +294,11 @@ export default function ProfilePage() {
             <div className="space-y-2">
               <Label className="text-sm font-light text-foreground">Push‑уведомления</Label>
               <div className="flex items-center gap-3">
-                <Button variant={pushEnabled ? 'default' : 'outline'} className={pushEnabled ? 'bg-accent text-white' : ''} onClick={handleTogglePush}>
+                <Button variant={pushEnabled ? 'default' : 'outline'} className={pushEnabled ? 'bg-accent text-white' : ''} onClick={handleTogglePush} disabled={pushBusy}>
                   {pushEnabled ? 'Отключить' : 'Включить'}
                 </Button>
                 {pushEnabled && (
-                  <Button variant="outline" onClick={() => sendTestPush({ title: 'Тест', body: 'Проверка уведомлений', url: '/' })}>
+                  <Button variant="outline" onClick={() => sendTestPush({ title: 'Тест', body: 'Проверка уведомлений', url: '/' })} disabled={pushBusy}>
                     Отправить тест
                   </Button>
                 )}
