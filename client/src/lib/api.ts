@@ -304,3 +304,21 @@ export async function patchReflect(input: ReflectInput): Promise<ApiSuccess<Refl
   const { data } = await api.patch<ApiSuccess<ReflectDay>>('/api/reflect', input);
   return data;
 }
+
+// Push Notifications API
+export type PushSubscriptionDTO = { endpoint: string; keys: { p256dh: string; auth: string } };
+
+export async function savePushSubscription(input: PushSubscriptionDTO): Promise<ApiSuccess<{ ok: boolean }>> {
+  const { data } = await api.post<ApiSuccess<{ ok: boolean }>>('/api/push/subscribe', input);
+  return data;
+}
+
+export async function removePushSubscription(endpoint: string): Promise<ApiSuccess<{ ok: boolean }>> {
+  const { data } = await api.post<ApiSuccess<{ ok: boolean }>>('/api/push/unsubscribe', { endpoint });
+  return data;
+}
+
+export async function sendTestPush(input: { title?: string; body?: string; url?: string }): Promise<ApiSuccess<{ ok: boolean }>> {
+  const { data } = await api.post<ApiSuccess<{ ok: boolean }>>('/api/push/send', input);
+  return data;
+}
