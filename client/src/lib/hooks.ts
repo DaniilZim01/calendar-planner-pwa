@@ -140,23 +140,25 @@ export function useCreateTask() {
       };
 
       qc.getQueriesData<any>({ queryKey: ['tasks'] }).forEach(([key]) => {
-        const list = qc.getQueryData<any>(key as any) as any[] | undefined;
-        if (!Array.isArray(list)) return;
         const scope = Array.isArray(key) && key.length >= 2 ? key[1] : undefined;
-        if (scope === 'today') {
-          if (isToday(optimistic.due_date)) {
-            qc.setQueryData<any>(key as any, [optimistic, ...list]);
+        qc.setQueryData<any>(key as any, (old: any) => {
+          const list: any[] | undefined = Array.isArray(old?.data) ? old.data : undefined;
+          if (!list) return old;
+          if (scope === 'today') {
+            if (isToday(optimistic.due_date)) {
+              return { ...old, data: [optimistic, ...list] };
+            }
+            return old;
           }
-          return;
-        }
-        if (scope === 'week') {
-          if (isThisWeek(optimistic.due_date)) {
-            qc.setQueryData<any>(key as any, [optimistic, ...list]);
+          if (scope === 'week') {
+            if (isThisWeek(optimistic.due_date)) {
+              return { ...old, data: [optimistic, ...list] };
+            }
+            return old;
           }
-          return;
-        }
-        // 'all' or other
-        qc.setQueryData<any>(key as any, [optimistic, ...list]);
+          // 'all' or other
+          return { ...old, data: [optimistic, ...list] };
+        });
       });
 
       return { snapshots };
@@ -179,16 +181,19 @@ export function useUpdateTask() {
       const snapshots = qc.getQueriesData<any>({ queryKey: ['tasks'] })
         .map(([key, prev]) => ({ key, prev }));
       qc.getQueriesData<any>({ queryKey: ['tasks'] }).forEach(([key]) => {
-        const list = qc.getQueryData<any>(key as any) as any[] | undefined;
-        if (!Array.isArray(list)) return;
-        qc.setQueryData<any>(key as any, list.map((t) => (t.id === id ? {
-          ...t,
-          title: input.title ?? t.title,
-          description: input.description ?? t.description,
-          due_date: input.dueDate ?? t.due_date,
-          priority: input.priority ?? t.priority,
-          updated_at: new Date().toISOString(),
-        } : t)));
+        qc.setQueryData<any>(key as any, (old: any) => {
+          const list: any[] | undefined = Array.isArray(old?.data) ? old.data : undefined;
+          if (!list) return old;
+          const next = list.map((t) => (t.id === id ? {
+            ...t,
+            title: input.title ?? t.title,
+            description: input.description ?? t.description,
+            due_date: input.dueDate ?? t.due_date,
+            priority: input.priority ?? t.priority,
+            updated_at: new Date().toISOString(),
+          } : t));
+          return { ...old, data: next };
+        });
       });
       return { snapshots };
     },
@@ -210,9 +215,12 @@ export function useToggleTask() {
       const snapshots = qc.getQueriesData<any>({ queryKey: ['tasks'] })
         .map(([key, prev]) => ({ key, prev }));
       qc.getQueriesData<any>({ queryKey: ['tasks'] }).forEach(([key]) => {
-        const list = qc.getQueryData<any>(key as any) as any[] | undefined;
-        if (!Array.isArray(list)) return;
-        qc.setQueryData<any>(key as any, list.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
+        qc.setQueryData<any>(key as any, (old: any) => {
+          const list: any[] | undefined = Array.isArray(old?.data) ? old.data : undefined;
+          if (!list) return old;
+          const next = list.map((t) => (t.id === id ? { ...t, completed: !t.completed, updated_at: new Date().toISOString() } : t));
+          return { ...old, data: next };
+        });
       });
       return { snapshots };
     },
@@ -234,9 +242,11 @@ export function useDeleteTask() {
       const snapshots = qc.getQueriesData<any>({ queryKey: ['tasks'] })
         .map(([key, prev]) => ({ key, prev }));
       qc.getQueriesData<any>({ queryKey: ['tasks'] }).forEach(([key]) => {
-        const list = qc.getQueryData<any>(key as any) as any[] | undefined;
-        if (!Array.isArray(list)) return;
-        qc.setQueryData<any>(key as any, list.filter((t) => t.id !== id));
+        qc.setQueryData<any>(key as any, (old: any) => {
+          const list: any[] | undefined = Array.isArray(old?.data) ? old.data : undefined;
+          if (!list) return old;
+          return { ...old, data: list.filter((t) => t.id !== id) };
+        });
       });
       return { snapshots };
     },
