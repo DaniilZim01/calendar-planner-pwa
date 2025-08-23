@@ -99,7 +99,9 @@ export default function ProfilePage() {
           toast({ title: 'Ошибка подписки', description: 'Не удалось оформить подписку' });
           return;
         }
-        await savePushSubscription(toDTO(sub));
+        const tzOffset = -new Date().getTimezoneOffset(); // minutes east of UTC
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || undefined;
+        await savePushSubscription({ ...toDTO(sub), timezone, tzOffset } as any);
         setPushEnabled(true);
         toast({ title: 'Готово', description: 'Push‑уведомления включены' });
       } else {

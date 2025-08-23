@@ -3,6 +3,7 @@
   "outputDirectory": "dist/public",
   "crons": [
     { "path": "/api/maintenance/cleanup-completed", "schedule": "0 3 * * *" }
+    , { "path": "/api/maintenance/notify-daily", "schedule": "*/5 * * * *" }
   ],
   "rewrites": [
     { "source": "/api/auth/update-profile", "destination": "/api/auth/profile" },

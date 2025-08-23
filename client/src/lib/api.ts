@@ -306,7 +306,7 @@ export async function patchReflect(input: ReflectInput): Promise<ApiSuccess<Refl
 }
 
 // Push Notifications API
-export type PushSubscriptionDTO = { endpoint: string; keys: { p256dh: string; auth: string } };
+export type PushSubscriptionDTO = { endpoint: string; keys: { p256dh: string; auth: string }; timezone?: string; tzOffset?: number };
 
 export async function savePushSubscription(input: PushSubscriptionDTO): Promise<ApiSuccess<{ ok: boolean }>> {
   const { data } = await api.post<ApiSuccess<{ ok: boolean }>>('/api/push', { action: 'subscribe', subscription: input });
