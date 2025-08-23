@@ -298,7 +298,25 @@ export default function ProfilePage() {
                   {pushEnabled ? 'Отключить' : 'Включить'}
                 </Button>
                 {pushEnabled && (
-                  <Button variant="outline" onClick={() => sendTestPush({ title: 'Тест', body: 'Проверка уведомлений', url: '/' })} disabled={pushBusy}>
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        setPushBusy(true);
+                        const res = await sendTestPush({ title: 'Тест', body: 'Проверка уведомлений', url: '/' });
+                        if (res.success) {
+                          toast({ title: 'Отправлено', description: 'Тестовое уведомление отправлено' });
+                        } else {
+                          toast({ title: 'Не удалось отправить', description: res.message || 'Ошибка отправки' });
+                        }
+                      } catch (e: any) {
+                        toast({ title: 'Ошибка', description: e?.response?.data?.message || e?.message || 'Ошибка отправки' });
+                      } finally {
+                        setPushBusy(false);
+                      }
+                    }}
+                    disabled={pushBusy}
+                  >
                     Отправить тест
                   </Button>
                 )}

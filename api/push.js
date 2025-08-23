@@ -102,6 +102,9 @@ export default async function handler(req, res) {
       .select('endpoint, p256dh, auth')
       .eq('user_id', req.user.userId);
     if (error) return res.status(500).json({ success: false, message: 'Failed to load subscriptions' });
+    if (!subs || subs.length === 0) {
+      return res.status(400).json({ success: false, message: 'No active push subscriptions for user' });
+    }
     const results = await Promise.allSettled((subs || []).map((s) => {
       return webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload);
     }));
@@ -120,5 +123,6 @@ export default async function handler(req, res) {
 
   return res.status(400).json({ success: false, message: 'Unknown action' });
 }
+
 
 
