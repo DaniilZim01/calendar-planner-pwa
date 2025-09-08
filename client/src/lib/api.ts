@@ -50,6 +50,18 @@ export const api: AxiosInstance = axios.create({
 
 let isRefreshing = false;
 let pendingRequests: Array<() => void> = [];
+let redirectingToAuth = false;
+
+function redirectToAuth(): void {
+  if (redirectingToAuth) return;
+  redirectingToAuth = true;
+  try {
+    // Force navigation even outside React tree
+    window.location.assign('/auth');
+  } catch {
+    // no-op
+  }
+}
 
 function subscribeTokenRefresh(cb: () => void): void {
   pendingRequests.push(cb);
@@ -81,6 +93,7 @@ async function refreshTokens(): Promise<AccessTokenPair | null> {
     return next;
   } catch (error) {
     clearStoredTokens();
+    // make caller handle redirect
     return null;
   }
 }
@@ -99,6 +112,7 @@ api.interceptors.response.use(
         isRefreshing = false;
         onRefreshed();
         if (!updated) {
+          redirectToAuth();
           return Promise.reject(error);
         }
       }
@@ -109,6 +123,11 @@ api.interceptors.response.use(
         (originalRequest.headers as Record<string, string>)['Authorization'] = `Bearer ${tokens.accessToken}`;
       }
       return api(originalRequest);
+    }
+    if (error.response?.status === 401 && originalRequest._retry) {
+      // If we already retried and still 401, go to auth
+      clearStoredTokens();
+      redirectToAuth();
     }
     return Promise.reject(error);
   }

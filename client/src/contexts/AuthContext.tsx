@@ -43,9 +43,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
     logout: async () => {
       setError(null);
-      await logoutMutation.mutateAsync().then(() => {
-        navigate('/auth');
-      }).catch(() => {});
+      try {
+        await logoutMutation.mutateAsync();
+      } catch {}
+      navigate('/auth');
     },
     user: me ?? null,
     isLoading: isLoadingProfile || loginMutation.isPending || registerMutation.isPending || logoutMutation.isPending,
