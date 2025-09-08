@@ -49,12 +49,20 @@ export default async function handler(req, res) {
   }
 
   const nowUtc = new Date();
+  const force = (req.query?.force || '').toString(); // '', 'morning', 'night', 'both', '1'
+  const targetUserId = req.query?.user_id ? req.query.user_id.toString() : null;
   try {
     // Fetch subscriptions with tz info
-    const { data: subs, error } = await supabase
+    let query = supabase
       .from('push_subscriptions')
-      .select('user_id, endpoint, p256dh, auth, tz_offset')
-      .not('tz_offset', 'is', null);
+      .select('user_id, endpoint, p256dh, auth, tz_offset');
+    if (!force) {
+      query = query.not('tz_offset', 'is', null);
+    }
+    if (targetUserId) {
+      query = query.eq('user_id', targetUserId);
+    }
+    const { data: subs, error } = await query;
     if (error) throw error;
 
     const payloadMorning = JSON.stringify({ title: 'Доброе утро!', body: 'Не забудь составить планы на день', url: '/' });
@@ -63,7 +71,21 @@ export default async function handler(req, res) {
     const sendOps = [];
     for (const s of subs || []) {
       const tzOffset = Number(s.tz_offset);
-      if (!Number.isFinite(tzOffset)) continue;
+      const canCompute = Number.isFinite(tzOffset);
+      const wantMorning = force === 'morning' || force === 'both' || force === '1';
+      const wantNight = force === 'night' || force === 'both' || force === '1';
+
+      if (force) {
+        if (wantMorning) {
+          sendOps.push(webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payloadMorning));
+        }
+        if (wantNight) {
+          sendOps.push(webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payloadNight));
+        }
+        continue;
+      }
+
+      if (!canCompute) continue;
       const isMorning = isTargetMinute(nowUtc, tzOffset, 9);
       const isNight = isTargetMinute(nowUtc, tzOffset, 21);
       if (!isMorning && !isNight) continue;
@@ -91,5 +113,6 @@ export default async function handler(req, res) {
     return res.status(500).json({ success: false, message: 'Cron push failed', error: String(error?.message || error) });
   }
 }
+
 
 
