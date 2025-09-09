@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "echo 'No build needed for serverless functions'",
+  "buildCommand": "npm run build",
   "crons": [
     { "path": "/api/maintenance/cleanup-completed", "schedule": "0 3 * * *" },
     { "path": "/api/maintenance/notify-morning", "schedule": "0 6 * * *" }
