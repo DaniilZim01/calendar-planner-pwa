@@ -6,6 +6,9 @@ const supabaseUrl = process.env.SUPABASE_URL || 'https://doirvgumddwncxujbosb.su
 const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRvaXJ2Z3VtZGR3bmN4dWpib3NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzYwMzcsImV4cCI6MjA2OTkxMjAzN30.q0vEL3ddgd4j9S639Jdbr6l1YU_ucaRxTJlMQrasX3s';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Normalize ISO string: if client sent without Z, treat as UTC by appending Z
+const normalize = (iso) => (/[zZ]$/.test(iso) ? iso : `${iso}Z`);
+
 // Zod schemas
 const insertSchema = z.object({
   title: z.string().min(1).max(255),
@@ -79,9 +82,6 @@ export default async function handler(req, res) {
         return res.status(400).json({ success: false, message: 'Invalid event data', errors: parseResult.error.flatten() });
       }
       const body = parseResult.data;
-
-      // If client sent naive local string (without 'Z'), treat as UTC already
-      const normalize = (iso) => (/[zZ]$/.test(iso) ? iso : `${iso}Z`);
 
       const payload = {
         user_id: req.user.userId,

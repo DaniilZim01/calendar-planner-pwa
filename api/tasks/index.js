@@ -17,6 +17,9 @@ export default async function handler(req, res) {
     return res.status(status).json({ success: false, message: error.message || 'Unauthorized', error: error.error || 'unauthorized' });
   }
 
+  // Consolidated: handle /api/tasks (list, create) and /api/tasks?id=... (update/toggle/delete)
+  const id = (req.query?.id || '').toString();
+
   if (req.method === 'GET') {
     try {
       const scope = (req.query?.scope || '').toString();
@@ -83,7 +86,7 @@ export default async function handler(req, res) {
     }
   }
 
-  if (req.method === 'POST') {
+  if (req.method === 'POST' && !id) {
     try {
       const createTaskSchema = z.object({
         title: z.string().min(1, 'Title is required').max(255),
@@ -125,6 +128,108 @@ export default async function handler(req, res) {
     } catch (error) {
       console.error('Task create error:', error);
       return res.status(500).json({ success: false, message: 'Failed to create task' });
+    }
+  }
+
+  // Update single task when id is provided via query
+  if (id && req.method === 'PUT') {
+    try {
+      const updateTaskSchema = z.object({
+        title: z.string().min(1).max(255).optional(),
+        description: z.string().max(10000).optional().nullable(),
+        dueDate: z.union([z.string().datetime({ offset: true }).or(z.string()), z.null()]).optional(),
+        priority: z.number().int().min(1).max(5).optional(),
+        completed: z.boolean().optional(),
+      });
+      const parseResult = updateTaskSchema.safeParse(req.body || {});
+      if (!parseResult.success) {
+        return res.status(400).json({ success: false, message: 'Invalid task data', errors: parseResult.error.flatten() });
+      }
+      const { title, description, dueDate, priority, completed } = parseResult.data;
+      const updateData = { updated_at: new Date().toISOString() };
+      if (title !== undefined) updateData.title = String(title).trim();
+      if (description !== undefined) updateData.description = description ? String(description) : null;
+      if (dueDate !== undefined) updateData.due_date = dueDate ? new Date(dueDate).toISOString() : null;
+      if (priority !== undefined) updateData.priority = Number(priority);
+      if (completed !== undefined) updateData.completed = Boolean(completed);
+
+      // ensure ownership via user_tasks
+      const { data: map, error: mapErr } = await supabase
+        .from('user_tasks')
+        .select('task_id')
+        .eq('task_id', id)
+        .eq('user_id', req.user.userId)
+        .single();
+      if (mapErr || !map) return res.status(404).json({ success: false, message: 'Task not found' });
+
+      const { data, error } = await supabase
+        .from('tasks')
+        .update(updateData)
+        .eq('id', id)
+        .select('id, title, description, due_date, completed, priority, created_at, updated_at')
+        .single();
+      if (error) throw error;
+      if (!data) return res.status(404).json({ success: false, message: 'Task not found' });
+      return res.status(200).json({ success: true, message: 'Task updated', data });
+    } catch (error) {
+      console.error('Task update error:', error);
+      return res.status(500).json({ success: false, message: 'Failed to update task' });
+    }
+  }
+
+  if (id && req.method === 'PATCH') {
+    try {
+      // ensure ownership
+      const { data: map, error: mapErr } = await supabase
+        .from('user_tasks')
+        .select('task_id')
+        .eq('task_id', id)
+        .eq('user_id', req.user.userId)
+        .single();
+      if (mapErr || !map) return res.status(404).json({ success: false, message: 'Task not found' });
+
+      const { data: existing, error: findError } = await supabase
+        .from('tasks')
+        .select('completed')
+        .eq('id', id)
+        .single();
+      if (findError) throw findError;
+      if (!existing) return res.status(404).json({ success: false, message: 'Task not found' });
+
+      const { data, error } = await supabase
+        .from('tasks')
+        .update({ completed: !existing.completed, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select('id, title, description, due_date, completed, priority, created_at, updated_at')
+        .single();
+      if (error) throw error;
+      return res.status(200).json({ success: true, message: 'Task toggled', data });
+    } catch (error) {
+      console.error('Task toggle error:', error);
+      return res.status(500).json({ success: false, message: 'Failed to toggle task' });
+    }
+  }
+
+  if (id && req.method === 'DELETE') {
+    try {
+      // ensure ownership
+      const { data: map, error: mapErr } = await supabase
+        .from('user_tasks')
+        .select('task_id')
+        .eq('task_id', id)
+        .eq('user_id', req.user.userId)
+        .single();
+      if (mapErr || !map) return res.status(404).json({ success: false, message: 'Task not found' });
+
+      const { error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      return res.status(200).json({ success: true, message: 'Task deleted' });
+    } catch (error) {
+      console.error('Task delete error:', error);
+      return res.status(500).json({ success: false, message: 'Failed to delete task' });
     }
   }
 
