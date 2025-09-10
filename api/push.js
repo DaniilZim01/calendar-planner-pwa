@@ -46,6 +46,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, message: 'Invalid subscription' });
     }
     const now = new Date().toISOString();
+    const timezone = (req.body?.timezone || '').toString() || null;
+    const tzOffset = Number.isFinite(Number(req.body?.tzOffset)) ? Number(req.body?.tzOffset) : null;
     // upsert by endpoint
     const { data: existing } = await supabase.from('push_subscriptions')
       .select('id')
@@ -54,7 +56,7 @@ export default async function handler(req, res) {
     let result;
     if (existing?.id) {
       const { data, error } = await supabase.from('push_subscriptions')
-        .update({ user_id: req.user.userId, p256dh: sub.keys.p256dh, auth: sub.keys.auth, updated_at: now })
+        .update({ user_id: req.user.userId, p256dh: sub.keys.p256dh, auth: sub.keys.auth, updated_at: now, timezone, tz_offset: tzOffset })
         .eq('id', existing.id)
         .select('id')
         .single();
@@ -62,7 +64,7 @@ export default async function handler(req, res) {
       result = data;
     } else {
       const { data, error } = await supabase.from('push_subscriptions')
-        .insert({ user_id: req.user.userId, endpoint: sub.endpoint, p256dh: sub.keys.p256dh, auth: sub.keys.auth, created_at: now, updated_at: now })
+        .insert({ user_id: req.user.userId, endpoint: sub.endpoint, p256dh: sub.keys.p256dh, auth: sub.keys.auth, created_at: now, updated_at: now, timezone, tz_offset: tzOffset })
         .select('id')
         .single();
       if (error) return res.status(500).json({ success: false, message: 'Failed to save subscription' });

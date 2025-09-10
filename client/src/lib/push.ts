@@ -73,7 +73,9 @@ export async function unsubscribePush(): Promise<boolean> {
 
 export function toDTO(sub: PushSubscription): PushSubscriptionDTO {
   const json = sub.toJSON() as any;
-  return { endpoint: json.endpoint, keys: { p256dh: json.keys?.p256dh, auth: json.keys?.auth } } as PushSubscriptionDTO;
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  const tzOffset = -new Date().getTimezoneOffset();
+  return { endpoint: json.endpoint, keys: { p256dh: json.keys?.p256dh, auth: json.keys?.auth }, timezone, tzOffset } as PushSubscriptionDTO;
 }
 
 
