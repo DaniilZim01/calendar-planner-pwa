@@ -56,6 +56,19 @@ export default async function handler(req, res) {
     try {
       const from = (req.query?.from || '').toString() || undefined;
       const to = (req.query?.to || '').toString() || undefined;
+      const id = (req.query?.id || '').toString() || undefined;
+
+      if (id) {
+        const { data, error } = await supabase
+          .from('events')
+          .select('id, user_id, title, description, start_time, end_time, timezone, location, is_all_day, created_at, updated_at')
+          .eq('id', id)
+          .eq('user_id', req.user.userId)
+          .single();
+        if (error) throw error;
+        if (!data) return res.status(404).json({ success: false, message: 'Event not found' });
+        return res.status(200).json({ success: true, data });
+      }
 
       let query = supabase
         .from('events')
