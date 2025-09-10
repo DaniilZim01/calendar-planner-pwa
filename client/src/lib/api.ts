@@ -108,7 +108,9 @@ api.interceptors.response.use(
           // Refresh failed → clear tokens and redirect to login
           try { clearStoredTokens(); } catch {}
           if (typeof window !== 'undefined') {
-            window.location.assign('/auth');
+            if (window.location.pathname !== '/auth') {
+              window.location.assign('/auth');
+            }
           }
           return Promise.reject(error);
         }
