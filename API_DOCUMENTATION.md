@@ -227,6 +227,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```json
 {
   "rewrites": [
+    { "source": "/api/events/:id", "destination": "/api/events?id=:id" },
+    { "source": "/api/tasks/:id", "destination": "/api/tasks?id=:id" },
     { "source": "/api/auth/update-profile", "destination": "/api/auth/profile" },
     { "source": "/api/auth/change-password", "destination": "/api/auth/profile" },
     { "source": "/api/auth/verify", "destination": "/api/auth/profile" }
@@ -238,11 +240,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ### События
 
-Новые функции событий (в одной/двух серверлес‑функциях):
-- GET  `/api/events?from=ISO&to=ISO`
-- POST `/api/events`
-- PATCH `/api/events/:id`
-- DELETE `/api/events/:id`
+Эндпоинты событий (консолидированы для соответствия лимитам функций):
+- GET  `/api/events?from=ISO&to=ISO` — список событий за диапазон
+- GET  `/api/events/:id` — получить одно событие по id
+- POST `/api/events` — создать событие
+- PATCH `/api/events/:id` — обновить событие
+- DELETE `/api/events/:id` — удалить событие
 
 Body для POST/PATCH: title, description?, startTime(UTC ISO), endTime(UTC ISO), timezone, location?, isAllDay.
 
@@ -300,7 +303,31 @@ Body для POST/PATCH: title, description?, startTime(UTC ISO), endTime(UTC ISO
 }
 ```
 
-### **Переменные окружения**
+### Задачи
+
+Эндпоинты задач (объединены; операции по id работают через rewrite):
+- GET  `/api/tasks` — список всех актуальных задач
+- GET  `/api/tasks?scope=today|week` — фильтры по дню/неделе
+- POST `/api/tasks` — создать задачу
+- PUT  `/api/tasks/:id` — обновить задачу
+- PATCH `/api/tasks/:id` — переключить `completed`
+- DELETE `/api/tasks/:id` — удалить задачу
+
+Body для POST/PUT:
+```json
+{
+  "title": "Название",
+  "description": "Описание",           
+  "dueDate": "2025-01-12T10:00:00Z",   
+  "priority": 1,                        
+  "completed": false                    
+}
+```
+
+Ответ для задач возвращает объект `data` в виде массива задач или одной задачи со свойствами:
+`id, title, description, due_date, completed, priority, created_at, updated_at`.
+
+## **Переменные окружения**
 Настройте переменные в Postman:
 - `baseUrl`: `https://calendar-planner-pwa.vercel.app`
 - `accessToken`: Получается после логина
@@ -314,6 +341,28 @@ SUPABASE_ANON_KEY=your-anon-key
 JWT_ACCESS_SECRET=your-access-secret-key
 JWT_REFRESH_SECRET=your-refresh-secret-key
 ```
+
+## 🔔 Push‑уведомления
+
+### Эндпоинт подписки
+- GET  `/api/push?vapid=1` — получить публичный VAPID‑ключ `{ publicKey }`
+- POST `/api/push` — действия:
+  - `{"action":"subscribe", "subscription": { endpoint, keys:{p256dh,auth} }, "timezone":"Europe/Moscow", "tzOffset": 180 }`
+    - сохраняет/обновляет подписку пользователя в таблице `push_subscriptions`, вместе с `timezone` и `tz_offset` (в минутах)
+  - `{"action":"unsubscribe", "endpoint":"..."}` — удаляет подписку
+  - `{"action":"send", "title":"Тест", "body":"...", "url":"/"}` — отправка тестового пуша пользователю (требует авторизацию)
+
+Примечание: клиент отправляет `timezone` и `tzOffset` (минуты от UTC, с учётом знака), чтобы сервер мог учитывать локальное время пользователя.
+
+### Утреннее напоминание
+- Ежедневная функция: `GET /api/maintenance/notify-morning` (запускается по расписанию Vercel один раз в день)
+- Локальное время пользователя вычисляется из `tz_offset`; пуш отправляется, когда у пользователя 09:00
+- Для теста можно вызвать вручную: `/api/maintenance/notify-morning?force=1`
+- На тарифе Hobby оставлено только утреннее уведомление; вечернее отключено
+
+### Service Worker
+- Файл `client/public/service-worker.js` обрабатывает события `push` и `notificationclick`
+- Для работы необходимы корректные переменные окружения `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`
 
 ## 📝 Примечания
 
