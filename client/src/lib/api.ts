@@ -89,7 +89,13 @@ api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const status = error.response?.status;
+    const url = (originalRequest?.url || '').toString();
+
+    // Do not try to refresh for auth endpoints to avoid loops
+    const isAuthEndpoint = url.includes('/api/auth/login') || url.includes('/api/auth/register') || url.includes('/api/auth/refresh');
+
+    if ((status === 401 || status === 403) && !originalRequest._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         await new Promise<void>((resolve) => subscribeTokenRefresh(resolve));
       } else {
@@ -99,6 +105,11 @@ api.interceptors.response.use(
         isRefreshing = false;
         onRefreshed();
         if (!updated) {
+          // Refresh failed → clear tokens and redirect to login
+          try { clearStoredTokens(); } catch {}
+          if (typeof window !== 'undefined') {
+            window.location.assign('/auth');
+          }
           return Promise.reject(error);
         }
       }
@@ -143,13 +154,15 @@ export async function logoutUser(): Promise<ApiSuccess<{ message: string }>> {
 }
 
 export async function fetchProfile(): Promise<ApiSuccess<{ id: string; email: string; name?: string | null; phone?: string | null }>> {
-  const { data } = await api.get<ApiSuccess<{ id: string; email: string; name?: string | null; phone?: string | null }>>('/api/auth/profile');
-  return data;
+  const { data } = await api.get<ApiSuccess<{ user?: { id: string; email: string; name?: string | null; phone?: string | null } | null }>>('/api/auth/profile');
+  const user = (data as any)?.data?.user ?? (data as any)?.data ?? null;
+  return { success: true, data: user } as ApiSuccess<{ id: string; email: string; name?: string | null; phone?: string | null }>;
 }
 
 export async function updateProfile(input: { name?: string; phone?: string }): Promise<ApiSuccess<{ id: string; email: string; name?: string | null; phone?: string | null }>> {
-  const { data } = await api.put<ApiSuccess<{ id: string; email: string; name?: string | null; phone?: string | null }>>('/api/auth/update-profile', input);
-  return data;
+  const { data } = await api.put<ApiSuccess<{ user?: { id: string; email: string; name?: string | null; phone?: string | null } | null }>>('/api/auth/update-profile', input);
+  const user = (data as any)?.data?.user ?? (data as any)?.data ?? null;
+  return { success: true, data: user } as ApiSuccess<{ id: string; email: string; name?: string | null; phone?: string | null }>;
 }
 
 export async function changePassword(input: { currentPassword: string; newPassword: string }): Promise<ApiSuccess<{ message: string }>> {
