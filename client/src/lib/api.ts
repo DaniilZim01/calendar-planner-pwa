@@ -128,8 +128,8 @@ api.interceptors.response.use(
 );
 
 // Auth endpoints
-export type LoginRequest = { email: string; password: string };
-export type RegisterRequest = { name: string; email: string; password: string; phone?: string };
+export type LoginRequest = { login?: string; email?: string; password: string };
+export type RegisterRequest = { login: string; name: string; email?: string; password: string; phone?: string };
 export type CheckLoginResponse = ApiSuccess<{ available: boolean }>;
 
 export type AuthResponse = ApiSuccess<{

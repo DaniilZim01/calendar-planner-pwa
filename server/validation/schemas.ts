@@ -2,7 +2,8 @@ import { z } from 'zod';
 
 // User validation schemas
 export const registerSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  login: z.string().min(2, 'Login must be at least 2 characters').max(255, 'Login too long'),
+  email: z.string().email('Invalid email address').optional(),
   phone: z.string().optional(),
   name: z.string().min(2, 'Name must be at least 2 characters').max(255, 'Name too long'),
   password: z.string().min(8, 'Password must be at least 8 characters').regex(
@@ -12,7 +13,7 @@ export const registerSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  login: z.string().min(1, 'Login is required'),
   password: z.string().min(1, 'Password is required'),
 });
 

@@ -5,7 +5,8 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 // Users table
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
-  email: varchar('email', { length: 255 }).notNull().unique(),
+  login: varchar('login', { length: 255 }).notNull().unique(),
+  email: varchar('email', { length: 255 }).unique(),
   phone: varchar('phone', { length: 20 }),
   name: varchar('name', { length: 255 }).notNull(),
   passwordHash: varchar('password_hash', { length: 255 }).notNull(),
@@ -13,6 +14,7 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({
+  loginIdx: index('login_idx').on(table.login),
   emailIdx: index('email_idx').on(table.email),
   phoneIdx: index('phone_idx').on(table.phone),
 }));

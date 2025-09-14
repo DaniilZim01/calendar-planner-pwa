@@ -38,7 +38,7 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
       ? email.trim()
       : `${login.trim()}-${Date.now()}@noemail.local`;
 
-    await register({ name: login.trim(), email: safeEmail, password });
+    await register({ login: login.trim(), name: login.trim(), email: safeEmail, password });
     navigate('/auth');
   };
 

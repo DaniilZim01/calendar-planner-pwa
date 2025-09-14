@@ -16,9 +16,18 @@ export async function register(req: Request, res: Response): Promise<void> {
     const validatedData = registerSchema.parse(req.body);
     
     // Check if user already exists
-    const existingUser = await db.query.users.findFirst({
-      where: eq(users.email, validatedData.email)
-    });
+    // Check login uniqueness
+    const existingLogin = await db.query.users.findFirst({ where: eq(users.login, validatedData.login) });
+    if (existingLogin) {
+      res.status(409).json({ success: false, message: 'Login already taken', code: 'LOGIN_TAKEN' });
+      return;
+    }
+
+    // If email provided, check its uniqueness too
+    let existingUser: any = null;
+    if (validatedData.email) {
+      existingUser = await db.query.users.findFirst({ where: eq(users.email, validatedData.email) });
+    }
 
     if (existingUser) {
       res.status(409).json({
@@ -34,12 +43,14 @@ export async function register(req: Request, res: Response): Promise<void> {
 
     // Create user
     const [newUser] = await db.insert(users).values({
-      email: validatedData.email,
+      login: validatedData.login,
+      email: validatedData.email ?? null,
       phone: validatedData.phone,
       name: validatedData.name,
       passwordHash,
     }).returning({
       id: users.id,
+      login: users.login,
       email: users.email,
       name: users.name,
       phone: users.phone,
@@ -65,6 +76,7 @@ export async function register(req: Request, res: Response): Promise<void> {
       data: {
         user: {
           id: newUser.id,
+          login: newUser.login,
           email: newUser.email,
           name: newUser.name,
           phone: newUser.phone,
@@ -105,15 +117,15 @@ export async function login(req: Request, res: Response): Promise<void> {
     // Validate input data
     const validatedData = loginSchema.parse(req.body);
     
-    // Find user by email
+    // Find user by login
     const user = await db.query.users.findFirst({
-      where: eq(users.email, validatedData.email)
+      where: eq(users.login, validatedData.login)
     });
 
     if (!user) {
       res.status(401).json({
         success: false,
-        message: 'Invalid email or password',
+        message: 'Invalid login or password',
         code: 'INVALID_CREDENTIALS'
       });
       return;
@@ -125,7 +137,7 @@ export async function login(req: Request, res: Response): Promise<void> {
     if (!isPasswordValid) {
       res.status(401).json({
         success: false,
-        message: 'Invalid email or password',
+        message: 'Invalid login or password',
         code: 'INVALID_CREDENTIALS'
       });
       return;
@@ -149,6 +161,7 @@ export async function login(req: Request, res: Response): Promise<void> {
       data: {
         user: {
           id: user.id,
+          login: user.login,
           email: user.email,
           name: user.name,
           phone: user.phone,
@@ -411,7 +424,7 @@ export async function checkLoginAvailability(req: Request, res: Response): Promi
       return;
     }
 
-    const existing = await db.query.users.findFirst({ where: eq(users.name, login) });
+    const existing = await db.query.users.findFirst({ where: eq(users.login, login) });
     res.json({ success: true, data: { available: !existing } });
   } catch (error) {
     console.error('Check login availability error:', error);

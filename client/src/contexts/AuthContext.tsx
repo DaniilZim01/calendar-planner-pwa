@@ -7,7 +7,7 @@ type AuthContextValue = {
   login: (payload: LoginRequest) => Promise<void>;
   register: (payload: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
-  user: { id: string; email: string; name?: string | null; phone?: string | null } | null;
+  user: { id: string; login?: string; email: string; name?: string | null; phone?: string | null } | null;
   isLoading: boolean;
   error: string | null;
 };
