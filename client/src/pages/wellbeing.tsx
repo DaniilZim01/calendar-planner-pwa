@@ -120,7 +120,7 @@ export default function WellbeingPage() {
             <ChevronLeft className="w-5 h-5" />
           </button>
           <div className="text-center text-foreground font-light">
-            {new Date(selectedDate).toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}
+            {new Date(selectedDate).toLocaleString('ru-RU', { month: 'long', year: 'numeric' }).replace(' г.', '')}
           </div>
           <button
             className="p-1 text-muted-foreground hover:text-accent"
@@ -140,8 +140,8 @@ export default function WellbeingPage() {
           </button>
         </div>
         <div className="grid grid-cols-7 gap-1 text-center">
-          {['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((d) => (
-            <div key={d} className="text-[11px] text-muted-foreground">{d}</div>
+          {['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((d, idx) => (
+            <div key={d} className={`text-[11px] ${(() => { const wd = new Date(selectedDate).getDay(); const hi = wd===0?6:wd-1; return idx===hi ? 'bg-accent text-white rounded-md px-2 py-1' : 'text-muted-foreground'; })()}`}>{d}</div>
           ))}
           {days.map((d) => {
             const ymd = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -160,7 +160,7 @@ export default function WellbeingPage() {
                   const dd = String(d.getDate()).padStart(2, '0');
                   setSelectedDate(`${y}-${m}-${dd}`);
                 }}
-                className={`mt-1 aspect-square flex items-center justify-center rounded-full text-sm transition-colors ${isSelected ? 'bg-accent text-white' : 'text-foreground hover:bg-secondary/30'}`}
+                className={`mt-1 aspect-square flex items-center justify-center rounded-full text-sm transition-colors ${isSelected ? 'bg-accent/20 text-foreground' : 'text-foreground hover:bg-secondary/30'}`}
               >
                 <div className="flex flex-col items-center justify-center leading-none">
                   <span>{d.getDate()}</span>
