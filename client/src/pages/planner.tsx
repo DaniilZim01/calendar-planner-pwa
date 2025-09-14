@@ -264,8 +264,8 @@ export default function PlannerPage() {
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-lg font-semibold text-foreground">События</h3>
               <EventDialog onAddEvent={handleAddEvent} selectedDate={selectedDayIso}>
-                <Button aria-label="Добавить событие" className="bg-accent hover:bg-accent/90 text-white px-3 py-2 rounded-full flex items-center justify-center text-lg">
-                  + Добавить событие
+                <Button aria-label="Добавить событие" className="bg-accent hover:bg-accent/90 text-white w-8 h-8 p-0 rounded-full flex items-center justify-center">
+                  <Plus className="w-4 h-4" />
                 </Button>
               </EventDialog>
             </div>
@@ -304,8 +304,8 @@ export default function PlannerPage() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-lg font-semibold text-foreground">Задачи</h3>
-              <Button aria-label="Добавить задачу" onClick={() => { setIsCreating(true); setEditingId(null); }} className="bg-accent hover:bg-accent/90 text-white px-3 py-2 rounded-full flex items-center justify-center text-lg">
-                + Добавить задачу
+              <Button aria-label="Добавить задачу" onClick={() => { setIsCreating(true); setEditingId(null); }} className="bg-accent hover:bg-accent/90 text-white w-8 h-8 p-0 rounded-full flex items-center justify-center">
+                <Plus className="w-4 h-4" />
               </Button>
             </div>
             {isLoadingTasksAll ? (
