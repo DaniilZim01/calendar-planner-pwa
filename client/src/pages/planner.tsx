@@ -206,10 +206,8 @@ export default function PlannerPage() {
             </button>
           </div>
           <div className="grid grid-cols-7 gap-1 text-center">
-            {['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((d, idx) => (
-              <div key={d} className={`text-[11px] ${idx===selectedDate.getDay()-1 || (selectedDate.getDay()===0 && idx===6) ? 'text-white' : 'text-muted-foreground'}`}>{d}</div>
-            ))}
-            {weekDays.map((d, idx) => {
+            {['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((name, idx) => {
+              const d = weekDays[idx];
               const isSelected = d.toDateString() === selectedDate.toDateString();
               const yyyy = d.getFullYear();
               const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -217,16 +215,22 @@ export default function PlannerPage() {
               const isoDay = `${yyyy}-${mm}-${dd}`;
               const hasEvents = eventDaysSet.has(isoDay);
               return (
-                <button
-                  key={d.toISOString()}
-                  onClick={() => setSelectedDate(new Date(d))}
-                  className={`mt-1 aspect-square flex items-center justify-center rounded-full text-sm transition-colors ${isSelected ? 'bg-accent text-white rounded-xl' : 'text-foreground hover:bg-secondary/30'}`}
-                >
-                  <div className="flex flex-col items-center justify-center leading-none">
-                    <span className="font-semibold">{d.getDate()}</span>
-                    {hasEvents ? <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-accent" /> : <span className="mt-0.5 h-1.5" />}
-                  </div>
-                </button>
+                <div key={name} className={`${isSelected ? 'bg-accent text-white rounded-2xl' : ''} py-1`}>
+                  <div className="text-[11px]">{name}</div>
+                  <button
+                    onClick={() => setSelectedDate(new Date(d))}
+                    className={`mt-1 w-full flex items-center justify-center text-sm`}
+                  >
+                    <div className="flex flex-col items-center justify-center leading-none">
+                      <span>{d.getDate()}</span>
+                      {hasEvents ? (
+                        <span className={`mt-0.5 w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-accent'}`} />
+                      ) : (
+                        <span className="mt-0.5 h-1.5" />
+                      )}
+                    </div>
+                  </button>
+                </div>
               );
             })}
           </div>

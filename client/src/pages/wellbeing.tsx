@@ -140,10 +140,8 @@ export default function WellbeingPage() {
           </button>
         </div>
         <div className="grid grid-cols-7 gap-1 text-center">
-          {['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((d, idx) => (
-            <div key={d} className={`text-[11px] ${(() => { const wd = new Date(selectedDate).getDay(); const hi = wd===0?6:wd-1; return idx===hi ? 'text-white' : 'text-muted-foreground'; })()}`}>{d}</div>
-          ))}
-          {days.map((d) => {
+          {['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((name, idx) => {
+            const d = days[idx];
             const ymd = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
             const isSelected = ymd === selectedDate;
             const yyyy = d.getFullYear();
@@ -152,21 +150,23 @@ export default function WellbeingPage() {
             const isoDay = `${yyyy}-${mm}-${dd}`;
             const hasEvents = eventDaysSet.has(isoDay);
             return (
-              <button
-                key={d.toISOString()}
-                onClick={() => {
-                  const y = d.getFullYear();
-                  const m = String(d.getMonth() + 1).padStart(2, '0');
-                  const dd = String(d.getDate()).padStart(2, '0');
-                  setSelectedDate(`${y}-${m}-${dd}`);
-                }}
-                className={`mt-1 aspect-square flex items-center justify-center rounded-xl text-sm transition-colors ${isSelected ? 'bg-accent text-white' : 'text-foreground hover:bg-secondary/30'}`}
-              >
-                <div className="flex flex-col items-center justify-center leading-none">
-                  <span className="font-semibold">{d.getDate()}</span>
-                  {hasEvents ? <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-accent" /> : <span className="mt-0.5 h-1.5" />}
-                </div>
-              </button>
+              <div key={name} className={`${isSelected ? 'bg-accent text-white rounded-2xl' : ''} py-1`}>
+                <div className="text-[11px]">{name}</div>
+                <button
+                  onClick={() => {
+                    const y = d.getFullYear();
+                    const m = String(d.getMonth() + 1).padStart(2, '0');
+                    const dd2 = String(d.getDate()).padStart(2, '0');
+                    setSelectedDate(`${y}-${m}-${dd2}`);
+                  }}
+                  className="mt-1 w-full flex items-center justify-center text-sm"
+                >
+                  <div className="flex flex-col items-center justify-center leading-none">
+                    <span>{d.getDate()}</span>
+                    {hasEvents ? <span className={`mt-0.5 w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-accent'}`} /> : <span className="mt-0.5 h-1.5" />}
+                  </div>
+                </button>
+              </div>
             );
           })}
         </div>
