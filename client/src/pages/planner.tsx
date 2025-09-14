@@ -263,7 +263,7 @@ export default function PlannerPage() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-base font-light text-foreground">События</h3>
-              <EventDialog onAddEvent={handleAddEvent} selectedDate={new Date(selectedDate).toISOString().slice(0,10)}>
+              <EventDialog onAddEvent={handleAddEvent} selectedDate={selectedDayIso}>
                 <Button aria-label="Добавить событие" className="bg-accent hover:bg-accent/90 text-white w-8 h-8 p-0 rounded-full flex items-center justify-center">
                   <Plus className="w-4 h-4" />
                 </Button>
