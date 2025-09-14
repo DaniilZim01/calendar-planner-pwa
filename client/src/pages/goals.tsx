@@ -1,6 +1,6 @@
 import React from 'react';
 import { isTaskOverdue, isTaskToday } from '../utils/dateUtils';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useTasks, useCreateTask, useUpdateTask, useToggleTask, useDeleteTask } from '@/lib/hooks';
@@ -31,7 +31,7 @@ export default function GoalsPage() {
     total: allTasks.length,
   };
 
-  const TaskItem = ({ task, onEdit, onDelete }: { task: ApiTask; onEdit: () => void; onDelete: () => void }) => (
+  const TaskItem = ({ task, onEdit, onDelete, onActualize }: { task: ApiTask; onEdit: () => void; onDelete: () => void; onActualize?: () => void }) => (
     <div
       className="flex items-center gap-3 p-3 card-element cursor-pointer select-none rounded-lg transition-colors hover:bg-accent/10"
       onClick={() => toggleTaskMut.mutate(task.id)}
@@ -52,6 +52,16 @@ export default function GoalsPage() {
         <span className={`text-xs ${isTaskOverdue(task.due_date) ? 'text-destructive' : 'text-muted-foreground'}`}>{String(task.due_date).slice(5, 10)}</span>
       ) : null}
       <div className="flex gap-2 ml-2">
+        {onActualize && !task.completed && isTaskOverdue(task.due_date || '') && (
+          <Button
+            aria-label="Сделать срок сегодня"
+            variant="outline"
+            className="w-8 h-8 p-0 rounded-full text-accent border-accent/30 hover:bg-accent/10"
+            onClick={(e) => { e.stopPropagation(); onActualize(); }}
+          >
+            <RotateCcw className="w-4 h-4" />
+          </Button>
+        )}
         <Button
           aria-label="Редактировать задачу"
           variant="outline"
@@ -106,6 +116,15 @@ export default function GoalsPage() {
                   task={task}
                   onEdit={() => { setEditingId(task.id); setIsCreating(false); }}
                   onDelete={() => deleteTask.mutate(task.id)}
+                  onActualize={(() => {
+                    // only provide action for overdue tasks
+                    if (!task.due_date || !isTaskOverdue(task.due_date) || task.completed) return undefined;
+                    return () => {
+                      const now = new Date();
+                      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 0, 0);
+                      updateTask.mutate({ id: task.id, input: { dueDate: d.toISOString() } as any });
+                    };
+                  })()}
                 />
               ))}
               {filtered.length === 0 && <div className="p-4 text-center text-muted-foreground text-sm">Задач нет</div>}
