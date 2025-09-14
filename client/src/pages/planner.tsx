@@ -95,6 +95,13 @@ export default function PlannerPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  // Default due date for new task = selected day at 23:59 local
+  const newTaskDefaultDueIso = useMemo(() => {
+    const d = new Date(selectedDate);
+    d.setHours(23, 59, 0, 0);
+    return d.toISOString();
+  }, [selectedDate]);
+
   // Add event (from EventDialog local shape → API shape)
   const handleAddEvent = (newEvent: any) => {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -231,6 +238,7 @@ export default function PlannerPage() {
         <TaskModal
           open={isCreating}
           title="Новая задача"
+          initialValues={{ dueDate: newTaskDefaultDueIso }}
           submitLabel="Добавить"
           onClose={() => setIsCreating(false)}
           onSubmit={async (v) => { await createTask.mutateAsync(v); setIsCreating(false); }}
