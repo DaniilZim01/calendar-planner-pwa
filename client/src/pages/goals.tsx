@@ -49,7 +49,7 @@ export default function GoalsPage() {
         <div className={`text-sm ${task.completed ? 'line-through opacity-60' : ''}`}>{task.title}</div>
       </div>
       {task.due_date ? (
-        <span className={`text-xs ${isTaskOverdue(task.due_date) ? 'text-destructive' : 'text-muted-foreground'}`}>{task.due_date}</span>
+        <span className={`text-xs ${isTaskOverdue(task.due_date) ? 'text-destructive' : 'text-muted-foreground'}`}>{String(task.due_date).slice(5, 10)}</span>
       ) : null}
       <div className="flex gap-2 ml-2">
         <Button
