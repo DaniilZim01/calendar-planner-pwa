@@ -14,7 +14,7 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
     e.preventDefault();
     setLocalError(null);
     if (!identifier || !password) {
-      setLocalError('Введите логин и пароль');
+      setLocalError('Логин/Email и пароль обязательны');
       return;
     }
     // передаём универсальное поле identifier для логина или email
@@ -24,12 +24,15 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="identifier">Логин или Email</Label>
-        <Input id="identifier" value={identifier} onChange={(e) => setIdentifier(e.target.value)} />
+        <div className="flex items-baseline justify-between">
+          <Label htmlFor="identifier">Логин или Email</Label>
+          <span className="text-xs text-muted-foreground">обязательно</span>
+        </div>
+        <Input id="identifier" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="Ваш логин или email" />
       </div>
       <div className="space-y-2">
         <Label htmlFor="password">Пароль</Label>
-        <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Введите пароль" />
       </div>
       {(localError || error) && <p className="text-sm text-red-500">{localError || error}</p>}
       <Button type="submit" className="w-full" disabled={isLoading}>Войти</Button>

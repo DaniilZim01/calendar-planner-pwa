@@ -18,7 +18,7 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
     e.preventDefault();
     setLocalError(null);
     if (!login || !password) {
-      setLocalError('Введите логин и пароль');
+      setLocalError('Логин и пароль обязательны');
       return;
     }
     // Проверка уникальности логина
@@ -45,8 +45,11 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="login">Логин</Label>
-        <Input id="login" value={login} onChange={(e) => setLogin(e.target.value)} />
+        <div className="flex items-baseline justify-between">
+          <Label htmlFor="login">Логин</Label>
+          <span className="text-xs text-muted-foreground">обязательно</span>
+        </div>
+        <Input id="login" value={login} onChange={(e) => setLogin(e.target.value)} placeholder="Придумайте логин" />
       </div>
       <div className="space-y-2">
         <div className="flex items-baseline justify-between">
@@ -57,7 +60,7 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
       </div>
       <div className="space-y-2">
         <Label htmlFor="password">Пароль</Label>
-        <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Минимум 8 символов" />
       </div>
       {(localError || error) && <p className="text-sm text-red-500">{localError || error}</p>}
       <Button type="submit" className="w-full" disabled={isLoading}>Зарегистрироваться</Button>
