@@ -136,7 +136,7 @@ export default function PlannerPage() {
           <h1 className="text-lg font-light text-muted-foreground mb-2 tracking-wide">
             ДОБРО ПОЖАЛОВАТЬ В
           </h1>
-          <h2 className="text-3xl font-thin text-foreground tracking-tight">Today</h2>
+          <h2 className="text-3xl font-medium text-foreground tracking-tight">Today</h2>
         </div>
 
         {/* Row 1: Сегодня слева, поиск/сортировка справа */}

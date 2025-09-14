@@ -39,7 +39,7 @@ export default function EventPage() {
   return (
     <div className="app-container animate-fade-in">
       <div className="screen-container space-y-4">
-        <h1 className="text-2xl font-thin text-foreground">{event.title}</h1>
+        <h1 className="text-2xl font-medium text-foreground">{event.title}</h1>
         <div className="card-element rounded-lg p-4 space-y-2">
           <div className="text-sm text-muted-foreground">Дата и время</div>
           <div className="text-foreground">{dateStr}</div>

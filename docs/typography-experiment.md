@@ -4,13 +4,19 @@ Purpose: Test replacing extra-light/ultra-light text styles with slightly heavie
 
 Scope:
 - Replace `font-extralight` → `font-light`
-- Audit usages of `font-thin` and keep as-is for headings where it looks balanced; can switch to `font-light` later if needed
+- Replace major headings `font-thin` → `font-medium` (test)
 
 Changes in this branch:
 - `client/src/pages/planner.tsx`: `font-extralight` → `font-light` (welcome caption)
+- Headings switched to `font-medium`:
+  - `client/src/pages/planner.tsx`: Today
+  - `client/src/pages/goals.tsx`: Цели
+  - `client/src/pages/wellbeing.tsx`: Reflect
+  - `client/src/pages/profile.tsx`: Профиль
+  - `client/src/pages/event.tsx`: Заголовок события
 
-Not changed (kept thin for now):
-- Headings using `font-thin` across pages (Goals/Today/Reflect/Profile/Event). These are candidates to move to `font-light` if feedback suggests.
+Not changed:
+- Body labels already mostly `font-light` — оставляем
 
 How to roll back:
 - Revert this branch or change `font-light` back to `font-extralight` in the listed files.

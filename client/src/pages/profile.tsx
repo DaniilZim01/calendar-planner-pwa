@@ -135,7 +135,7 @@ export default function ProfilePage() {
     <div className="app-container animate-fade-in">
       <div className="screen-container">
         <div className="mb-6">
-          <h1 className="text-2xl font-thin text-foreground mb-2">Профиль</h1>
+          <h1 className="text-2xl font-medium text-foreground mb-2">Профиль</h1>
           <p className="text-sm text-muted-foreground font-light">
             Настройки аккаунта и приложения
           </p>

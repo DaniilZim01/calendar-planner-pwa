@@ -207,7 +207,7 @@ export default function WellbeingPage() {
     <div className="app-container animate-fade-in">
       <div className="screen-container">
         <div className="mb-6">
-          <h1 className="text-2xl font-thin text-foreground mb-2">Reflect</h1>
+          <h1 className="text-2xl font-medium text-foreground mb-2">Reflect</h1>
           <p className="text-sm text-muted-foreground font-light">Отслеживайте свое самочувствие</p>
         </div>
 
