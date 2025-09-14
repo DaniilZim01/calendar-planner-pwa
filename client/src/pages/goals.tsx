@@ -47,6 +47,9 @@ export default function GoalsPage() {
       />
       <div className="flex-1 min-w-0">
         <div className={`text-sm ${task.completed ? 'line-through opacity-60' : ''}`}>{task.title}</div>
+        {task.description ? (
+          <div className="text-xs text-muted-foreground whitespace-pre-wrap break-words mt-0.5">{task.description}</div>
+        ) : null}
       </div>
       {task.due_date ? (
         <span className={`text-xs ${isTaskOverdue(task.due_date) ? 'text-destructive' : 'text-muted-foreground'}`}>{String(task.due_date).slice(5, 10)}</span>
