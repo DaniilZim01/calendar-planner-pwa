@@ -133,7 +133,7 @@ export default function PlannerPage() {
     <div className="app-container animate-fade-in">
       <div className="screen-container">
         <div className="text-center mb-8">
-          <h1 className="text-lg font-extralight text-muted-foreground mb-2 tracking-wide">
+          <h1 className="text-lg font-light text-muted-foreground mb-2 tracking-wide">
             ДОБРО ПОЖАЛОВАТЬ В
           </h1>
           <h2 className="text-3xl font-thin text-foreground tracking-tight">Today</h2>
