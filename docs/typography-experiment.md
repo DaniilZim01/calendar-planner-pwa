@@ -14,6 +14,10 @@ Changes in this branch:
   - `client/src/pages/wellbeing.tsx`: Reflect
   - `client/src/pages/profile.tsx`: Профиль
   - `client/src/pages/event.tsx`: Заголовок события
+- Secondary texts (readability bump):
+  - Task titles on Today list: `font-medium` (`client/src/components/tasks/TaskList.tsx`)
+  - Calendar grid: day numbers and weekday labels set to medium (`client/src/pages/calendar.tsx`)
+  - Goals counters/labels (Сегодня/Просроченные/Всего): values `font-semibold`, labels `font-medium` (`client/src/pages/goals.tsx`)
 
 Not changed:
 - Body labels already mostly `font-light` — оставляем

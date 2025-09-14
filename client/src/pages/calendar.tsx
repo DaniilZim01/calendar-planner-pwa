@@ -196,7 +196,7 @@ export default function CalendarPage() {
                       : 'text-muted-foreground/50'
                   }`}
                 >
-                  {date.getDate()}
+                  <span className="font-medium">{date.getDate()}</span>
                   {!isSelected && colorsForDate(date).length > 0 && (
                     <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
                       {colorsForDate(date).map((c, i) => (

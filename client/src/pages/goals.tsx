@@ -92,16 +92,16 @@ export default function GoalsPage() {
 
         <div className="flex gap-3 mb-6">
           <button onClick={() => setFilter('today')} className={`flex-1 card-soft text-center transition-colors ${filter === 'today' ? 'ring-2 ring-accent' : ''}`}>
-            <div className="text-2xl font-bold text-accent">{counts.today}</div>
-            <div className="text-xs text-muted-foreground">Сегодня</div>
+            <div className="text-2xl font-semibold text-accent">{counts.today}</div>
+            <div className="text-xs text-muted-foreground font-medium">Сегодня</div>
           </button>
           <button onClick={() => setFilter('overdue')} className={`flex-1 text-center transition-colors rounded-xl p-4 ${filter === 'overdue' ? 'ring-2 ring-destructive' : ''}`} style={{ background: 'rgba(179, 138, 138, 0.2)' }}>
-            <div className="text-2xl font-bold text-destructive">{counts.overdue}</div>
-            <div className="text-xs text-muted-foreground">Просроченные</div>
+            <div className="text-2xl font-semibold text-destructive">{counts.overdue}</div>
+            <div className="text-xs text-muted-foreground font-medium">Просроченные</div>
           </button>
           <button onClick={() => setFilter('all')} className={`flex-1 card-soft text-center transition-colors ${filter === 'all' ? 'ring-2 ring-accent' : ''}`}>
-            <div className="text-2xl font-bold text-foreground">{counts.total}</div>
-            <div className="text-xs text-muted-foreground">Всего</div>
+            <div className="text-2xl font-semibold text-foreground">{counts.total}</div>
+            <div className="text-xs text-muted-foreground font-medium">Всего</div>
           </button>
         </div>
 

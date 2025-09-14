@@ -34,7 +34,7 @@ export function TaskList({
             className="w-5 h-5 rounded-full border-2 data-[state=checked]:bg-accent data-[state=checked]:border-accent"
           />
           <div className="flex-1 min-w-0">
-            <div className={`text-sm text-foreground transition-opacity ${t.completed ? 'line-through opacity-60' : ''}`}>{t.title}</div>
+            <div className={`text-sm text-foreground font-medium transition-opacity ${t.completed ? 'line-through opacity-60' : ''}`}>{t.title}</div>
             {t.description && <div className="text-xs text-muted-foreground whitespace-pre-wrap break-words">{t.description}</div>}
           </div>
           <div className="flex gap-2 ml-2">
