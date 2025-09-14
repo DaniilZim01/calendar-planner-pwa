@@ -163,10 +163,10 @@ export async function logoutUser(): Promise<ApiSuccess<{ message: string }>> {
   return data;
 }
 
-export async function fetchProfile(): Promise<ApiSuccess<{ id: string; email: string; name?: string | null; phone?: string | null }>> {
-  const { data } = await api.get<ApiSuccess<{ user?: { id: string; email: string; name?: string | null; phone?: string | null } | null }>>('/api/auth/profile');
+export async function fetchProfile(): Promise<ApiSuccess<{ id: string; login?: string; email: string; name?: string | null; phone?: string | null }>> {
+  const { data } = await api.get<ApiSuccess<{ user?: { id: string; login?: string; email: string; name?: string | null; phone?: string | null } | null }>>('/api/auth/profile');
   const user = (data as any)?.data?.user ?? (data as any)?.data ?? null;
-  return { success: true, data: user } as ApiSuccess<{ id: string; email: string; name?: string | null; phone?: string | null }>;
+  return { success: true, data: user } as ApiSuccess<{ id: string; login?: string; email: string; name?: string | null; phone?: string | null }>;
 }
 
 export async function updateProfile(input: { login?: string; name?: string; phone?: string }): Promise<ApiSuccess<{ id: string; login?: string; email: string; name?: string | null; phone?: string | null }>> {

@@ -49,6 +49,10 @@ export default function ProfilePage() {
   }, [profile.theme]);
   const IDENTITY_MODE = (import.meta as any).env?.VITE_AUTH_IDENTITY_MODE === 'email' ? 'email' : 'login';
   const [authedLogin, setAuthedLogin] = useState<string>((user as any)?.login ?? '');
+
+  useEffect(() => {
+    if ((user as any)?.login) setAuthedLogin((user as any).login);
+  }, [user]);
   const [authedName, setAuthedName] = useState<string>(user?.name ?? '');
   const [authedPhone, setAuthedPhone] = useState<string>(user?.phone ?? '');
 

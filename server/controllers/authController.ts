@@ -327,6 +327,7 @@ export async function getProfile(req: Request, res: Response): Promise<void> {
       data: {
         user: {
           id: user.id,
+          login: user.login,
           email: user.email,
           name: user.name,
           phone: user.phone,
