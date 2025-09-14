@@ -20,27 +20,30 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { email, password } = req.body;
+    const { identifier, email, password } = req.body || {};
+    const id = (identifier ?? email ?? '').trim();
 
     // Basic validation
-    if (!email || !password) {
+    if (!id || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Email and password are required'
+        message: 'Identifier and password are required'
       });
     }
 
-    // Find user by email
+    const looksLikeEmail = /@/.test(id);
+
+    // Find user by login or email
     const { data: user, error: findError } = await supabase
       .from('users')
-      .select('id, email, name, phone, password_hash, email_verified, created_at')
-      .eq('email', email)
+      .select('id, login, email, name, phone, password_hash, email_verified, created_at')
+      [looksLikeEmail ? 'eq' : 'eq'](looksLikeEmail ? 'email' : 'login', id)
       .single();
 
     if (findError || !user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: 'Invalid credentials'
       });
     }
 
@@ -50,7 +53,7 @@ export default async function handler(req, res) {
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: 'Invalid credentials'
       });
     }
 
@@ -83,6 +86,7 @@ export default async function handler(req, res) {
       data: {
         user: {
           id: user.id,
+          login: user.login,
           email: user.email,
           name: user.name,
           phone: user.phone,

@@ -20,22 +20,37 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { email, password, name, phone } = req.body;
+    const { login, email, password, name, phone } = req.body;
 
     // Basic validation
-    if (!email || !password || !name) {
+    if (!login || !password || !name) {
       return res.status(400).json({
         success: false,
-        message: 'Email, password, and name are required'
+        message: 'Login, password, and name are required'
       });
     }
 
-    // Check if user already exists
-    const { data: existingUser, error: checkError } = await supabase
+    // Check if login already exists
+    const { data: existingLogin } = await supabase
       .from('users')
       .select('id')
-      .eq('email', email)
-      .single();
+      .eq('login', login)
+      .maybeSingle();
+
+    if (existingLogin) {
+      return res.status(409).json({ success: false, message: 'Login already taken' });
+    }
+
+    // If email provided, check uniqueness
+    let existingUser = null;
+    if (email) {
+      const { data } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+      existingUser = data;
+    }
 
     if (existingUser) {
       return res.status(409).json({
@@ -52,13 +67,14 @@ export default async function handler(req, res) {
     const { data: newUser, error: insertError } = await supabase
       .from('users')
       .insert({
-        email,
+        login,
+        email: email || null,
         name,
         phone: phone || null,
         password_hash: passwordHash,
         email_verified: false
       })
-      .select('id, email, name, phone, email_verified, created_at')
+      .select('id, login, email, name, phone, email_verified, created_at')
       .single();
 
     if (insertError) {
@@ -98,6 +114,7 @@ export default async function handler(req, res) {
       data: {
         user: {
           id: newUser.id,
+          login: newUser.login,
           email: newUser.email,
           name: newUser.name,
           phone: newUser.phone,
