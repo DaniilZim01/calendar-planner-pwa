@@ -363,14 +363,17 @@ export async function updateProfile(req: Request, res: Response): Promise<void> 
     const validatedData = updateUserSchema.parse(req.body);
 
     // Update user
+    const nextSet: any = { updatedAt: new Date() };
+    if (validatedData.login && IDENTITY_MODE === 'login') nextSet.login = validatedData.login;
+    if (validatedData.name && IDENTITY_MODE !== 'login') nextSet.name = validatedData.name;
+    if (typeof validatedData.phone !== 'undefined' && IDENTITY_MODE !== 'login') nextSet.phone = validatedData.phone;
+
     const [updatedUser] = await db.update(users)
-      .set({
-        ...validatedData,
-        updatedAt: new Date(),
-      })
+      .set(nextSet)
       .where(eq(users.id, req.user.userId))
       .returning({
         id: users.id,
+        login: users.login,
         email: users.email,
         name: users.name,
         phone: users.phone,

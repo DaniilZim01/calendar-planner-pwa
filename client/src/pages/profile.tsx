@@ -47,13 +47,19 @@ export default function ProfilePage() {
     // Apply language immediately as well
     root.setAttribute('lang', profile.language || 'ru');
   }, [profile.theme]);
+  const IDENTITY_MODE = (import.meta as any).env?.VITE_AUTH_IDENTITY_MODE === 'email' ? 'email' : 'login';
+  const [authedLogin, setAuthedLogin] = useState<string>((user as any)?.login ?? '');
   const [authedName, setAuthedName] = useState<string>(user?.name ?? '');
   const [authedPhone, setAuthedPhone] = useState<string>(user?.phone ?? '');
 
   const handleSave = async () => {
     if (isAuthenticated) {
       try {
-        await updateProfile.mutateAsync({ name: authedName, phone: authedPhone || undefined });
+        if (IDENTITY_MODE === 'login') {
+          await updateProfile.mutateAsync({ login: authedLogin || undefined });
+        } else {
+          await updateProfile.mutateAsync({ name: authedName || undefined, phone: authedPhone || undefined });
+        }
       } catch {}
     }
     setProfile(tempProfile);
@@ -152,11 +158,13 @@ export default function ProfilePage() {
               </Avatar>
               <div className="flex-1">
                 <CardTitle className="font-light text-foreground">
-                  {user?.name || profile.name || 'Пользователь'}
+                  {IDENTITY_MODE === 'login' ? ((user as any)?.login || authedLogin || 'Пользователь') : (user?.name || profile.name || 'Пользователь')}
                 </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  {user?.email || profile.email || 'Настройте свой профиль'}
-                </p>
+                {IDENTITY_MODE !== 'login' && (
+                  <p className="text-sm text-muted-foreground">
+                    {user?.email || profile.email || 'Настройте свой профиль'}
+                  </p>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <Button
@@ -200,51 +208,24 @@ export default function ProfilePage() {
 
           {isEditing && (
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-light text-foreground">
-                  Имя
-                </Label>
-                <Input
-                  id="name"
-                  value={isAuthenticated ? authedName : tempProfile.name}
-                  onChange={(e) => {
-                    if (isAuthenticated) setAuthedName(e.target.value);
-                    else setTempProfile({ ...tempProfile, name: e.target.value });
-                  }}
-                  placeholder="Введите ваше имя"
-                  className="border-border focus:ring-accent"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-light text-foreground">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={isAuthenticated ? (user?.email ?? '') : tempProfile.email}
-                  onChange={(e) => !isAuthenticated && setTempProfile({ ...tempProfile, email: e.target.value })}
-                  placeholder="Введите ваш email"
-                  className="border-border focus:ring-accent"
-                  disabled={isAuthenticated}
-                />
-              </div>
-
-              {isAuthenticated && (
+              {IDENTITY_MODE === 'login' ? (
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-sm font-light text-foreground">
-                    Телефон
-                  </Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={authedPhone}
-                    onChange={(e) => setAuthedPhone(e.target.value)}
-                    placeholder="Введите ваш телефон"
-                    className="border-border focus:ring-accent"
-                  />
+                  <Label htmlFor="login" className="text-sm font-light text-foreground">Логин</Label>
+                  <Input id="login" value={authedLogin} onChange={(e) => setAuthedLogin(e.target.value)} placeholder="Ваш логин" className="border-border focus:ring-accent" />
                 </div>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-sm font-light text-foreground">Имя</Label>
+                    <Input id="name" value={isAuthenticated ? authedName : tempProfile.name} onChange={(e) => { if (isAuthenticated) setAuthedName(e.target.value); else setTempProfile({ ...tempProfile, name: e.target.value }); }} placeholder="Введите ваше имя" className="border-border focus:ring-accent" />
+                  </div>
+                  {isAuthenticated && (
+                    <div className="space-y-2">
+                      <Label htmlFor="phone" className="text-sm font-light text-foreground">Телефон</Label>
+                      <Input id="phone" type="tel" value={authedPhone} onChange={(e) => setAuthedPhone(e.target.value)} placeholder="Введите ваш телефон" className="border-border focus:ring-accent" />
+                    </div>
+                  )}
+                </>
               )}
 
               {!isAuthenticated && (

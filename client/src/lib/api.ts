@@ -169,10 +169,10 @@ export async function fetchProfile(): Promise<ApiSuccess<{ id: string; email: st
   return { success: true, data: user } as ApiSuccess<{ id: string; email: string; name?: string | null; phone?: string | null }>;
 }
 
-export async function updateProfile(input: { name?: string; phone?: string }): Promise<ApiSuccess<{ id: string; email: string; name?: string | null; phone?: string | null }>> {
-  const { data } = await api.put<ApiSuccess<{ user?: { id: string; email: string; name?: string | null; phone?: string | null } | null }>>('/api/auth/update-profile', input);
+export async function updateProfile(input: { login?: string; name?: string; phone?: string }): Promise<ApiSuccess<{ id: string; login?: string; email: string; name?: string | null; phone?: string | null }>> {
+  const { data } = await api.put<ApiSuccess<{ user?: { id: string; login?: string; email: string; name?: string | null; phone?: string | null } | null }>>('/api/auth/update-profile', input);
   const user = (data as any)?.data?.user ?? (data as any)?.data ?? null;
-  return { success: true, data: user } as ApiSuccess<{ id: string; email: string; name?: string | null; phone?: string | null }>;
+  return { success: true, data: user } as ApiSuccess<{ id: string; login?: string; email: string; name?: string | null; phone?: string | null }>;
 }
 
 export async function changePassword(input: { currentPassword: string; newPassword: string }): Promise<ApiSuccess<{ message: string }>> {

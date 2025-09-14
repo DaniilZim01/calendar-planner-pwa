@@ -22,6 +22,7 @@ export const loginSchema = z.object({
 });
 
 export const updateUserSchema = z.object({
+  login: z.string().min(2, 'Login must be at least 2 characters').max(255, 'Login too long').optional(),
   name: z.string().min(2, 'Name must be at least 2 characters').max(255, 'Name too long').optional(),
   phone: z.string().optional(),
 });
