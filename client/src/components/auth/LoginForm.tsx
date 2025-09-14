@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
+const IDENTITY_MODE = (import.meta as any).env?.VITE_AUTH_IDENTITY_MODE === 'email' ? 'email' : 'login';
 
 export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   const { login, isLoading, error } = useAuth();
@@ -25,10 +26,10 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="space-y-2">
         <div className="flex items-baseline justify-between">
-          <Label htmlFor="identifier">Логин или Email</Label>
+          <Label htmlFor="identifier">{IDENTITY_MODE === 'email' ? 'Email' : 'Логин или Email'}</Label>
           <span className="text-xs text-muted-foreground">обязательно</span>
         </div>
-        <Input id="identifier" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="Ваш логин или email" />
+        <Input id="identifier" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder={IDENTITY_MODE === 'email' ? 'email@пример.com' : 'Ваш логин или email'} />
       </div>
       <div className="space-y-2">
         <Label htmlFor="password">Пароль</Label>

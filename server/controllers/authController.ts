@@ -6,6 +6,7 @@ import { hashPassword, comparePassword } from '../utils/password';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { registerSchema, loginSchema, updateUserSchema } from '../validation/schemas';
 import { ZodError } from 'zod';
+import { IDENTITY_MODE } from '../config/auth';
 
 /**
  * Register a new user
@@ -16,11 +17,13 @@ export async function register(req: Request, res: Response): Promise<void> {
     const validatedData = registerSchema.parse(req.body);
     
     // Check if user already exists
-    // Check login uniqueness
-    const existingLogin = await db.query.users.findFirst({ where: eq(users.login, validatedData.login) });
-    if (existingLogin) {
-      res.status(409).json({ success: false, message: 'Login already taken', code: 'LOGIN_TAKEN' });
-      return;
+    // Check login uniqueness (only if mode=login and provided)
+    if (IDENTITY_MODE === 'login' && validatedData.login) {
+      const existingLogin = await db.query.users.findFirst({ where: eq(users.login, validatedData.login) });
+      if (existingLogin) {
+        res.status(409).json({ success: false, message: 'Login already taken', code: 'LOGIN_TAKEN' });
+        return;
+      }
     }
 
     // If email provided, check its uniqueness too
@@ -43,7 +46,7 @@ export async function register(req: Request, res: Response): Promise<void> {
 
     // Create user
     const [newUser] = await db.insert(users).values({
-      login: validatedData.login,
+      login: validatedData.login ?? (validatedData.email ?? '').toLowerCase(),
       email: validatedData.email ?? null,
       phone: validatedData.phone,
       name: validatedData.name,
@@ -117,7 +120,7 @@ export async function login(req: Request, res: Response): Promise<void> {
     // Validate input data
     const validatedData = loginSchema.parse(req.body);
     const raw = validatedData.identifier.trim();
-    const looksLikeEmail = /@/.test(raw);
+    const looksLikeEmail = IDENTITY_MODE === 'email' || /@/.test(raw);
     
     // Find user by login or email
     const user = await db.query.users.findFirst({

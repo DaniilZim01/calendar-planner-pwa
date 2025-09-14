@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkLoginAvailability } from '@/lib/api';
+const IDENTITY_MODE = (import.meta as any).env?.VITE_AUTH_IDENTITY_MODE === 'email' ? 'email' : 'login';
 
 export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
   const { register, isLoading, error } = useAuth();
@@ -17,28 +18,28 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError(null);
-    if (!login || !password) {
-      setLocalError('Логин и пароль обязательны');
+    if ((IDENTITY_MODE === 'login' && !login) || !password) {
+      setLocalError(IDENTITY_MODE === 'login' ? 'Логин и пароль обязательны' : 'Email и пароль обязательны');
       return;
     }
     // Проверка уникальности логина
-    try {
-      const res = await checkLoginAvailability(login.trim());
-      if (!res?.data?.available) {
-        setLocalError('Логин уже занят');
-        return;
-      }
-    } catch {
-      // тихо продолжаем — проверка продублируется на сервере после миграции
+    if (IDENTITY_MODE === 'login' && login.trim()) {
+      try {
+        const res = await checkLoginAvailability(login.trim());
+        if (!res?.data?.available) {
+          setLocalError('Логин уже занят');
+          return;
+        }
+      } catch {}
     }
     // Совместимость с текущим API: используем login как name;
     // если email не указан, генерируем временный placeholder (уникальный),
     // чтобы пройти текущие серверные ограничения до миграции БД (Этап 2).
     const safeEmail = email && email.trim().length > 0
       ? email.trim()
-      : `${login.trim()}-${Date.now()}@noemail.local`;
+      : (IDENTITY_MODE === 'login' ? `${login.trim()}-${Date.now()}@noemail.local` : undefined);
 
-    await register({ login: login.trim(), name: login.trim(), email: safeEmail, password });
+    await register({ login: (IDENTITY_MODE === 'login' ? login.trim() : (email?.trim() || '')), name: login.trim() || (email?.trim() || ''), email: safeEmail, password });
     navigate('/auth');
   };
 

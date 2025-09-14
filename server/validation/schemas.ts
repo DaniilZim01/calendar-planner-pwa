@@ -1,9 +1,13 @@
 import { z } from 'zod';
+import { IDENTITY_MODE } from '../config/auth';
 
 // User validation schemas
 export const registerSchema = z.object({
-  login: z.string().min(2, 'Login must be at least 2 characters').max(255, 'Login too long'),
-  email: z.string().email('Invalid email address').optional(),
+  login: z.string().min(2, 'Login must be at least 2 characters').max(255, 'Login too long')
+    .optional()
+    .refine((v) => (IDENTITY_MODE === 'login' ? Boolean(v) : true), { message: 'Login is required' }),
+  email: z.string().email('Invalid email address').optional()
+    .refine((v) => (IDENTITY_MODE === 'email' ? Boolean(v) : true), { message: 'Email is required' }),
   phone: z.string().optional(),
   name: z.string().min(2, 'Name must be at least 2 characters').max(255, 'Name too long'),
   password: z.string().min(8, 'Password must be at least 8 characters').regex(
@@ -13,7 +17,7 @@ export const registerSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  identifier: z.string().min(1, 'Login or email is required'),
+  identifier: z.string().min(1, IDENTITY_MODE === 'email' ? 'Email is required' : 'Login or email is required'),
   password: z.string().min(1, 'Password is required'),
 });
 
