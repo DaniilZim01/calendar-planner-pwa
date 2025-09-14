@@ -320,7 +320,6 @@ export default function ProfilePage() {
                     Отправить тест
                   </Button>
                 )}
-                <span className="text-xs text-muted-foreground">Работают в фоне (при поддержке браузера)</span>
               </div>
             </div>
             <div className="space-y-2">
@@ -354,25 +353,7 @@ export default function ProfilePage() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-sm font-light text-foreground">
-                Язык интерфейса
-              </Label>
-              <Select 
-                value={tempProfile.language} 
-                onValueChange={(value: string) => 
-                  setTempProfile({ ...tempProfile, language: value })
-                }
-              >
-                <SelectTrigger className="border-border">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ru">Русский</SelectItem>
-                  <SelectItem value="en">English</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Язык интерфейса — временно скрыт по запросу */}
 
             {tempProfile !== profile && (
               <div className="flex gap-3 pt-4">
