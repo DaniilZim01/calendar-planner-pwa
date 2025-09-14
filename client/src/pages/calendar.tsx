@@ -168,7 +168,7 @@ export default function CalendarPage() {
           {/* Заголовки дней недели */}
           <div className="grid grid-cols-7 gap-1 mb-2">
             {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((day) => (
-              <div key={day} className="text-center py-2 text-xs font-medium text-muted-foreground">
+              <div key={day} className="text-center py-2 text-xs text-muted-foreground">
                 {day}
               </div>
             ))}
@@ -196,7 +196,7 @@ export default function CalendarPage() {
                       : 'text-muted-foreground/50'
                   }`}
                 >
-                  <span className="font-medium">{date.getDate()}</span>
+                  <span>{date.getDate()}</span>
                   {!isSelected && colorsForDate(date).length > 0 && (
                     <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
                       {colorsForDate(date).map((c, i) => (
