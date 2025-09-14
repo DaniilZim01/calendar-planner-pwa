@@ -46,7 +46,7 @@ export default function GoalsPage() {
         className="w-5 h-5 rounded-full border-2 data-[state=checked]:bg-accent data-[state=checked]:border-accent"
       />
       <div className="flex-1 min-w-0">
-        <div className={`text-sm truncate ${task.completed ? 'line-through opacity-60' : ''}`}>{task.title}</div>
+        <div className={`text-sm ${task.completed ? 'line-through opacity-60' : ''}`}>{task.title}</div>
       </div>
       {task.due_date ? (
         <span className={`text-xs ${isTaskOverdue(task.due_date) ? 'text-destructive' : 'text-muted-foreground'}`}>{task.due_date}</span>

@@ -33,16 +33,16 @@ export function TaskList({
             onClick={(e) => e.stopPropagation()}
             className="w-5 h-5 rounded-full border-2 data-[state=checked]:bg-accent data-[state=checked]:border-accent"
           />
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className={`text-sm text-foreground transition-opacity ${t.completed ? 'line-through opacity-60' : ''}`}>{t.title}</div>
-            {t.description && <div className="text-xs text-muted-foreground">{t.description}</div>}
+            {t.description && <div className="text-xs text-muted-foreground whitespace-pre-wrap break-words">{t.description}</div>}
           </div>
           <div className="flex gap-2 ml-2">
             <Button aria-label="Редактировать задачу" variant="outline" className="w-8 h-8 p-0 rounded-full"
               onClick={(e) => { e.stopPropagation(); onEdit(t.id); }}>
               <Pencil className="w-4 h-4" />
             </Button>
-            <Button aria-label="Удалить задачу" variant="outline" className="w-8 h-8 p-0 rounded-full"
+            <Button aria-label="Удалить задачу" variant="outline" className="w-8 h-8 p-0 rounded-full text-destructive border-destructive/30 hover:bg-destructive/10"
               onClick={(e) => { e.stopPropagation(); onDelete(t.id); }}>
               <Trash2 className="w-4 h-4" />
             </Button>
