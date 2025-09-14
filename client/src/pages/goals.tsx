@@ -1,6 +1,6 @@
 import React from 'react';
 import { isTaskOverdue, isTaskToday } from '../utils/dateUtils';
-import { Plus } from 'lucide-react';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useTasks, useCreateTask, useUpdateTask, useToggleTask, useDeleteTask } from '@/lib/hooks';
@@ -84,8 +84,22 @@ export default function GoalsPage() {
                 <div key={task.id} className="flex items-center gap-3">
                   <TaskItem task={task} />
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => { setEditingId(task.id); setIsCreating(false); }}>Изм.</Button>
-                    <Button variant="outline" size="sm" onClick={() => deleteTask.mutate(task.id)}>Удал.</Button>
+                    <Button
+                      aria-label="Редактировать задачу"
+                      variant="outline"
+                      className="w-8 h-8 p-0 rounded-full"
+                      onClick={() => { setEditingId(task.id); setIsCreating(false); }}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      aria-label="Удалить задачу"
+                      variant="outline"
+                      className="w-8 h-8 p-0 rounded-full text-destructive border-destructive/30 hover:bg-destructive/10"
+                      onClick={() => deleteTask.mutate(task.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               ))}
