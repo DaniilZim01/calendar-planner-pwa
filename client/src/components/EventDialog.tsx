@@ -84,6 +84,23 @@ export default function EventDialog({ onAddEvent, selectedDate, children }: Even
     };
   }, [debug, open, date, endDate, time, endTime]);
 
+  // Sync dialog dates with selectedDate when dialog opens or when prop changes while closed
+  useEffect(() => {
+    const base = selectedDate || getCurrentDateString();
+    if (open) {
+      setDate(base);
+      setEndDate(base);
+    }
+  }, [open, selectedDate]);
+
+  useEffect(() => {
+    if (!open) {
+      const base = selectedDate || getCurrentDateString();
+      setDate(base);
+      setEndDate(base);
+    }
+  }, [selectedDate, open]);
+
   // Подставлять сохранённый цвет при смене категории
   useEffect(() => {
     try {
