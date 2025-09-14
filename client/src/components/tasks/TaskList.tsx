@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Pencil, Trash2 } from 'lucide-react';
 
 export function TaskList({
   items,
@@ -36,9 +37,15 @@ export function TaskList({
             <div className={`text-sm text-foreground transition-opacity ${t.completed ? 'line-through opacity-60' : ''}`}>{t.title}</div>
             {t.description && <div className="text-xs text-muted-foreground">{t.description}</div>}
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onEdit(t.id); }}>Изм.</Button>
-            <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onDelete(t.id); }}>Удал.</Button>
+          <div className="flex gap-2 ml-2">
+            <Button aria-label="Редактировать задачу" variant="outline" className="w-8 h-8 p-0 rounded-full"
+              onClick={(e) => { e.stopPropagation(); onEdit(t.id); }}>
+              <Pencil className="w-4 h-4" />
+            </Button>
+            <Button aria-label="Удалить задачу" variant="outline" className="w-8 h-8 p-0 rounded-full"
+              onClick={(e) => { e.stopPropagation(); onDelete(t.id); }}>
+              <Trash2 className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       ))}

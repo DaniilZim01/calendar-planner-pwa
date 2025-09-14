@@ -31,7 +31,7 @@ export default function GoalsPage() {
     total: allTasks.length,
   };
 
-  const TaskItem = ({ task }: { task: ApiTask }) => (
+  const TaskItem = ({ task, onEdit, onDelete }: { task: ApiTask; onEdit: () => void; onDelete: () => void }) => (
     <div
       className="flex items-center gap-3 p-3 card-element cursor-pointer select-none rounded-lg transition-colors hover:bg-accent/10"
       onClick={() => toggleTaskMut.mutate(task.id)}
@@ -45,10 +45,30 @@ export default function GoalsPage() {
         onClick={(e) => e.stopPropagation()}
         className="w-5 h-5 rounded-full border-2 data-[state=checked]:bg-accent data-[state=checked]:border-accent"
       />
-      <span className={`flex-1 text-sm ${task.completed ? 'line-through opacity-60' : ''}`}>{task.title}</span>
-      {task.due_date && (
+      <div className="flex-1 min-w-0">
+        <div className={`text-sm truncate ${task.completed ? 'line-through opacity-60' : ''}`}>{task.title}</div>
+      </div>
+      {task.due_date ? (
         <span className={`text-xs ${isTaskOverdue(task.due_date) ? 'text-destructive' : 'text-muted-foreground'}`}>{task.due_date}</span>
-      )}
+      ) : null}
+      <div className="flex gap-2 ml-2">
+        <Button
+          aria-label="Редактировать задачу"
+          variant="outline"
+          className="w-8 h-8 p-0 rounded-full"
+          onClick={(e) => { e.stopPropagation(); onEdit(); }}
+        >
+          <Pencil className="w-4 h-4" />
+        </Button>
+        <Button
+          aria-label="Удалить задачу"
+          variant="outline"
+          className="w-8 h-8 p-0 rounded-full text-destructive border-destructive/30 hover:bg-destructive/10"
+          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
     </div>
   );
 
@@ -81,27 +101,12 @@ export default function GoalsPage() {
           ) : (
             <div className="space-y-3 animate-slide-up">
               {filtered.map((task: ApiTask) => (
-                <div key={task.id} className="flex items-center gap-3">
-                  <TaskItem task={task} />
-                  <div className="flex gap-2">
-                    <Button
-                      aria-label="Редактировать задачу"
-                      variant="outline"
-                      className="w-8 h-8 p-0 rounded-full"
-                      onClick={() => { setEditingId(task.id); setIsCreating(false); }}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      aria-label="Удалить задачу"
-                      variant="outline"
-                      className="w-8 h-8 p-0 rounded-full text-destructive border-destructive/30 hover:bg-destructive/10"
-                      onClick={() => deleteTask.mutate(task.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
+                <TaskItem
+                  key={task.id}
+                  task={task}
+                  onEdit={() => { setEditingId(task.id); setIsCreating(false); }}
+                  onDelete={() => deleteTask.mutate(task.id)}
+                />
               ))}
               {filtered.length === 0 && <div className="p-4 text-center text-muted-foreground text-sm">Задач нет</div>}
             </div>
