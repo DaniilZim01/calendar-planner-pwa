@@ -215,7 +215,7 @@ export default function PlannerPage() {
               const isoDay = `${yyyy}-${mm}-${dd}`;
               const hasEvents = eventDaysSet.has(isoDay);
               return (
-                <div key={name} className={`${isSelected ? 'bg-accent text-white rounded-2xl' : ''} py-1`}>
+                <div key={name} className={`${isSelected ? 'bg-accent text-white rounded-full' : ''} py-1.5`}>
                   <div className="text-[11px]">{name}</div>
                   <button
                     onClick={() => setSelectedDate(new Date(d))}
