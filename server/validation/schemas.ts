@@ -13,7 +13,7 @@ export const registerSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  login: z.string().min(1, 'Login is required'),
+  identifier: z.string().min(1, 'Login or email is required'),
   password: z.string().min(1, 'Password is required'),
 });
 

@@ -128,7 +128,7 @@ api.interceptors.response.use(
 );
 
 // Auth endpoints
-export type LoginRequest = { login?: string; email?: string; password: string };
+export type LoginRequest = { identifier?: string; login?: string; email?: string; password: string };
 export type RegisterRequest = { login: string; name: string; email?: string; password: string; phone?: string };
 export type CheckLoginResponse = ApiSuccess<{ available: boolean }>;
 
@@ -139,7 +139,8 @@ export type AuthResponse = ApiSuccess<{
 }>;
 
 export async function loginUser(input: LoginRequest): Promise<AuthResponse> {
-  const { data } = await api.post<AuthResponse>('/api/auth/login', input);
+  const payload = input.identifier ? { identifier: input.identifier, password: input.password } : input;
+  const { data } = await api.post<AuthResponse>('/api/auth/login', payload as any);
   setStoredTokens({ accessToken: data.data.accessToken, refreshToken: data.data.refreshToken });
   return data;
 }

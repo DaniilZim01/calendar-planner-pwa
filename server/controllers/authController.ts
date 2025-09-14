@@ -116,16 +116,18 @@ export async function login(req: Request, res: Response): Promise<void> {
   try {
     // Validate input data
     const validatedData = loginSchema.parse(req.body);
+    const raw = validatedData.identifier.trim();
+    const looksLikeEmail = /@/.test(raw);
     
-    // Find user by login
+    // Find user by login or email
     const user = await db.query.users.findFirst({
-      where: eq(users.login, validatedData.login)
+      where: looksLikeEmail ? eq(users.email, raw) : eq(users.login, raw)
     });
 
     if (!user) {
       res.status(401).json({
         success: false,
-        message: 'Invalid login or password',
+        message: 'Invalid credentials',
         code: 'INVALID_CREDENTIALS'
       });
       return;
@@ -137,7 +139,7 @@ export async function login(req: Request, res: Response): Promise<void> {
     if (!isPasswordValid) {
       res.status(401).json({
         success: false,
-        message: 'Invalid login or password',
+        message: 'Invalid credentials',
         code: 'INVALID_CREDENTIALS'
       });
       return;

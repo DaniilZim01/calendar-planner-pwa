@@ -6,25 +6,26 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   const { login, isLoading, error } = useAuth();
-  const [loginId, setLoginId] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError(null);
-    if (!loginId || !password) {
+    if (!identifier || !password) {
       setLocalError('Введите логин и пароль');
       return;
     }
-    await login({ login: loginId, password });
+    // передаём универсальное поле identifier для логина или email
+    await login({ identifier, password } as any);
   };
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="login">Логин</Label>
-        <Input id="login" value={loginId} onChange={(e) => setLoginId(e.target.value)} />
+        <Label htmlFor="identifier">Логин или Email</Label>
+        <Input id="identifier" value={identifier} onChange={(e) => setIdentifier(e.target.value)} />
       </div>
       <div className="space-y-2">
         <Label htmlFor="password">Пароль</Label>
