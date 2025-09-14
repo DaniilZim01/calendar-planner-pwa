@@ -6,6 +6,7 @@ import {
   logout,
   getProfile,
   updateProfile,
+  checkLoginAvailability,
 } from '../controllers/authController';
 import { authenticateToken, authRateLimit } from '../middleware/auth';
 
@@ -15,6 +16,7 @@ const router = Router();
 router.post('/register', authRateLimit, register);
 router.post('/login', authRateLimit, login);
 router.post('/refresh', refreshToken);
+router.get('/check-login', authRateLimit, checkLoginAvailability);
 
 // Protected routes (authentication required)
 router.post('/logout', authenticateToken, logout);

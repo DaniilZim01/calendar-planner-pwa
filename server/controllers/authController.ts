@@ -399,3 +399,22 @@ export async function updateProfile(req: Request, res: Response): Promise<void> 
     });
   }
 } 
+
+/**
+ * Check login availability (temporary uses users.name field)
+ */
+export async function checkLoginAvailability(req: Request, res: Response): Promise<void> {
+  try {
+    const login = (req.query.login as string | undefined)?.trim();
+    if (!login) {
+      res.status(400).json({ success: false, message: 'login is required' });
+      return;
+    }
+
+    const existing = await db.query.users.findFirst({ where: eq(users.name, login) });
+    res.json({ success: true, data: { available: !existing } });
+  } catch (error) {
+    console.error('Check login availability error:', error);
+    res.status(500).json({ success: false, message: 'Failed to check login' });
+  }
+}

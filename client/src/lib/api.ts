@@ -130,6 +130,7 @@ api.interceptors.response.use(
 // Auth endpoints
 export type LoginRequest = { email: string; password: string };
 export type RegisterRequest = { name: string; email: string; password: string; phone?: string };
+export type CheckLoginResponse = ApiSuccess<{ available: boolean }>;
 
 export type AuthResponse = ApiSuccess<{
   user: { id: string; email: string; name?: string | null; phone?: string | null; emailVerified?: boolean };
@@ -146,6 +147,12 @@ export async function loginUser(input: LoginRequest): Promise<AuthResponse> {
 export async function registerUser(input: RegisterRequest): Promise<AuthResponse> {
   const { data } = await api.post<AuthResponse>('/api/auth/register', input);
   setStoredTokens({ accessToken: data.data.accessToken, refreshToken: data.data.refreshToken });
+  return data;
+}
+
+export async function checkLoginAvailability(login: string): Promise<CheckLoginResponse> {
+  const params = new URLSearchParams({ login });
+  const { data } = await api.get<CheckLoginResponse>(`/api/auth/check-login?${params.toString()}`);
   return data;
 }
 
