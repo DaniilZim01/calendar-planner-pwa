@@ -153,7 +153,7 @@ export default function CalendarPage() {
               <ChevronLeft className="h-5 w-5" />
             </Button>
             <h1 className="text-xl font-light text-foreground tracking-tight">
-              {getMonthName(currentMonth)}
+              {getMonthName(currentMonth)} {currentYear}
             </h1>
             <Button
               variant="ghost"

@@ -191,7 +191,7 @@ export default function PlannerPage() {
               <ChevronLeft className="w-5 h-5" />
             </button>
             <div className="text-center text-foreground font-light">
-              {selectedDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}
+              {selectedDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' }).replace(' г.', '')}
             </div>
             <button
               className="p-1 text-muted-foreground hover:text-accent"
@@ -207,9 +207,9 @@ export default function PlannerPage() {
           </div>
           <div className="grid grid-cols-7 gap-1 text-center">
             {['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((d, idx) => (
-              <div key={d} className={`text-[11px] ${idx===selectedDate.getDay()-1 || (selectedDate.getDay()===0 && idx===6) ? 'bg-accent text-white rounded-md px-2 py-1' : 'text-muted-foreground'}`}>{d}</div>
+              <div key={d} className={`text-[11px] ${idx===selectedDate.getDay()-1 || (selectedDate.getDay()===0 && idx===6) ? 'text-white' : 'text-muted-foreground'}`}>{d}</div>
             ))}
-            {weekDays.map((d) => {
+            {weekDays.map((d, idx) => {
               const isSelected = d.toDateString() === selectedDate.toDateString();
               const yyyy = d.getFullYear();
               const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -220,10 +220,10 @@ export default function PlannerPage() {
                 <button
                   key={d.toISOString()}
                   onClick={() => setSelectedDate(new Date(d))}
-                  className={`mt-1 aspect-square flex items-center justify-center rounded-full text-sm transition-colors ${isSelected ? 'bg-accent/20 text-foreground' : 'text-foreground hover:bg-secondary/30'}`}
+                  className={`mt-1 aspect-square flex items-center justify-center rounded-full text-sm transition-colors ${isSelected ? 'bg-accent text-white rounded-xl' : 'text-foreground hover:bg-secondary/30'}`}
                 >
                   <div className="flex flex-col items-center justify-center leading-none">
-                    <span>{d.getDate()}</span>
+                    <span className="font-semibold">{d.getDate()}</span>
                     {hasEvents ? <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-accent" /> : <span className="mt-0.5 h-1.5" />}
                   </div>
                 </button>
