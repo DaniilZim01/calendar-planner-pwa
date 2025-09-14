@@ -35,11 +35,11 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
     // Совместимость с текущим API: используем login как name;
     // если email не указан, генерируем временный placeholder (уникальный),
     // чтобы пройти текущие серверные ограничения до миграции БД (Этап 2).
-    const safeEmail = email && email.trim().length > 0
-      ? email.trim()
-      : (IDENTITY_MODE === 'login' ? `${login.trim()}-${Date.now()}@noemail.local` : undefined);
+    const safeEmail = (IDENTITY_MODE === 'email')
+      ? (email && email.trim().length > 0 ? email.trim() : undefined)
+      : undefined;
 
-    await register({ login: (IDENTITY_MODE === 'login' ? login.trim() : (email?.trim() || '')), name: login.trim() || (email?.trim() || ''), email: safeEmail, password });
+    await register({ login: (IDENTITY_MODE === 'login' ? login.trim() : (email?.trim() || '')), name: (IDENTITY_MODE === 'login' ? login.trim() : (email?.trim() || '')), email: safeEmail, password });
     navigate('/auth');
   };
 
@@ -52,13 +52,15 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
         </div>
         <Input id="login" value={login} onChange={(e) => setLogin(e.target.value)} placeholder="Придумайте логин" />
       </div>
-      <div className="space-y-2">
-        <div className="flex items-baseline justify-between">
-          <Label htmlFor="email">Email</Label>
-          <span className="text-xs text-muted-foreground">необязательно</span>
+      {IDENTITY_MODE === 'email' && (
+        <div className="space-y-2">
+          <div className="flex items-baseline justify-between">
+            <Label htmlFor="email">Email</Label>
+            <span className="text-xs text-muted-foreground">обязательно</span>
+          </div>
+          <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@пример.com" />
         </div>
-        <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@пример.com" />
-      </div>
+      )}
       <div className="space-y-2">
         <Label htmlFor="password">Пароль</Label>
         <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Минимум 8 символов" />
