@@ -2,7 +2,7 @@
   "version": 2,
   "outputDirectory": "dist/public",
   "crons": [
-    { "path": "/api/maintenance/notify-morning", "schedule": "*/1 * * * *" }
+    { "path": "/api/maintenance/cleanup-completed", "schedule": "*/5 * * * *" }
   ],
   "rewrites": [
     { "source": "/api/events/:id", "destination": "/api/events?id=:id" },
